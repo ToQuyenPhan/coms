@@ -7,7 +7,7 @@
 
 ## Auth
 
-###Login
+### Login
 
 ```js
 POST {{host}}/auth/login
@@ -22,7 +22,7 @@ POST {{host}}/auth/login
 }
 ```
 
-#### Authentication Response
+#### Login Response
 
 ```js
 200 OK
