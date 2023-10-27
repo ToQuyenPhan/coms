@@ -1,4 +1,5 @@
 ﻿using Coms.Application.Services.Authentication;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Coms.Application
