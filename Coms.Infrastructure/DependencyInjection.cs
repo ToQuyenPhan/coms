@@ -1,6 +1,8 @@
 ﻿using Coms.Application.Common.Intefaces.Authentication;
+using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Common.Intefaces.Services;
 using Coms.Infrastructure.Authentication;
+using Coms.Infrastructure.Persistence;
 using Coms.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +15,7 @@ namespace Coms.Infrastructure
             services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName)); 
             services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+            services.AddScoped<IUserRepository, UserRepository>();
             return services;
         }
     }

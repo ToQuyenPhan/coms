@@ -20,8 +20,8 @@ namespace Coms.Api.Controllers
         {
             var authResult = _authenticationService.Login(request.Username, request.Password);
             var authResponse = new AuthenticationResponse(
-                authResult.Id,
-                authResult.Username,
+                authResult.user.Id,
+                authResult.user.FullName,
                 authResult.Token
             );
             return Ok(authResponse);

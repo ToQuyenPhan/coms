@@ -2,7 +2,7 @@
 {
     public record AuthenticationResponse
     (
-        Guid Id,
+        int Id,
         string Username,
         string Token
     );

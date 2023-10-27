@@ -1,9 +1,10 @@
-﻿namespace Coms.Application.Services.Authentication
+﻿using Coms.Domain.Entities;
+
+namespace Coms.Application.Services.Authentication
 {
     public record AuthenticationResult
     (
-        Guid Id,
-        string Username,
+        User user,
         string Token
     );
 }
