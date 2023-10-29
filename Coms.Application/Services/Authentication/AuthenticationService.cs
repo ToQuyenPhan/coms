@@ -1,6 +1,8 @@
 ﻿using Coms.Application.Common.Intefaces.Authentication;
 using Coms.Application.Common.Intefaces.Persistence;
+using Coms.Domain.Common.Errors;
 using Coms.Domain.Entities;
+using ErrorOr;
 
 namespace Coms.Application.Services.Authentication
 {
@@ -15,17 +17,17 @@ namespace Coms.Application.Services.Authentication
             _userRepository = userRepository;
         }
 
-        public AuthenticationResult Login(string username, string password)
+        public ErrorOr<AuthenticationResult> Login(string username, string password)
         {
             // Validate the user exist
             if(_userRepository.GetUserByUsername(username) is not User user)
             {
-                throw new Exception("Your username is incorrect!");
+                return Errors.User.IncorrectUsername;
             }
             // Validate the password is correct
             if(user.Password != password)
             {
-                throw new Exception("Invalid password!");
+                return Errors.User.IncorrectPassword;
             }
             //Create JWT Token
             var token = _jwtTokenGenerator.GenerateToken(user);

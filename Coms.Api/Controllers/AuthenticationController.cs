@@ -1,12 +1,12 @@
 ﻿using Coms.Application.Services.Authentication;
 using Coms.Contracts.Authentication;
+using ErrorOr;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Coms.Api.Controllers
 {
-    [ApiController]
     [Route("auth")]
-    public class AuthenticationController : ControllerBase
+    public class AuthenticationController : ApiController
     {
         private readonly IAuthenticationService _authenticationService;
 
@@ -18,13 +18,21 @@ namespace Coms.Api.Controllers
         [HttpPost("login")]
         public IActionResult Login(LoginRequest request)
         {
-            var authResult = _authenticationService.Login(request.Username, request.Password);
-            var authResponse = new AuthenticationResponse(
-                authResult.user.Id,
-                authResult.user.FullName,
-                authResult.Token
+            ErrorOr<AuthenticationResult> result =
+                _authenticationService.Login(request.Username, request.Password);
+            return result.Match(
+                result => Ok(MapAuthResult(result)),
+                errors => Problem(errors)
             );
-            return Ok(authResponse);
+        }
+
+        private static AuthenticationResponse MapAuthResult(AuthenticationResult result)
+        {
+            return new AuthenticationResponse(
+                            result.user.Id,
+                            result.user.FullName,
+                            result.Token
+                        );
         }
     }
 }

@@ -1,7 +1,9 @@
-﻿namespace Coms.Application.Services.Authentication
+﻿using ErrorOr;
+
+namespace Coms.Application.Services.Authentication
 {
     public interface IAuthenticationService
     {
-        AuthenticationResult Login(string username, string password);
+        ErrorOr<AuthenticationResult> Login(string username, string password);
     }
 }
