@@ -26,8 +26,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
 
         public User? GetUserByUsername(string username)
         {
-            _users.Add(new User { Username = username, Password = "string" });
-            return _users.SingleOrDefault(u => u.Username == username);
+            return _dbContext.Users.SingleOrDefault(u => u.Username == username);
         }
     }
 }

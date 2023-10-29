@@ -28,7 +28,7 @@ namespace Coms.Application.Services.Authentication
                 throw new Exception("Invalid password!");
             }
             //Create JWT Token
-            var token = _jwtTokenGenerator.GenerateToken(new User { Username = "string", Password = "string"});
+            var token = _jwtTokenGenerator.GenerateToken(user);
             return new AuthenticationResult(user, token);
         }
     }

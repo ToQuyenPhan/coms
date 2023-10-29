@@ -4,6 +4,7 @@ using Coms.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coms.Infrastructure.Migrations
 {
     [DbContext(typeof(ComsDBContext))]
-    partial class ComsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20231029125416_AddActionEntity")]
+    partial class AddActionEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -480,21 +482,6 @@ namespace Coms.Infrastructure.Migrations
                     b.ToTable("Document_Attachments");
                 });
 
-            modelBuilder.Entity("Coms.Domain.Entities.Document_PartnerReview", b =>
-                {
-                    b.Property<int?>("PartnerReviewId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DocumentId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PartnerReviewId", "DocumentId");
-
-                    b.HasIndex("DocumentId");
-
-                    b.ToTable("DocumentPartnerReviews");
-                });
-
             modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecord", b =>
                 {
                     b.Property<int>("Id")
@@ -605,146 +592,6 @@ namespace Coms.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("LiquidationTypes");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.Partner", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("CompanyName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Image")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("Representative")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("RepresentativePosition")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TaxCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Partners");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.PartnerComment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("PartnerReviewId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ReplyId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PartnerReviewId");
-
-                    b.ToTable("PartnerComments");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.PartnerReview", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("PartnerId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ReviewAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("SendDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("SenderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PartnerId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PartnerReviews");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.PartnerSign", b =>
-                {
-                    b.Property<int?>("PartnerId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("DocumentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SignedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("PartnerId", "DocumentId");
-
-                    b.HasIndex("DocumentId");
-
-                    b.ToTable("PartnerSigns");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.Permission", b =>
@@ -1199,25 +1046,6 @@ namespace Coms.Infrastructure.Migrations
                     b.Navigation("Document");
                 });
 
-            modelBuilder.Entity("Coms.Domain.Entities.Document_PartnerReview", b =>
-                {
-                    b.HasOne("Coms.Domain.Entities.Document", "Document")
-                        .WithMany()
-                        .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Coms.Domain.Entities.PartnerReview", "PartnerReview")
-                        .WithMany()
-                        .HasForeignKey("PartnerReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Document");
-
-                    b.Navigation("PartnerReview");
-                });
-
             modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecord", b =>
                 {
                     b.HasOne("Coms.Domain.Entities.Contract", "Contract")
@@ -1269,51 +1097,6 @@ namespace Coms.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("LiquidationRecord");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.PartnerComment", b =>
-                {
-                    b.HasOne("Coms.Domain.Entities.PartnerReview", "PartnerReview")
-                        .WithMany()
-                        .HasForeignKey("PartnerReviewId");
-
-                    b.Navigation("PartnerReview");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.PartnerReview", b =>
-                {
-                    b.HasOne("Coms.Domain.Entities.Partner", "Partner")
-                        .WithMany()
-                        .HasForeignKey("PartnerId");
-
-                    b.HasOne("Coms.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Partner");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.PartnerSign", b =>
-                {
-                    b.HasOne("Coms.Domain.Entities.Document", "Document")
-                        .WithMany()
-                        .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Coms.Domain.Entities.Partner", "Partner")
-                        .WithMany()
-                        .HasForeignKey("PartnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Document");
-
-                    b.Navigation("Partner");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.Permission_Role", b =>

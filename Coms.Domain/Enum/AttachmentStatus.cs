@@ -1,6 +1,6 @@
 ﻿namespace Coms.Domain.Enum
 {
-    public enum UserStatus
+    public enum AttachmentStatus
     {
         Inactive,
         Active

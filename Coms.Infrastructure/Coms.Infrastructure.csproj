@@ -18,8 +18,4 @@
     <ProjectReference Include="..\Coms.Application\Coms.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Persistence\Configurations\" />
-  </ItemGroup>
-
 </Project>

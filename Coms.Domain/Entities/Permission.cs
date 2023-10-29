@@ -1,17 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace Coms.Domain.Entities
 {
-    public class Role
+    public class Permission
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(50)]
-        public string RoleName { get; set; } = null!;
+        [MaxLength(150)]
+        public string PermissionName { get; set; } = null!;
         public virtual ICollection<Permission_Role>? PermissionRoles { get; set; }
     }
 }
