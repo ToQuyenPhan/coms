@@ -19,12 +19,13 @@ namespace Coms.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, 
             Microsoft.Extensions.Configuration.ConfigurationManager configuration)
-        {
+        {         
             services.AddAuth(configuration);
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
             services.AddDbContext<ComsDBContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("ComsDB")));
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             return services;
         }
 

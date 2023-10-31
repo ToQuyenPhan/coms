@@ -20,7 +20,7 @@ namespace Coms.Application.Services.Authentication
         public ErrorOr<AuthenticationResult> Login(string username, string password)
         {
             // Validate the user exist
-            if(_userRepository.GetUserByUsername(username) is not User user)
+            if (_userRepository.GetUserByUsername(username).Result is not User user)
             {
                 return Errors.User.IncorrectUsername;
             }
@@ -31,7 +31,7 @@ namespace Coms.Application.Services.Authentication
             }
             //Create JWT Token
             var token = _jwtTokenGenerator.GenerateToken(user);
-            return new AuthenticationResult(user, token);
+            return new AuthenticationResult(token);
         }
     }
 }

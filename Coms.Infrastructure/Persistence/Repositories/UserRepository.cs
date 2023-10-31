@@ -1,21 +1,15 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Domain.Entities;
-using Coms.Infrastructure.Persistence.Context;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly ComsDBContext _dbContext;
+        private readonly IGenericRepository<User> _genericRepository;
 
-        public UserRepository(ComsDBContext dbContext)
+        public UserRepository(IGenericRepository<User> genericRepository)
         {
-            _dbContext = dbContext;
+            _genericRepository = genericRepository;
         }
 
         private readonly List<User> _users = new();
@@ -24,9 +18,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _users.Add(user);
         }
 
-        public User? GetUserByUsername(string username)
+        public async Task<User?> GetUserByUsername(string username)
         {
-            return _dbContext.Users.SingleOrDefault(u => u.Username == username);
+            return await _genericRepository.FirstOrDefaultAsync(u => u.Username == username, 
+                    new System.Linq.Expressions.Expression<Func<User, object>>[] {u => u.Role});
         }
     }
 }

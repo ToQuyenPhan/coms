@@ -25,18 +25,9 @@ namespace Coms.Api.Controllers
             ErrorOr<AuthenticationResult> result =
                 _authenticationService.Login(request.Username, request.Password);
             return result.Match(
-                result => Ok(MapAuthResult(result)),
+                result => Ok(result),
                 errors => Problem(errors)
             );
-        }
-
-        private static AuthenticationResponse MapAuthResult(AuthenticationResult result)
-        {
-            return new AuthenticationResponse(
-                            result.user.Id,
-                            result.user.FullName,
-                            result.Token
-                        );
         }
     }
 }

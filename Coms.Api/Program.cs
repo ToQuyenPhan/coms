@@ -1,5 +1,6 @@
 using Coms.Api.Common.Errors;
 using Coms.Application;
+using Coms.Domain.Entities;
 using Coms.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.OpenApi.Models;
@@ -12,6 +13,21 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<ProblemDetailsFactory, ComsProblemDetailsFactory>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("AllowOrigin",
+        builder =>
+        {
+            builder
+            .SetIsOriginAllowed(origin => true) // allow any origin
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .WithExposedHeaders(new string[] { "Authorization", "authorization" });
+        });
+});
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Coms.API", Version = "v1" });
@@ -55,7 +71,7 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Coms API V1");
     c.RoutePrefix = "";
 });
-
+app.UseCors("AllowOrigin");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
