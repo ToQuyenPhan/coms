@@ -1,11 +1,14 @@
 ﻿using Coms.Application.Services.Authentication;
 using Coms.Contracts.Authentication;
 using ErrorOr;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Coms.Api.Controllers
 {
     [Route("auth")]
+    [AllowAnonymous]
     public class AuthenticationController : ApiController
     {
         private readonly IAuthenticationService _authenticationService;
@@ -16,6 +19,7 @@ namespace Coms.Api.Controllers
         }
 
         [HttpPost("login")]
+        [SwaggerOperation(Summary = "Log in for Coms")]
         public IActionResult Login(LoginRequest request)
         {
             ErrorOr<AuthenticationResult> result =
