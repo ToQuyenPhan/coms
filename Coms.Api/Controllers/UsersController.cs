@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
+    [Authorize(Roles = "Staff")]
     public class UsersController : ApiController
     {
         [HttpGet]
