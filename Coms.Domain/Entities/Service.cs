@@ -22,5 +22,6 @@ namespace Coms.Domain.Entities
 
         [Required]
         public ServiceStatus Status { get; set; }
+        public virtual ICollection<ContractCost>? ContractCosts { get; set; }
     }
 }

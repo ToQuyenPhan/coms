@@ -11,7 +11,7 @@ namespace Coms.Domain.Entities
         public int Id { get; set; }
 
         [Required]
-        public string ContractAnnexName { get; set; }
+        public string ContractAnnexName { get; set; } = string.Empty;
 
         [Required]
         public int Version { get; set; }
@@ -26,14 +26,8 @@ namespace Coms.Domain.Entities
         public DocumentStatus Status { get; set; }
 
         public int? ContractId { get; set; }
-        public virtual Contract Contract { get; set; }
-
-        [Required]
-        public int ContractAnnexTemplateID { get; set; }
-        public virtual ContractAnnexTemplate ContractAnnexTemplate { get; set; }
-
-        [Required]
-        public int DocumentId { get; set; }
-        public virtual Document Document { get; set; }
+        public virtual Contract? Contract { get; set; }
+        public virtual ICollection<ContractAnnexTerm>? ContractAnnexTerms { get; set; }
+        public virtual ICollection<ContractAnnexCost>? ContractAnnexCosts { get; set; }
     }
 }

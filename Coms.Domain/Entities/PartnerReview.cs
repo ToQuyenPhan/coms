@@ -23,5 +23,8 @@ namespace Coms.Domain.Entities
 
         public int? SenderId { get; set; }
         public virtual User User { get; set; }
+
+        public int ContractId { get; set; }
+        public virtual Contract? Contract { get; set; }
     }
 }

@@ -11,7 +11,7 @@ namespace Coms.Domain.Entities
         public int Id { get; set; }
 
         [Required]
-        public string LiquidationName { get; set; }
+        public string LiquidationName { get; set; } = string.Empty;
 
         [Required]
         public int Version { get; set; }
@@ -24,13 +24,7 @@ namespace Coms.Domain.Entities
 
         [Required]
         public int ContractId { get; set; }
-        public Contract Contract { get; set; }
-
-        [Required]
-        public int LiquidationRecordTemplateId { get; set; }
-        public LiquidationRecordTemplate LiquidationRecordTemplate { get; set;  }
-
-        public int? DocumentId { get; set; }
-        public virtual Document Document { get; set; }
+        public Contract? Contract { get; set; }
+        public virtual ICollection<LiquidationRecordTerm>? LiquidationRecordTerms { get; set; }
     }
 }

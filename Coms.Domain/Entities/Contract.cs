@@ -11,7 +11,7 @@ namespace Coms.Domain.Entities
         public int Id { get; set; }
 
         [Required]
-        public string ContractName { get; set; }
+        public string ContractName { get; set; } = string.Empty;
 
         [Required]
         public int Version { get; set; }
@@ -27,13 +27,17 @@ namespace Coms.Domain.Entities
 
         [Required]
         public DocumentStatus Status { get; set; }
-
+            
         [Required]
-        public int ContractTemplateID { get; set; }
-        public virtual ContractTemplate ContractTemplate { get; set; }
+        public int TemplateID { get; set; }
+        public virtual Template? Template { get; set; }
 
-        [Required]
-        public int DocumentId { get; set; }
-        public virtual Document Document { get; set; }
+        public int AccessId { get; set; }
+        public virtual Access? Access { get; set; }
+        public virtual ICollection<ActionHistory>? ActionHistories { get; set; }
+        public virtual ICollection<Attachment>? Attachments { get; set; }
+        public virtual ICollection<ContractAnnex>? ContractAnnexes { get; set; }
+        public virtual ICollection<ContractCost>? ContractCosts { get; set; }
+        public virtual ICollection<ContractTerm>? ContractTerms { get; set; }
     }
 }

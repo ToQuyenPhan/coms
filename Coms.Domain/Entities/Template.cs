@@ -4,7 +4,7 @@ using Coms.Domain.Enum;
 
 namespace Coms.Domain.Entities
 {
-    public class ContractAnnexTemplate
+    public class Template
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -27,6 +27,12 @@ namespace Coms.Domain.Entities
 
         [Required]
         public int ContractCategoryId { get; set; }
-        public virtual ContractCategory ContractCategory { get; set; }
+        public virtual ContractCategory? ContractCategory { get; set; }
+
+        public int TemplateTypeId { get; set; }
+        public virtual TemplateType? TemplateTypes { get; set; }
+        public virtual ICollection<Contract>? Contracts { get; set; }
+        public virtual ICollection<TemplateTerm>? TemplateTerms { get; set; }
+        public virtual ICollection<TemplateField>? TemplateFields { get; set; }
     }
 }

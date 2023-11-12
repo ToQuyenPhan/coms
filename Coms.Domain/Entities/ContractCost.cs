@@ -10,9 +10,10 @@ namespace Coms.Domain.Entities
         public int Id { get; set; }
 
         public int? ServiceId { get; set; }
-        public virtual Service Service { get; set; }
+        public virtual Service? Service { get; set; }
 
         public int? ContractId { get; set; }
-        public virtual Contract Contract { get; set; }
+        public virtual Contract? Contract { get; set; }
+        public virtual ICollection<ContractAnnexCost>? ContractAnnexCosts { get; set;}
     }
 }

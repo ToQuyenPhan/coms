@@ -12,5 +12,7 @@ namespace Coms.Domain.Entities
 
         [Required]
         public AccessRole AccessRole { get; set; }
+        public virtual ICollection<User_Access>? User_Accesses { get; set; }
+        public virtual ICollection<ApproveWorkflow>? ApproveWorkflows { get; set; }
     }
 }

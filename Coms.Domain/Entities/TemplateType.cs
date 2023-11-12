@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Coms.Domain.Entities
 {
-    public class LiquidationType
+    public class TemplateType
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

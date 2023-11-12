@@ -4,6 +4,7 @@ using Coms.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coms.Infrastructure.Migrations
 {
     [DbContext(typeof(ComsDBContext))]
-    partial class ComsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20231112091357_RemoveDocumentAccess")]
+    partial class RemoveDocumentAccess
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,9 +93,6 @@ namespace Coms.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("ContractId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -113,8 +112,6 @@ namespace Coms.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ContractId");
 
                     b.ToTable("Attachments");
                 });
@@ -155,12 +152,12 @@ namespace Coms.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("AccessId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ContractName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ContractTemplateID")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -171,9 +168,6 @@ namespace Coms.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int>("TemplateID")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -182,9 +176,7 @@ namespace Coms.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccessId");
-
-                    b.HasIndex("TemplateID");
+                    b.HasIndex("ContractTemplateID");
 
                     b.ToTable("Contracts");
                 });
@@ -201,11 +193,17 @@ namespace Coms.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ContractAnnexTemplateID")
+                        .HasColumnType("int");
+
                     b.Property<int?>("ContractId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -218,7 +216,11 @@ namespace Coms.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ContractAnnexTemplateID");
+
                     b.HasIndex("ContractId");
+
+                    b.HasIndex("DocumentId");
 
                     b.ToTable("ContractAnnexes");
                 });
@@ -236,6 +238,41 @@ namespace Coms.Infrastructure.Migrations
                     b.HasIndex("ContractCostId");
 
                     b.ToTable("ContractAnnexCosts");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("ContractCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TemplateName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractCategoryId");
+
+                    b.ToTable("ContractAnnexTemplates");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexTerm", b =>
@@ -299,6 +336,77 @@ namespace Coms.Infrastructure.Migrations
                     b.ToTable("ContractCosts");
                 });
 
+            modelBuilder.Entity("Coms.Domain.Entities.ContractField", b =>
+                {
+                    b.Property<int?>("ContractId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TemplateFieldId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ContractId", "TemplateFieldId");
+
+                    b.HasIndex("TemplateFieldId");
+
+                    b.ToTable("ContractFields");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.ContractTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("ContractCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TemplateName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractCategoryId");
+
+                    b.ToTable("ContractTemplates");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.ContractTemplateTerm", b =>
+                {
+                    b.Property<int>("ContractTemplateId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ContractTemplateId", "Number");
+
+                    b.ToTable("ContractTemplateTerms");
+                });
+
             modelBuilder.Entity("Coms.Domain.Entities.ContractTerm", b =>
                 {
                     b.Property<int>("ContractId")
@@ -316,6 +424,64 @@ namespace Coms.Infrastructure.Migrations
                     b.ToTable("ContractTerms");
                 });
 
+            modelBuilder.Entity("Coms.Domain.Entities.Document", b =>
+                {
+                    b.Property<int>("DocumentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DocumentId"), 1L, 1);
+
+                    b.HasKey("DocumentId");
+
+                    b.ToTable("Documents");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.Document_ActionHistory", b =>
+                {
+                    b.Property<int?>("ActionHistoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DocumentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ActionHistoryId", "DocumentId");
+
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("Document_ActionHistories");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.Document_Attachment", b =>
+                {
+                    b.Property<int?>("AttachmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DocumentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AttachmentId", "DocumentId");
+
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("Document_Attachments");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.Document_PartnerReview", b =>
+                {
+                    b.Property<int?>("PartnerReviewId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DocumentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PartnerReviewId", "DocumentId");
+
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("DocumentPartnerReviews");
+                });
+
             modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecord", b =>
                 {
                     b.Property<int>("Id")
@@ -330,9 +496,15 @@ namespace Coms.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("DocumentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("LiquidationName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LiquidationRecordTemplateId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -344,7 +516,47 @@ namespace Coms.Infrastructure.Migrations
 
                     b.HasIndex("ContractId");
 
+                    b.HasIndex("DocumentId");
+
+                    b.HasIndex("LiquidationRecordTemplateId");
+
                     b.ToTable("LiquidationRecords");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecordTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("ContractCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LiquidationTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TemplateName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractCategoryId");
+
+                    b.HasIndex("LiquidationTypeId");
+
+                    b.ToTable("LiquidationRecordTemplates");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecordTerm", b =>
@@ -362,6 +574,24 @@ namespace Coms.Infrastructure.Migrations
                     b.HasKey("LiquidationRecordId", "Number");
 
                     b.ToTable("LiquidationRecordTerms");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.LiquidationType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LiquidationTypes");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.Partner", b =>
@@ -459,9 +689,6 @@ namespace Coms.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("ContractId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
 
@@ -482,8 +709,6 @@ namespace Coms.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ContractId");
-
                     b.HasIndex("PartnerId");
 
                     b.HasIndex("UserId");
@@ -496,15 +721,15 @@ namespace Coms.Infrastructure.Migrations
                     b.Property<int?>("PartnerId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ContractId")
+                    b.Property<int?>("DocumentId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("SignedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("PartnerId", "ContractId");
+                    b.HasKey("PartnerId", "DocumentId");
 
-                    b.HasIndex("ContractId");
+                    b.HasIndex("DocumentId");
 
                     b.ToTable("PartnerSigns");
                 });
@@ -630,64 +855,6 @@ namespace Coms.Infrastructure.Migrations
                     b.ToTable("Services");
                 });
 
-            modelBuilder.Entity("Coms.Domain.Entities.Template", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("ContractCategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TemplateName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TemplateTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContractCategoryId");
-
-                    b.HasIndex("TemplateTypeId");
-
-                    b.ToTable("Templates");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.TemplateContent", b =>
-                {
-                    b.Property<int>("ContractId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TemplateFieldId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ContractId", "TemplateFieldId");
-
-                    b.HasIndex("TemplateFieldId");
-
-                    b.ToTable("TemplateContents");
-                });
-
             modelBuilder.Entity("Coms.Domain.Entities.TemplateField", b =>
                 {
                     b.Property<int>("Id")
@@ -695,6 +862,9 @@ namespace Coms.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("ContractTemplateId")
+                        .HasColumnType("int");
 
                     b.Property<string>("FieldName")
                         .IsRequired()
@@ -709,49 +879,11 @@ namespace Coms.Infrastructure.Migrations
                     b.Property<int>("PositionY")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TemplateId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("TemplateId");
+                    b.HasIndex("ContractTemplateId");
 
                     b.ToTable("TemplateFields");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.TemplateTerm", b =>
-                {
-                    b.Property<int>("TemplateId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Number")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("TemplateId", "Number");
-
-                    b.ToTable("TemplateTerms");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.TemplateType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TemplateTypes");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.User", b =>
@@ -844,17 +976,6 @@ namespace Coms.Infrastructure.Migrations
                     b.Navigation("Access");
                 });
 
-            modelBuilder.Entity("Coms.Domain.Entities.Attachment", b =>
-                {
-                    b.HasOne("Coms.Domain.Entities.Contract", "Contract")
-                        .WithMany("Attachments")
-                        .HasForeignKey("ContractId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Contract");
-                });
-
             modelBuilder.Entity("Coms.Domain.Entities.Comment", b =>
                 {
                     b.HasOne("Coms.Domain.Entities.ActionHistory", "ActionHistory")
@@ -866,42 +987,50 @@ namespace Coms.Infrastructure.Migrations
 
             modelBuilder.Entity("Coms.Domain.Entities.Contract", b =>
                 {
-                    b.HasOne("Coms.Domain.Entities.Access", "Access")
+                    b.HasOne("Coms.Domain.Entities.ContractTemplate", "ContractTemplate")
                         .WithMany()
-                        .HasForeignKey("AccessId")
+                        .HasForeignKey("ContractTemplateID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Coms.Domain.Entities.Template", "Template")
-                        .WithMany("Contracts")
-                        .HasForeignKey("TemplateID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Access");
-
-                    b.Navigation("Template");
+                    b.Navigation("ContractTemplate");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.ContractAnnex", b =>
                 {
+                    b.HasOne("Coms.Domain.Entities.ContractAnnexTemplate", "ContractAnnexTemplate")
+                        .WithMany()
+                        .HasForeignKey("ContractAnnexTemplateID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Coms.Domain.Entities.Contract", "Contract")
-                        .WithMany("ContractAnnexes")
+                        .WithMany()
                         .HasForeignKey("ContractId");
 
+                    b.HasOne("Coms.Domain.Entities.Document", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Contract");
+
+                    b.Navigation("ContractAnnexTemplate");
+
+                    b.Navigation("Document");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexCost", b =>
                 {
                     b.HasOne("Coms.Domain.Entities.ContractAnnex", "ContractAnnex")
-                        .WithMany("ContractAnnexCosts")
+                        .WithMany()
                         .HasForeignKey("ContractAnnexId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Coms.Domain.Entities.ContractCost", "ContractCost")
-                        .WithMany("ContractAnnexCosts")
+                        .WithMany()
                         .HasForeignKey("ContractCostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -911,10 +1040,21 @@ namespace Coms.Infrastructure.Migrations
                     b.Navigation("ContractCost");
                 });
 
+            modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexTemplate", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.ContractCategory", "ContractCategory")
+                        .WithMany()
+                        .HasForeignKey("ContractCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ContractCategory");
+                });
+
             modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexTerm", b =>
                 {
                     b.HasOne("Coms.Domain.Entities.ContractAnnex", "ContractAnnex")
-                        .WithMany("ContractAnnexTerms")
+                        .WithMany()
                         .HasForeignKey("ContractAnnexId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -925,11 +1065,11 @@ namespace Coms.Infrastructure.Migrations
             modelBuilder.Entity("Coms.Domain.Entities.ContractCost", b =>
                 {
                     b.HasOne("Coms.Domain.Entities.Contract", "Contract")
-                        .WithMany("ContractCosts")
+                        .WithMany()
                         .HasForeignKey("ContractId");
 
                     b.HasOne("Coms.Domain.Entities.Service", "Service")
-                        .WithMany("ContractCosts")
+                        .WithMany()
                         .HasForeignKey("ServiceId");
 
                     b.Navigation("Contract");
@@ -937,18 +1077,48 @@ namespace Coms.Infrastructure.Migrations
                     b.Navigation("Service");
                 });
 
-            modelBuilder.Entity("Coms.Domain.Entities.ContractTerm", b =>
+            modelBuilder.Entity("Coms.Domain.Entities.ContractField", b =>
                 {
                     b.HasOne("Coms.Domain.Entities.Contract", "Contract")
-                        .WithMany("ContractTerms")
+                        .WithMany()
                         .HasForeignKey("ContractId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Coms.Domain.Entities.TemplateField", "TemplateField")
+                        .WithMany()
+                        .HasForeignKey("TemplateFieldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Contract");
+
+                    b.Navigation("TemplateField");
                 });
 
-            modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecord", b =>
+            modelBuilder.Entity("Coms.Domain.Entities.ContractTemplate", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.ContractCategory", "ContractCategory")
+                        .WithMany()
+                        .HasForeignKey("ContractCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ContractCategory");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.ContractTemplateTerm", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.ContractTemplate", "ContractTemplate")
+                        .WithMany()
+                        .HasForeignKey("ContractTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ContractTemplate");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.ContractTerm", b =>
                 {
                     b.HasOne("Coms.Domain.Entities.Contract", "Contract")
                         .WithMany()
@@ -959,10 +1129,109 @@ namespace Coms.Infrastructure.Migrations
                     b.Navigation("Contract");
                 });
 
+            modelBuilder.Entity("Coms.Domain.Entities.Document_ActionHistory", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.ActionHistory", "ActionHistory")
+                        .WithMany()
+                        .HasForeignKey("ActionHistoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Coms.Domain.Entities.Document", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ActionHistory");
+
+                    b.Navigation("Document");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.Document_Attachment", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.Attachment", "Attachment")
+                        .WithMany()
+                        .HasForeignKey("AttachmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Coms.Domain.Entities.Document", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Attachment");
+
+                    b.Navigation("Document");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.Document_PartnerReview", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.Document", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Coms.Domain.Entities.PartnerReview", "PartnerReview")
+                        .WithMany()
+                        .HasForeignKey("PartnerReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+
+                    b.Navigation("PartnerReview");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecord", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.Contract", "Contract")
+                        .WithMany()
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Coms.Domain.Entities.Document", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId");
+
+                    b.HasOne("Coms.Domain.Entities.LiquidationRecordTemplate", "LiquidationRecordTemplate")
+                        .WithMany()
+                        .HasForeignKey("LiquidationRecordTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Contract");
+
+                    b.Navigation("Document");
+
+                    b.Navigation("LiquidationRecordTemplate");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecordTemplate", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.ContractCategory", "ContractCategory")
+                        .WithMany()
+                        .HasForeignKey("ContractCategoryId");
+
+                    b.HasOne("Coms.Domain.Entities.LiquidationType", "LiquidationType")
+                        .WithMany()
+                        .HasForeignKey("LiquidationTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ContractCategory");
+
+                    b.Navigation("LiquidationType");
+                });
+
             modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecordTerm", b =>
                 {
                     b.HasOne("Coms.Domain.Entities.LiquidationRecord", "LiquidationRecord")
-                        .WithMany("LiquidationRecordTerms")
+                        .WithMany()
                         .HasForeignKey("LiquidationRecordId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -981,23 +1250,15 @@ namespace Coms.Infrastructure.Migrations
 
             modelBuilder.Entity("Coms.Domain.Entities.PartnerReview", b =>
                 {
-                    b.HasOne("Coms.Domain.Entities.Contract", "Contract")
-                        .WithMany()
-                        .HasForeignKey("ContractId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Coms.Domain.Entities.Partner", "Partner")
                         .WithMany()
                         .HasForeignKey("PartnerId");
 
                     b.HasOne("Coms.Domain.Entities.User", "User")
-                        .WithMany("PartnerReviews")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Contract");
 
                     b.Navigation("Partner");
 
@@ -1006,9 +1267,9 @@ namespace Coms.Infrastructure.Migrations
 
             modelBuilder.Entity("Coms.Domain.Entities.PartnerSign", b =>
                 {
-                    b.HasOne("Coms.Domain.Entities.Contract", "Contract")
+                    b.HasOne("Coms.Domain.Entities.Document", "Document")
                         .WithMany()
-                        .HasForeignKey("ContractId")
+                        .HasForeignKey("DocumentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1018,7 +1279,7 @@ namespace Coms.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Contract");
+                    b.Navigation("Document");
 
                     b.Navigation("Partner");
                 });
@@ -1049,62 +1310,13 @@ namespace Coms.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Coms.Domain.Entities.Template", b =>
-                {
-                    b.HasOne("Coms.Domain.Entities.ContractCategory", "ContractCategory")
-                        .WithMany("Templates")
-                        .HasForeignKey("ContractCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Coms.Domain.Entities.TemplateType", "TemplateTypes")
-                        .WithMany()
-                        .HasForeignKey("TemplateTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ContractCategory");
-
-                    b.Navigation("TemplateTypes");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.TemplateContent", b =>
-                {
-                    b.HasOne("Coms.Domain.Entities.Contract", "Contract")
-                        .WithMany()
-                        .HasForeignKey("ContractId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Coms.Domain.Entities.TemplateField", "TemplateField")
-                        .WithMany("TemplateContents")
-                        .HasForeignKey("TemplateFieldId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Contract");
-
-                    b.Navigation("TemplateField");
-                });
-
             modelBuilder.Entity("Coms.Domain.Entities.TemplateField", b =>
                 {
-                    b.HasOne("Coms.Domain.Entities.Template", "Template")
-                        .WithMany("TemplateFields")
-                        .HasForeignKey("TemplateId");
+                    b.HasOne("Coms.Domain.Entities.ContractTemplate", "ContractTemplate")
+                        .WithMany()
+                        .HasForeignKey("ContractTemplateId");
 
-                    b.Navigation("Template");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.TemplateTerm", b =>
-                {
-                    b.HasOne("Coms.Domain.Entities.Template", "Template")
-                        .WithMany("TemplateTerms")
-                        .HasForeignKey("TemplateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Template");
+                    b.Navigation("ContractTemplate");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.User", b =>
@@ -1147,36 +1359,6 @@ namespace Coms.Infrastructure.Migrations
             modelBuilder.Entity("Coms.Domain.Entities.Contract", b =>
                 {
                     b.Navigation("ActionHistories");
-
-                    b.Navigation("Attachments");
-
-                    b.Navigation("ContractAnnexes");
-
-                    b.Navigation("ContractCosts");
-
-                    b.Navigation("ContractTerms");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.ContractAnnex", b =>
-                {
-                    b.Navigation("ContractAnnexCosts");
-
-                    b.Navigation("ContractAnnexTerms");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.ContractCategory", b =>
-                {
-                    b.Navigation("Templates");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.ContractCost", b =>
-                {
-                    b.Navigation("ContractAnnexCosts");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecord", b =>
-                {
-                    b.Navigation("LiquidationRecordTerms");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.Permission", b =>
@@ -1191,30 +1373,9 @@ namespace Coms.Infrastructure.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("Coms.Domain.Entities.Service", b =>
-                {
-                    b.Navigation("ContractCosts");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.Template", b =>
-                {
-                    b.Navigation("Contracts");
-
-                    b.Navigation("TemplateFields");
-
-                    b.Navigation("TemplateTerms");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.TemplateField", b =>
-                {
-                    b.Navigation("TemplateContents");
-                });
-
             modelBuilder.Entity("Coms.Domain.Entities.User", b =>
                 {
                     b.Navigation("ActionHistories");
-
-                    b.Navigation("PartnerReviews");
 
                     b.Navigation("UserAccesses");
                 });

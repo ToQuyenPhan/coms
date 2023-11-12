@@ -4,6 +4,7 @@ using Coms.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coms.Infrastructure.Migrations
 {
     [DbContext(typeof(ComsDBContext))]
-    partial class ComsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20231112100114_UpdateDatabase")]
+    partial class UpdateDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -155,9 +157,6 @@ namespace Coms.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("AccessId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ContractName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -181,8 +180,6 @@ namespace Coms.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AccessId");
 
                     b.HasIndex("TemplateID");
 
@@ -362,6 +359,24 @@ namespace Coms.Infrastructure.Migrations
                     b.HasKey("LiquidationRecordId", "Number");
 
                     b.ToTable("LiquidationRecordTerms");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.LiquidationType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LiquidationTypes");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.Partner", b =>
@@ -655,17 +670,12 @@ namespace Coms.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TemplateTypeId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ContractCategoryId");
-
-                    b.HasIndex("TemplateTypeId");
 
                     b.ToTable("Templates");
                 });
@@ -734,24 +744,6 @@ namespace Coms.Infrastructure.Migrations
                     b.HasKey("TemplateId", "Number");
 
                     b.ToTable("TemplateTerms");
-                });
-
-            modelBuilder.Entity("Coms.Domain.Entities.TemplateType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TemplateTypes");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.User", b =>
@@ -866,19 +858,11 @@ namespace Coms.Infrastructure.Migrations
 
             modelBuilder.Entity("Coms.Domain.Entities.Contract", b =>
                 {
-                    b.HasOne("Coms.Domain.Entities.Access", "Access")
-                        .WithMany()
-                        .HasForeignKey("AccessId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Coms.Domain.Entities.Template", "Template")
                         .WithMany("Contracts")
                         .HasForeignKey("TemplateID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Access");
 
                     b.Navigation("Template");
                 });
@@ -1057,15 +1041,7 @@ namespace Coms.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Coms.Domain.Entities.TemplateType", "TemplateTypes")
-                        .WithMany()
-                        .HasForeignKey("TemplateTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("ContractCategory");
-
-                    b.Navigation("TemplateTypes");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.TemplateContent", b =>

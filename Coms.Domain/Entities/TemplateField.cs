@@ -11,7 +11,7 @@ namespace Coms.Domain.Entities
         public int Id { get; set; }
 
         [Required]
-        public string FieldName { get; set; }
+        public string FieldName { get; set; } = string.Empty;
 
         [Required]
         public int PositionX { get; set; }
@@ -22,8 +22,9 @@ namespace Coms.Domain.Entities
         [Required] 
         public FieldType FieldType { get; set; }
 
-        public int? ContractTemplateId { get; set; }
+        public int? TemplateId { get; set; }
 
-        public virtual ContractTemplate ContractTemplate { get; set; }
+        public virtual Template? Template { get; set; }
+        public virtual ICollection<TemplateContent>? TemplateContents { get; set; }
     }
 }

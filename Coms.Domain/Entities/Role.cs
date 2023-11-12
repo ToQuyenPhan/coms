@@ -13,5 +13,6 @@ namespace Coms.Domain.Entities
         [MaxLength(50)]
         public string RoleName { get; set; } = null!;
         public virtual ICollection<Permission_Role>? PermissionRoles { get; set; }
+        public virtual ICollection<User>? Users { get; set; }
     }
 }

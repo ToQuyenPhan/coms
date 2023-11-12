@@ -2,11 +2,11 @@
 
 namespace Coms.Domain.Entities
 {
-    public class ContractTemplateTerm
+    public class TemplateTerm
     {
         [Required]
-        public int ContractTemplateId { get; set; }
-        public virtual ContractTemplate ContractTemplate { get; set; }
+        public int TemplateId { get; set; }
+        public virtual Template? Template { get; set; }
 
         [Required]
         public int Number { get; set; }

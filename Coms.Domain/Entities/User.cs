@@ -37,6 +37,9 @@ namespace Coms.Domain.Entities
 
         [Required]
         public int RoleId { get; set; }
-        public virtual Role Role { get; set; }
+        public virtual Role? Role { get; set; }
+        public virtual ICollection<ActionHistory>? ActionHistories { get; set; }
+        public virtual ICollection<User_Access>? UserAccesses { get; set; }
+        public virtual ICollection<PartnerReview>? PartnerReviews { get; set; }
     }
 }

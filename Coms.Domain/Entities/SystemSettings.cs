@@ -2,7 +2,7 @@
 
 namespace Coms.Domain.Entities
 {
-    public class Company
+    public class SystemSettings
     {
         [Required]
         public string CompanyName { get; set; }
