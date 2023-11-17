@@ -67,7 +67,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return await AsQueryableWithIncludes(includes).AsNoTracking().FirstOrDefaultAsync(predicate);
         }
 
-        public virtual async Task<IList<T>> WhereAsync(Expression<Func<T, bool>> predicate, params string[] navigationProperties)
+        public virtual async Task<IList<T>> WhereAsyncWithParam(Expression<Func<T, bool>> predicate, params string[] navigationProperties)
         {
             List<T> list;
             var query = _entities.AsQueryable();

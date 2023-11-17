@@ -1,5 +1,5 @@
 ﻿using Coms.Application.Services.Authentication;
-using Microsoft.EntityFrameworkCore;
+using Coms.Application.Services.ContractCategories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Coms.Application
@@ -9,6 +9,7 @@ namespace Coms.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IContractCategoryService, ContractCategoryService>();
             return services;
         }
     }

@@ -25,6 +25,8 @@ namespace Coms.Domain.Entities
         [Required]
         public TemplateStatus Status { get; set; }
 
+        public string TemplateLink { get; set; }
+
         [Required]
         public int ContractCategoryId { get; set; }
         public virtual ContractCategory? ContractCategory { get; set; }

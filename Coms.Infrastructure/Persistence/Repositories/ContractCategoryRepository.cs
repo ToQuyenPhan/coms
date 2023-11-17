@@ -1,0 +1,23 @@
+﻿using Coms.Application.Common.Intefaces.Persistence;
+using Coms.Domain.Entities;
+using Coms.Domain.Enum;
+
+namespace Coms.Infrastructure.Persistence.Repositories
+{
+    public class ContractCategoryRepository : IContractCategoryRepository
+    {
+        private readonly IGenericRepository<ContractCategory> _genericRepository;
+
+        public ContractCategoryRepository(IGenericRepository<ContractCategory> genericRepository)
+        {
+            _genericRepository = genericRepository;
+        }
+
+        public async Task<IList<ContractCategory>?> GetActiveContractCategories()
+        {
+            var list = await _genericRepository.WhereAsync(
+                    cc => cc.Status.Equals(ContractCategoryStatus.Active), null);
+            return (list.Count > 0) ? list : null;
+        }
+    }
+}

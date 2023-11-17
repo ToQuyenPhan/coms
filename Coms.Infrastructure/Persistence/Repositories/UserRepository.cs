@@ -12,12 +12,6 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        private readonly List<User> _users = new();
-        public void Add(User user)
-        {
-            _users.Add(user);
-        }
-
         public async Task<User?> GetUserByUsername(string username)
         {
             return await _genericRepository.FirstOrDefaultAsync(u => u.Username == username, 
