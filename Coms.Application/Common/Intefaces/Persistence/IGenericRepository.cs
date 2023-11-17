@@ -4,7 +4,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
 {
     public interface IGenericRepository<T> where T : class
     {
-        IEnumerable<T> GetAll();
+        IList<T> GetAll();
         Task CreateAsync(T entity);
         Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
         Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>>[]? includes);

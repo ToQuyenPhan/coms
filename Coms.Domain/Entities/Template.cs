@@ -19,8 +19,7 @@ namespace Coms.Domain.Entities
         [Required]
         public DateTime CreatedDate { get; set; }
 
-        [Required]
-        public DateTime UpdatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
 
         [Required]
         public TemplateStatus Status { get; set; }

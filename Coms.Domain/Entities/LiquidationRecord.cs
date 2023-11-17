@@ -18,6 +18,7 @@ namespace Coms.Domain.Entities
 
         [Required]
         public DateTime CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
 
         [Required]
         public DocumentStatus Status { get; set; }

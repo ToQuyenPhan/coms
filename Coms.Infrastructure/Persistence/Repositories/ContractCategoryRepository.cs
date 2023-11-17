@@ -19,5 +19,12 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     cc => cc.Status.Equals(ContractCategoryStatus.Active), null);
             return (list.Count > 0) ? list : null;
         }
+
+        public async Task<ContractCategory?> GetActiveContractCategoryById(int id)
+        {
+            var item = await _genericRepository.FirstOrDefaultAsync(cc => cc.Id == id && 
+                cc.Status.Equals(ContractCategoryStatus.Active));
+            return item;
+        }
     }
 }

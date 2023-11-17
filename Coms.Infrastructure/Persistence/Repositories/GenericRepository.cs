@@ -16,7 +16,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _entities = context.Set<T>();
         }
 
-        public IEnumerable<T> GetAll()
+        public IList<T> GetAll()
         {
             return _entities.ToList();
         }

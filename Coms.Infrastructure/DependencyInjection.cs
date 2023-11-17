@@ -26,6 +26,8 @@ namespace Coms.Infrastructure
                 options.UseSqlServer(configuration.GetConnectionString("ComsDB")));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IContractCategoryRepository, ContractCategoryRepository>();
+            services.AddScoped<ITemplateTypeRepository, TemplateTypeRepository>();
+            services.AddScoped<ITemplateRepository, TemplateRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             return services;
         }
