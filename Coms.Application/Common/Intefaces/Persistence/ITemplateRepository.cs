@@ -9,5 +9,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task AddTemplate(Template template);
         Task<PagingResult<Template>> GetTemplates(string templateName, int? contractCategoryId,
                 int? templateTypeId, int? status, int currentPage, int pageSize);
+        Task DeleteTemplate(Template template);
+        Task<Template> GetTemplate(int id);
     }
 }

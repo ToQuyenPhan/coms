@@ -9,5 +9,6 @@ namespace Coms.Application.Services.Templates
                 string link, int status);
         Task<ErrorOr<PagingResult<TemplateResult>>> GetTemplates(string name, int? category,
                 int? type, int? status, int currentPage, int pageSize);
+        Task<ErrorOr<TemplateResult>> DeleteTemplate(int id);
     }
 }

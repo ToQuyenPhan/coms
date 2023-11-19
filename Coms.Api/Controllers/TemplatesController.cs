@@ -21,7 +21,6 @@ namespace Coms.Api.Controllers
 
         [HttpGet]
         [SwaggerOperation(Summary = "Get all templates (with filter) in Coms")]
-        [AllowAnonymous]
         public IActionResult Get([FromQuery]TemplateFilterRequest request)
         {
             ErrorOr<PagingResult<TemplateResult>> result =
@@ -41,6 +40,17 @@ namespace Coms.Api.Controllers
                 _templateService.AddTemplate(request.TemplateName, request.Description, 
                     request.ContractCategoryId, request.TemplateTypeId, request.TemplateLink, 
                     request.Status).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpDelete]
+        [SwaggerOperation(Summary = "Delete a template in Coms")]
+        public IActionResult Delete(int id)
+        {
+            ErrorOr<TemplateResult> result = _templateService.DeleteTemplate(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
