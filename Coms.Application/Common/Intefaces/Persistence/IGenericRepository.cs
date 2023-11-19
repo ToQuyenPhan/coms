@@ -15,5 +15,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task UpdateRangeAsync(IList<T> entities);
         Task DeleteAsync(T entity);
         Task DeleteRangeAsync(IList<T> entities);
+        Task<IList<T>> WhereAsyncWithFilter(Expression<Func<T, bool>> predicate,
+                Expression<Func<T, object>>[]? includes, int currentPage, int pageSize);
     }
 }

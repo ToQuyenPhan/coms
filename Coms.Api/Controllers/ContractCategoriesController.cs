@@ -2,6 +2,7 @@
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Coms.Api.Controllers
 {
@@ -17,6 +18,7 @@ namespace Coms.Api.Controllers
         }
 
         [HttpGet("active")]
+        [SwaggerOperation(Summary = "Get all active contract categories of Coms")]
         public IActionResult GetActiveContractCategories()
         {
             ErrorOr<IList<ContractCategoryResult>> result =

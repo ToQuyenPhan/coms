@@ -8,10 +8,6 @@ namespace Coms.Api.Controllers
     [Authorize(Roles = "Staff")]
     public class UsersController : ApiController
     {
-        [HttpGet]
-        public IActionResult ListUsers()
-        {
-            return Ok(Array.Empty<string>());
-        }
+        
     }
 }

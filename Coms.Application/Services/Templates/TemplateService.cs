@@ -1,4 +1,5 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
+using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
@@ -18,6 +19,45 @@ namespace Coms.Application.Services.Templates
             _templateRepository = templateRepository;
             _contractCategoryRepository = contractCategoryRepository;
             _templateTypeRepository = templateTypeRepository;
+        }
+
+        public async Task<ErrorOr<PagingResult<TemplateResult>>> GetTemplates(string name, int? category, 
+                int? type, int? status, int currentPage, int pageSize)
+        {
+            if(_templateRepository
+                    .GetTemplates(name, category, type, status, currentPage, pageSize).Result is not null)
+            {
+                IList<TemplateResult> responses = new List<TemplateResult>();
+                var result = _templateRepository
+                    .GetTemplates(name, category, type, status, currentPage, pageSize).Result;
+                foreach(var template in result.Items)
+                {
+                    var templateResult = new TemplateResult
+                    {
+                        Id = template.Id,
+                        TemplateName = template.TemplateName,
+                        Description = template.Description,
+                        CreatedDate = template.CreatedDate,
+                        CreatedDateString = template.CreatedDate.ToString(),
+                        ContractCategoryId = template.ContractCategoryId,
+                        ContractCategoryName = template.ContractCategory.CategoryName,
+                        TemplateTypeId = template.TemplateTypeId,
+                        TemplateTypeName = template.TemplateTypes.Name,
+                        TemplateLink = template.TemplateLink,
+                        Status = (int)template.Status,
+                        StatusString = template.Status.ToString()
+                    };
+                    responses.Add(templateResult);
+                }
+                return new 
+                    PagingResult<TemplateResult>(responses, result.TotalCount, result.CurrentPage, 
+                    result.PageSize);
+            }
+            else
+            {
+                return new PagingResult<TemplateResult>(new List<TemplateResult>(), 0, currentPage,
+                    pageSize);
+            }
         }
 
         public async Task<ErrorOr<TemplateResult>> AddTemplate(string name, string description, int category, int type,

@@ -82,6 +82,21 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return await AsQueryableWithIncludes(includes).Where(predicate).AsNoTracking().ToListAsync();
         }
 
+        public async Task<IList<T>> WhereAsyncWithFilter(Expression<Func<T, bool>> predicate, 
+                Expression<Func<T, object>>[]? includes, int currentPage, int pageSize)
+        {
+            var query = AsQueryableWithIncludes(includes).Where(predicate);
+            if(currentPage > 0)
+            {
+                query = query.Skip((currentPage - 1) * pageSize);
+            }
+            if(pageSize > 0)
+            {
+                query = query.Take(pageSize);
+            }
+            return await query.AsNoTracking().ToListAsync();
+        }
+
         private IQueryable<T> AsQueryableWithIncludes(Expression<Func<T, object>>[]? includes)
         {
             var query = _entities.AsQueryable();
