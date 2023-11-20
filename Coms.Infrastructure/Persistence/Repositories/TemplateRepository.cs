@@ -17,15 +17,15 @@ namespace Coms.Infrastructure.Persistence.Repositories
         }
 
         public async Task<PagingResult<Template>> GetTemplates(string templateName, int? contractCategoryId, 
-                int? templateTypeId, int? status, int currentPage, int pageSize)
+                int? templateTypeId, int? status, string email, int currentPage, int pageSize)
         {
             var query = await _genericRepository.WhereAsync(BuildExpression(templateName,
-                    contractCategoryId, templateTypeId, status), null);
+                    contractCategoryId, templateTypeId, status, email), null);
             int totalCount = query.Count();
             var list = await _genericRepository.WhereAsyncWithFilter(BuildExpression(templateName,
-                    contractCategoryId, templateTypeId, status),
+                    contractCategoryId, templateTypeId, status, email),
                     new System.Linq.Expressions.Expression<Func<Template, object>>[] { 
-                            t => t.ContractCategory, t => t.TemplateTypes }, 
+                            t => t.ContractCategory, t => t.TemplateType, t => t.User }, 
                     currentPage, pageSize);
             return (list.Count() > 0) ? new PagingResult<Template>(list, totalCount, currentPage, pageSize) : null;
         }
@@ -34,7 +34,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             return await _genericRepository.FirstOrDefaultAsync(t => t.Id.Equals(id),
                 new System.Linq.Expressions.Expression<Func<Template, object>>[]
-                    {t => t.ContractCategory, t => t.TemplateTypes});
+                    {t => t.ContractCategory, t => t.TemplateType, t => t.User});
         }
 
         public async Task AddTemplate(Template template)
@@ -48,7 +48,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
         }
 
         private Expression<Func<Template, bool>> BuildExpression(string templateName, 
-                int? contractCategoryId, int? templateTypeId, int? status)
+                int? contractCategoryId, int? templateTypeId, int? status, string email)
         {
             var predicate = PredicateBuilder.New<Template>(true);
             if (!string.IsNullOrEmpty(templateName))
@@ -66,6 +66,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
             if (status >= 0)
             {
                 predicate = predicate.And(t => t.Status.Equals((TemplateStatus)status));
+            }
+            if(!string.IsNullOrEmpty(email)) {
+                predicate = predicate.And(t => t.User.Email.Contains(email.Trim()));
             }
             return predicate;
         }

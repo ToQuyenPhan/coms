@@ -22,14 +22,14 @@ namespace Coms.Application.Services.Templates
         }
 
         public async Task<ErrorOr<PagingResult<TemplateResult>>> GetTemplates(string name, int? category, 
-                int? type, int? status, int currentPage, int pageSize)
+                int? type, int? status, string email, int currentPage, int pageSize)
         {
             if(_templateRepository
-                    .GetTemplates(name, category, type, status, currentPage, pageSize).Result is not null)
+                    .GetTemplates(name, category, type, status, email, currentPage, pageSize).Result is not null)
             {
                 IList<TemplateResult> responses = new List<TemplateResult>();
                 var result = _templateRepository
-                    .GetTemplates(name, category, type, status, currentPage, pageSize).Result;
+                    .GetTemplates(name, category, type, status, email, currentPage, pageSize).Result;
                 foreach(var template in result.Items)
                 {
                     var templateResult = new TemplateResult
@@ -42,10 +42,13 @@ namespace Coms.Application.Services.Templates
                         ContractCategoryId = template.ContractCategoryId,
                         ContractCategoryName = template.ContractCategory.CategoryName,
                         TemplateTypeId = template.TemplateTypeId,
-                        TemplateTypeName = template.TemplateTypes.Name,
+                        TemplateTypeName = template.TemplateType.Name,
                         TemplateLink = template.TemplateLink,
                         Status = (int)template.Status,
-                        StatusString = template.Status.ToString()
+                        StatusString = template.Status.ToString(),
+                        UserId = template.User.Id,
+                        UserName = template.User.Username,
+                        Email = template.User.Email
                     };
                     responses.Add(templateResult);
                 }
@@ -61,7 +64,7 @@ namespace Coms.Application.Services.Templates
         }
 
         public async Task<ErrorOr<TemplateResult>> AddTemplate(string name, string description, int category, int type,
-                string link, int status)
+                string link, int status, int userId)
         {
             try
             {
@@ -73,26 +76,28 @@ namespace Coms.Application.Services.Templates
                     TemplateTypeId = type,
                     TemplateLink = link,
                     CreatedDate = DateTime.Now,
-                    Status = (TemplateStatus) status
+                    Status = (TemplateStatus) status,
+                    UserId = userId
                 };
                 await _templateRepository.AddTemplate(template);
-                var contractCategory = 
-                        _contractCategoryRepository.GetActiveContractCategoryById(category).Result;
-                var templateType = _templateTypeRepository.GetTemplateTypeById(type).Result;
+                var createdTemplate = await _templateRepository.GetTemplate(template.Id);
                 var templateResult = new TemplateResult
                 {
-                    Id = template.Id,
-                    TemplateName = name,
-                    Description = description,
-                    CreatedDate = template.CreatedDate,
-                    CreatedDateString = template.CreatedDate.ToString(),
-                    ContractCategoryId= category,
-                    ContractCategoryName = contractCategory.CategoryName,
-                    TemplateTypeId = type,
-                    TemplateTypeName = templateType.Name,
-                    TemplateLink = link,
-                    Status = status,
-                    StatusString = template.Status.ToString(),
+                    Id = createdTemplate.Id,
+                    TemplateName = createdTemplate.TemplateName,
+                    Description = createdTemplate.Description,
+                    CreatedDate = createdTemplate.CreatedDate,
+                    CreatedDateString = createdTemplate.CreatedDate.ToString(),
+                    ContractCategoryId= createdTemplate.ContractCategory.Id,
+                    ContractCategoryName = createdTemplate.ContractCategory.CategoryName,
+                    TemplateTypeId = createdTemplate.TemplateType.Id,
+                    TemplateTypeName = createdTemplate.TemplateType.Name,
+                    TemplateLink = createdTemplate.TemplateLink,
+                    Status = (int)createdTemplate.Status,
+                    StatusString = createdTemplate.Status.ToString(),
+                    UserId = createdTemplate.User.Id,
+                    UserName = createdTemplate.User.Username,
+                    Email = createdTemplate.User.Email
                 };
                 return templateResult;
             }
@@ -121,10 +126,13 @@ namespace Coms.Application.Services.Templates
                         ContractCategoryId = template.ContractCategoryId,
                         ContractCategoryName = template.ContractCategory.CategoryName,
                         TemplateTypeId = template.TemplateTypeId,
-                        TemplateTypeName = template.TemplateTypes.Name,
+                        TemplateTypeName = template.TemplateType.Name,
                         TemplateLink = template.TemplateLink,
                         Status = (int)template.Status,
                         StatusString = template.Status.ToString(),
+                        UserId = template.User.Id,
+                        UserName = template.User.Username,
+                        Email = template.User.Email
                     };
                     return templateResult;
                 }

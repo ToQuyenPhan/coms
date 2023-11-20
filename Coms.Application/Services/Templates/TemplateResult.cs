@@ -20,5 +20,8 @@ namespace Coms.Application.Services.Templates
         public string ContractCategoryName { get; set; }
         public int TemplateTypeId { get; set; }
         public string TemplateTypeName { get; set; }
+        public int? UserId { get; set; }
+        public string UserName { get; set; }
+        public string Email { get; set; }
     }
 }

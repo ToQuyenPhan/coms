@@ -31,7 +31,10 @@ namespace Coms.Domain.Entities
         public virtual ContractCategory? ContractCategory { get; set; }
 
         public int TemplateTypeId { get; set; }
-        public virtual TemplateType? TemplateTypes { get; set; }
+        public virtual TemplateType? TemplateType { get; set; }
+
+        public int? UserId { get; set; }
+        public virtual User? User { get; set; }
         public virtual ICollection<Contract>? Contracts { get; set; }
         public virtual ICollection<TemplateTerm>? TemplateTerms { get; set; }
         public virtual ICollection<TemplateField>? TemplateFields { get; set; }

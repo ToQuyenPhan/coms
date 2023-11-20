@@ -31,7 +31,8 @@ namespace Coms.Infrastructure.Authentication
                 new Claim(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Name, user.FullName),
                 new Claim(ClaimTypes.Role, user.Role.RoleName),
-                new Claim("role", user.Role.RoleName)
+                new Claim("role", user.Role.RoleName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
             var securityToken = new JwtSecurityToken(issuer: _jwtSettings.Issuer, 
                 audience: _jwtSettings.Audience,
