@@ -4,6 +4,7 @@ using Coms.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coms.Infrastructure.Migrations
 {
     [DbContext(typeof(ComsDBContext))]
-    partial class ComsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20231120144225_UpdateContractAccess")]
+    partial class UpdateContractAccess
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -170,10 +172,13 @@ namespace Coms.Infrastructure.Migrations
                     b.Property<DateTime>("EffectiveDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("OriginalVersion")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int>("TemplateId")
+                    b.Property<int>("TemplateID")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -184,7 +189,7 @@ namespace Coms.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TemplateId");
+                    b.HasIndex("TemplateID");
 
                     b.ToTable("Contracts");
                 });
@@ -477,7 +482,10 @@ namespace Coms.Infrastructure.Migrations
                     b.Property<DateTime>("SendDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int?>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -886,7 +894,7 @@ namespace Coms.Infrastructure.Migrations
                 {
                     b.HasOne("Coms.Domain.Entities.Template", "Template")
                         .WithMany("Contracts")
-                        .HasForeignKey("TemplateId")
+                        .HasForeignKey("TemplateID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1003,7 +1011,9 @@ namespace Coms.Infrastructure.Migrations
 
                     b.HasOne("Coms.Domain.Entities.User", "User")
                         .WithMany("PartnerReviews")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Contract");
 

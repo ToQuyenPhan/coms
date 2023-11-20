@@ -21,7 +21,7 @@ namespace Coms.Domain.Entities
         public int? PartnerId { get; set; }
         public virtual Partner Partner { get; set; }
 
-        public int? SenderId { get; set; }
+        public int? UserId { get; set; }
         public virtual User User { get; set; }
 
         public int ContractId { get; set; }

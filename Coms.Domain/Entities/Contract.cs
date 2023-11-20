@@ -28,11 +28,10 @@ namespace Coms.Domain.Entities
         public DocumentStatus Status { get; set; }
             
         [Required]
-        public int TemplateID { get; set; }
+        public int TemplateId { get; set; }
         public virtual Template? Template { get; set; }
 
-        public int AccessId { get; set; }
-        public virtual Access? Access { get; set; }
+        public virtual ICollection<Access> Accesses { get; set; }
         public virtual ICollection<ActionHistory>? ActionHistories { get; set; }
         public virtual ICollection<Attachment>? Attachments { get; set; }
         public virtual ICollection<ContractAnnex>? ContractAnnexes { get; set; }

@@ -28,6 +28,10 @@ namespace Coms.Infrastructure
             services.AddScoped<IContractCategoryRepository, ContractCategoryRepository>();
             services.AddScoped<ITemplateTypeRepository, TemplateTypeRepository>();
             services.AddScoped<ITemplateRepository, TemplateRepository>();
+            services.AddScoped<IContractRepository, ContractRepository>();
+            services.AddScoped<IAccessRepository, AccessRepository>();
+            services.AddScoped<IUserAccessRepository, UserAccessRepository>();
+            services.AddScoped<IPartnerReviewRepository, PartnerReviewRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             return services;
         }
