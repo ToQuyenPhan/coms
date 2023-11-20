@@ -22,13 +22,23 @@ namespace Coms.Api.Controllers
 
         [HttpGet("yours")]
         [SwaggerOperation(Summary = "Get your contracts in Coms")]
-        [AllowAnonymous]
         public IActionResult GetYourContracts([FromQuery] YourContractsFilterRequest request)
         {
             ErrorOr<PagingResult<ContractResult>> result = _contractService.GetYourContracts(
                 int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
                 request.ContractName, request.CreatorName, request.Status, request.CurrentPage, 
                 request.PageSize).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpDelete]
+        [SwaggerOperation(Summary = "Get your contracts in Coms")]
+        public IActionResult Delete([FromQuery] int id)
+        {
+            ErrorOr<ContractResult> result = _contractService.DeleteContract(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

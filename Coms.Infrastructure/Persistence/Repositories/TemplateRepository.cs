@@ -42,7 +42,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             await _genericRepository.CreateAsync(template);
         }
 
-        public async Task DeleteTemplate(Template template)
+        public async Task UpdateTemplate(Template template)
         {
             await _genericRepository.UpdateAsync(template);
         }

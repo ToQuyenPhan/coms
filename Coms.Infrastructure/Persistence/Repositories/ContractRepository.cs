@@ -11,5 +11,15 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             _genericRepository = genericRepository;
         }
+
+        public async Task<Contract> GetContract(int id)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id), null);
+        }
+
+        public async Task UpdateContract(Contract contract)
+        {
+            await _genericRepository.UpdateAsync(contract);
+        }
     }
 }

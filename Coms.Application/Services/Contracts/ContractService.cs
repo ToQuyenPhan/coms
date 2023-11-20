@@ -12,14 +12,54 @@ namespace Coms.Application.Services.Contracts
         private readonly IAccessRepository _accessRepository;
         private readonly IUserAccessRepository _userAccessRepository;
         private readonly IPartnerReviewRepository _partnerReviewRepository;
+        private readonly IContractRepository _contractRepository;
 
         public ContractService(IAccessRepository accessRepository,
                 IUserAccessRepository userAccessRepository,
-                IPartnerReviewRepository partnerReviewRepository)
+                IPartnerReviewRepository partnerReviewRepository,
+                IContractRepository contractRepository)
         {
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
             _partnerReviewRepository = partnerReviewRepository;
+            _contractRepository = contractRepository;
+        }
+
+        public async Task<ErrorOr<ContractResult>> DeleteContract(int id)
+        {
+            try
+            {
+                if(_contractRepository.GetContract(id).Result is not null)
+                {
+                    var contract = await _contractRepository.GetContract(id);
+                    contract.Status = DocumentStatus.Deleted;
+                    await _contractRepository.UpdateContract(contract);
+                    var contractResult = new ContractResult
+                    {
+                        Id = contract.Id,
+                        ContractName = contract.ContractName,
+                        Version = contract.Version,
+                        CreatedDate = contract.CreatedDate,
+                        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        UpdatedDate = contract.UpdatedDate,
+                        UpdatedDateString = contract.UpdatedDate.ToString(),
+                        EffectiveDate = contract.EffectiveDate,
+                        EffectiveDateString = contract.EffectiveDate.ToString(),
+                        Status = (int)contract.Status,
+                        StatusString = contract.Status.ToString(),
+                        TemplateID = contract.TemplateId
+                    };
+                    return contractResult;
+                }
+                else
+                {
+                    return Error.NotFound();
+                }
+            }
+            catch(Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
         }
 
         public async Task<ErrorOr<PagingResult<ContractResult>>> GetYourContracts(int userId, 
@@ -32,6 +72,7 @@ namespace Coms.Application.Services.Contracts
                     creatorName = "";
                 }
                 var predicate = PredicateBuilder.New<Access>(true);
+                predicate = predicate.And(a => a.Contract.Status != DocumentStatus.Deleted);
                 if (!string.IsNullOrEmpty(name))
                 {
                     predicate = predicate.And(a => a.Contract.ContractName.Contains(name.Trim()));
@@ -57,9 +98,11 @@ namespace Coms.Application.Services.Contracts
                     }
                 }
                 IList<Access> filteredList = accesses.Where(predicate).ToList();
+                var total = filteredList.Count();
                 if(currentPage > 0 && pageSize > 0)
                 {
-                    filteredList.Skip((currentPage - 1) * pageSize).Take(pageSize);
+                    filteredList = filteredList.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                            .ToList();
                 }
                 IList<ContractResult> responses = new List<ContractResult>();
                 foreach (var contract in filteredList)
@@ -70,7 +113,7 @@ namespace Coms.Application.Services.Contracts
                         ContractName = contract.Contract.ContractName,
                         Version = contract.Contract.Version,
                         CreatedDate = contract.Contract.CreatedDate,
-                        CreatedDateString = contract.Contract.CreatedDate.ToString(),
+                        CreatedDateString = contract.Contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
                         UpdatedDate = contract.Contract.UpdatedDate,
                         UpdatedDateString = contract.Contract.UpdatedDate.ToString(),
                         EffectiveDate = contract.Contract.EffectiveDate,
@@ -93,8 +136,7 @@ namespace Coms.Application.Services.Contracts
                     responses.Add(contractResult);
                 }
                 return new
-                    PagingResult<ContractResult>(responses, filteredList.Count(), currentPage,
-                    pageSize);
+                    PagingResult<ContractResult>(responses, total, currentPage, pageSize);
             }
             else
             {

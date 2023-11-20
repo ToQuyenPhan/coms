@@ -115,7 +115,7 @@ namespace Coms.Application.Services.Templates
                 {
                     var template = await _templateRepository.GetTemplate(id);
                     template.Status = TemplateStatus.Deleted;
-                    await _templateRepository.DeleteTemplate(template);
+                    await _templateRepository.UpdateTemplate(template);
                     var templateResult = new TemplateResult
                     {
                         Id = template.Id,
