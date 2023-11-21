@@ -3,6 +3,7 @@
     public enum CommentStatus
     {
         Inactive,
-        Active
+        Active,
+        Dismissed
     }
 }

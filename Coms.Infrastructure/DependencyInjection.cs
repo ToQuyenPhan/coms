@@ -32,6 +32,8 @@ namespace Coms.Infrastructure
             services.AddScoped<IAccessRepository, AccessRepository>();
             services.AddScoped<IUserAccessRepository, UserAccessRepository>();
             services.AddScoped<IPartnerReviewRepository, PartnerReviewRepository>();
+            services.AddScoped<ICommentRepository, CommentRepository>();
+            services.AddScoped<IActionHistoryRepository, ActionHistoryRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             return services;
         }

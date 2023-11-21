@@ -1,4 +1,5 @@
 ﻿using Coms.Application.Services.Authentication;
+using Coms.Application.Services.Comments;
 using Coms.Application.Services.ContractCategories;
 using Coms.Application.Services.Contracts;
 using Coms.Application.Services.Templates;
@@ -16,6 +17,7 @@ namespace Coms.Application
             services.AddScoped<ITemplateTypeService, TemplateTypeService>();
             services.AddScoped<ITemplateService, TemplateService>();
             services.AddScoped<IContractService, ContractService>();
+            services.AddScoped<ICommentService, CommentService>();
             return services;
         }
     }
