@@ -44,5 +44,17 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpGet("general-report")]
+        [SwaggerOperation(Summary = "Get contract general report in Coms")]
+        public IActionResult GetGeneralReport()
+        {
+            ErrorOr<IList<GeneralReportResult>> result = _contractService.GetGeneralReport(
+                int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value)).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

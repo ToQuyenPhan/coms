@@ -8,5 +8,6 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<ContractResult>> DeleteContract(int id);
         Task<ErrorOr<PagingResult<ContractResult>>> GetYourContracts(int userId,
                 string name, string creatorName, int? status, int currentPage, int pageSize);
+        Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport(int userId);
     }
 }

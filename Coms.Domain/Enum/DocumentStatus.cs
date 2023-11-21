@@ -7,6 +7,7 @@
         Draft,
         Approved,
         Rejected,
+        Signed,
         Finalized,
         Liquidated
     }

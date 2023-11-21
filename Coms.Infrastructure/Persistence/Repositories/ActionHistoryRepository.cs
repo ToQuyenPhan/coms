@@ -18,7 +18,8 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public async Task<IList<ActionHistory>> GetCreateActionByUserId(int userId)
         {
             var list = await _genericRepository.WhereAsync(ah => ah.UserId.Equals(userId) &&
-                ah.ActionType.Equals(ActionType.Created), null);
+                ah.ActionType.Equals(ActionType.Created), new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User,
+                        ah => ah.Contract });
             return (list.Count() > 0) ? list : null;
         }
 
