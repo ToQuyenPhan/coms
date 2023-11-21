@@ -41,11 +41,6 @@ namespace Coms.Application.Services.Comments
                             }
                         }
                     }
-                    else
-                    {
-                        return new PagingResult<CommentResult>(new List<CommentResult>(), 0, currentPage,
-                            pageSize);
-                    }
                 }
                 IList<CommentResult> comments = new List<CommentResult>();
                 foreach (var commentHistory in commentHistories)

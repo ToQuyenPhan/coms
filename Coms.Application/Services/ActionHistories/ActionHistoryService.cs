@@ -35,11 +35,6 @@ namespace Coms.Application.Services.ActionHistories
                             }
                         }
                     }
-                    else
-                    {
-                        return new PagingResult<ActionHistoryResult>(new List<ActionHistoryResult>(), 0, currentPage,
-                            pageSize);
-                    }
                 }
                 IList<ActionHistoryResult> actionHistoryResults = new List<ActionHistoryResult>();
                 foreach (var actionHistory in actionHistories)
