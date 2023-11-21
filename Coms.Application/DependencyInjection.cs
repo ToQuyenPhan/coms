@@ -1,4 +1,5 @@
-﻿using Coms.Application.Services.Authentication;
+﻿using Coms.Application.Services.ActionHistories;
+using Coms.Application.Services.Authentication;
 using Coms.Application.Services.Comments;
 using Coms.Application.Services.ContractCategories;
 using Coms.Application.Services.Contracts;
@@ -18,6 +19,7 @@ namespace Coms.Application
             services.AddScoped<ITemplateService, TemplateService>();
             services.AddScoped<IContractService, ContractService>();
             services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<IActionHistoryService, ActionHistoryService>();
             return services;
         }
     }

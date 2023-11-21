@@ -1,4 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
+using Coms.Application.Services.ActionHistories;
+using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 
@@ -24,6 +26,15 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             var list = await _genericRepository.WhereAsync(ah => ah.ContractId.Equals(contractId) &&
                 ah.ActionType.Equals(ActionType.Commented) && !ah.UserId.Equals(userId), null);
+            return (list.Count() > 0) ? list : null;
+        }
+
+        public async Task<IList<ActionHistory>> GetOtherUserActionByContractId(int contractId, int userId)
+        {
+            var list = await _genericRepository.WhereAsync(ah => ah.ContractId.Equals(contractId) &&
+                !ah.UserId.Equals(userId), new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User,
+                        ah => ah.Contract });
+            list = list.OrderByDescending(ah => ah.CreatedAt).ToList();
             return (list.Count() > 0) ? list : null;
         }
     }
