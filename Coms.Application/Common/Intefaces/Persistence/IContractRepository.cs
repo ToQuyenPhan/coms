@@ -6,5 +6,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
     {
         Task<Contract> GetContract(int id);
         Task UpdateContract(Contract contract);
+        Task AddContract(Contract contract);
     }
 }

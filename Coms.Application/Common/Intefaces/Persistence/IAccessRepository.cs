@@ -5,5 +5,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
     public interface IAccessRepository
     {
         Task<Access> GetAccessById(int id);
+        Task AddAccess(Access access);
     }
 }

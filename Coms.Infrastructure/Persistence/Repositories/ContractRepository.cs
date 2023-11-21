@@ -21,5 +21,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             await _genericRepository.UpdateAsync(contract);
         }
+
+        public async Task AddContract(Contract contract)
+        {
+            await _genericRepository.CreateAsync(contract);
+        }
     }
 }

@@ -5,5 +5,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
     public interface IUserRepository
     {
         Task<User?> GetUserByUsername(string username);
+        Task<User?> GetUser(int id);
     }
 }

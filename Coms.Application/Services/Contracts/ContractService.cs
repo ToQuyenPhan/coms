@@ -13,16 +13,25 @@ namespace Coms.Application.Services.Contracts
         private readonly IUserAccessRepository _userAccessRepository;
         private readonly IPartnerReviewRepository _partnerReviewRepository;
         private readonly IContractRepository _contractRepository;
+        private readonly ITemplateRepository _templateRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IContractCategoryRepository _contractCategoryRepository;
 
         public ContractService(IAccessRepository accessRepository,
                 IUserAccessRepository userAccessRepository,
                 IPartnerReviewRepository partnerReviewRepository,
-                IContractRepository contractRepository)
+                IContractRepository contractRepository,
+                ITemplateRepository templateRepository, 
+                IUserRepository userRepository,
+                IContractCategoryRepository contractCategoryRepository)
         {
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
             _partnerReviewRepository = partnerReviewRepository;
             _contractRepository = contractRepository;
+            _templateRepository = templateRepository;
+            _userRepository = userRepository;
+            _contractCategoryRepository = contractCategoryRepository;
         }
 
         public async Task<ErrorOr<ContractResult>> DeleteContract(int id)
@@ -146,6 +155,72 @@ namespace Coms.Application.Services.Contracts
             {
                 return new PagingResult<ContractResult>(new List<ContractResult>(), 0, currentPage,
                     pageSize);
+            }
+        }
+
+        public async Task<ErrorOr<ContractResult>> AddContract(string name,string code, int authorId, int partnerId, int templateId, DateTime effectiveDate,
+               string link, int status)
+        {
+            try
+            {
+                var access = new Access
+                {
+                    AccessRole = AccessRole.Author
+                };
+                await _accessRepository.AddAccess(access);
+
+                var userAccess = new User_Access
+                {
+                    UserId = authorId,
+                    AccessId = access.Id,
+                };
+                await _userAccessRepository.AddUserAccess(userAccess);
+
+                var contract = new Contract
+                {
+                    ContractName = name,
+                    Code = code,
+                    TemplateId = templateId,
+                    Link = link,
+                    CreatedDate = DateTime.Now,
+                    UpdatedDate = DateTime.Now,
+                    EffectiveDate = effectiveDate,
+                    Version = 1,
+                    Status = (DocumentStatus)status,                
+                };
+                await _contractRepository.AddContract(contract);
+                var template = _templateRepository.GetTemplate(templateId).Result;
+                var user =  _userRepository.GetUser(userAccess.UserId ?? throw new InvalidOperationException("Value cannot be null")).Result;
+                //var contractCategory =
+                //        _contractCategoryRepository.GetActiveContractCategoryById(template.ContractCategoryId).Result;
+                var contractResult = new ContractResult
+                {
+                    Id = contract.Id,
+                    Code = contract.Code,
+                    ContractName = name,
+                    CreatedDate = contract.CreatedDate,
+                    CreatedDateString = contract.CreatedDate.ToString(),
+                    UpdatedDate = contract.UpdatedDate,
+                    UpdatedDateString = contract.UpdatedDate.ToString(),
+                    EffectiveDate = contract.EffectiveDate,
+                    EffectiveDateString = contract.EffectiveDate.ToString(),
+                    Link = link,
+                    Status = status,
+                    StatusString = template.Status.ToString(),
+                    CreatorId = userAccess.UserId,
+                    CreatorName = user.FullName,
+                    CreatorEmail = user.Email,
+                    CreatorImage = user.Image,
+                    TemplateID = contract.TemplateId,
+                    Version = 1,
+                    //ContractCategoryId = template.ContractCategoryId,
+                    //ContractCategoryName = contractCategory.CategoryName
+                };
+                return contractResult;
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
             }
         }
     }
