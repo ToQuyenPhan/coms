@@ -19,7 +19,7 @@
         public string CreatorName { get; set; }
         public string CreatorEmail { get; set; }
         public string CreatorImage { get; set; }
-        public int PartnerId { get; set; }
+        public int? PartnerId { get; set; }
         public string PartnerName { get; set;}
         public string Code { get; set; }
         public string Link { get; set; }

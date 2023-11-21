@@ -4,6 +4,7 @@ using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
 using LinqKit;
+using static Coms.Domain.Common.Errors.Errors;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -15,7 +16,7 @@ namespace Coms.Application.Services.Contracts
         private readonly IContractRepository _contractRepository;
         private readonly ITemplateRepository _templateRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IContractCategoryRepository _contractCategoryRepository;
+        private readonly IPartnerRepository _partnerRepository;
 
         public ContractService(IAccessRepository accessRepository,
                 IUserAccessRepository userAccessRepository,
@@ -23,7 +24,7 @@ namespace Coms.Application.Services.Contracts
                 IContractRepository contractRepository,
                 ITemplateRepository templateRepository, 
                 IUserRepository userRepository,
-                IContractCategoryRepository contractCategoryRepository)
+                IPartnerRepository partnerRepository)
         {
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
@@ -31,7 +32,7 @@ namespace Coms.Application.Services.Contracts
             _contractRepository = contractRepository;
             _templateRepository = templateRepository;
             _userRepository = userRepository;
-            _contractCategoryRepository = contractCategoryRepository;
+            _partnerRepository = partnerRepository;
         }
 
         public async Task<ErrorOr<ContractResult>> DeleteContract(int id)
@@ -162,20 +163,7 @@ namespace Coms.Application.Services.Contracts
                string link, int status)
         {
             try
-            {
-                var access = new Access
-                {
-                    AccessRole = AccessRole.Author
-                };
-                await _accessRepository.AddAccess(access);
-
-                var userAccess = new User_Access
-                {
-                    UserId = authorId,
-                    AccessId = access.Id,
-                };
-                await _userAccessRepository.AddUserAccess(userAccess);
-
+            {              
                 var contract = new Contract
                 {
                     ContractName = name,
@@ -189,10 +177,33 @@ namespace Coms.Application.Services.Contracts
                     Status = (DocumentStatus)status,                
                 };
                 await _contractRepository.AddContract(contract);
+                var access = new Access
+                {
+                    ContractId = contract.Id,
+                   AccessRole = AccessRole.Author
+                };
+                await _accessRepository.AddAccess(access);
+
+                var userAccess = new User_Access
+                {
+                    UserId = authorId,
+                    AccessId = access.Id,
+                };
+                var partnerReview = new PartnerReview
+                {
+                    ContractId = contract.Id ,
+                    PartnerId = partnerId,
+                    UserId = authorId,
+                    IsApproved = false,
+                    SendDate = DateTime.Now,
+                    ReviewAt = DateTime.Now,
+
+                };
+                await _partnerReviewRepository.AddPartnerReview(partnerReview);
+                await _userAccessRepository.AddUserAccess(userAccess);
+                var partner = _partnerRepository.GetPartner(partnerId).Result;
                 var template = _templateRepository.GetTemplate(templateId).Result;
                 var user =  _userRepository.GetUser(userAccess.UserId ?? throw new InvalidOperationException("Value cannot be null")).Result;
-                //var contractCategory =
-                //        _contractCategoryRepository.GetActiveContractCategoryById(template.ContractCategoryId).Result;
                 var contractResult = new ContractResult
                 {
                     Id = contract.Id,
@@ -213,8 +224,8 @@ namespace Coms.Application.Services.Contracts
                     CreatorImage = user.Image,
                     TemplateID = contract.TemplateId,
                     Version = 1,
-                    //ContractCategoryId = template.ContractCategoryId,
-                    //ContractCategoryName = contractCategory.CategoryName
+                    PartnerId= partnerReview.PartnerId,
+                    PartnerName = partner.CompanyName
                 };
                 return contractResult;
             }

@@ -11,7 +11,8 @@ using System.Security.Claims;
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
-    [Authorize(Roles = "Staff")]
+    //[Authorize(Roles = "Staff")]
+    [AllowAnonymous]
     public class ContractsController : ApiController
     {
         private readonly IContractService _contractService;
@@ -51,7 +52,7 @@ namespace Coms.Api.Controllers
         public IActionResult Add(ContractFormRequest request)
         {
             ErrorOr<ContractResult> result =
-                _contractService.AddContract(request.ContractName,request.Code,request.PartnerId, int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value)
+                _contractService.AddContract(request.ContractName,request.Code,request.PartnerId, /*int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value)*/ 1
                 , request.TemplateId, request.EffectiveDate, request.Link, request.Status).Result;
             return result.Match(
                 result => Ok(result),
