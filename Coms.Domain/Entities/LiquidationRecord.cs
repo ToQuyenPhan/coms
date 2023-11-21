@@ -24,6 +24,9 @@ namespace Coms.Domain.Entities
         public DocumentStatus Status { get; set; }
 
         [Required]
+        public string Link { get; set; }
+
+        [Required]
         public int ContractId { get; set; }
         public Contract? Contract { get; set; }
         public virtual ICollection<LiquidationRecordTerm>? LiquidationRecordTerms { get; set; }

@@ -1,8 +1,4 @@
-﻿using Coms.Domain.Entities;
-using Coms.Domain.Enum;
-using System.ComponentModel.DataAnnotations;
-
-namespace Coms.Application.Services.Contracts
+﻿namespace Coms.Application.Services.Contracts
 {
     public class ContractResult
     {
@@ -25,5 +21,7 @@ namespace Coms.Application.Services.Contracts
         public string CreatorImage { get; set; }
         public int PartnerId { get; set; }
         public string PartnerName { get; set;}
+        public string Code { get; set; }
+        public string Link { get; set; }
     }
 }

@@ -47,7 +47,9 @@ namespace Coms.Application.Services.Contracts
                         EffectiveDateString = contract.EffectiveDate.ToString(),
                         Status = (int)contract.Status,
                         StatusString = contract.Status.ToString(),
-                        TemplateID = contract.TemplateId
+                        TemplateID = contract.TemplateId,
+                        Code = contract.Code,
+                        Link = contract.Link,
                     };
                     return contractResult;
                 }
@@ -121,6 +123,8 @@ namespace Coms.Application.Services.Contracts
                         Status = (int)contract.Contract.Status,
                         StatusString = contract.Contract.Status.ToString(),
                         TemplateID = contract.Contract.TemplateId,
+                        Code = contract.Contract.Code,
+                        Link = contract.Contract.Link
                     };
                     var access = await _userAccessRepository.GetByAccessId(contract.Id);
                     if (contract.AccessRole.Equals(AccessRole.Author))

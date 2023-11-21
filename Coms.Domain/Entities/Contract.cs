@@ -26,6 +26,12 @@ namespace Coms.Domain.Entities
 
         [Required]
         public DocumentStatus Status { get; set; }
+
+        [Required]
+        public string Code { get; set; }
+
+        [Required] 
+        public string Link { get; set; }
             
         [Required]
         public int TemplateId { get; set; }
