@@ -11,8 +11,7 @@ using System.Security.Claims;
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
-    //[Authorize(Roles = "Staff")]
-    [AllowAnonymous]
+    [Authorize(Roles = "Staff")]
     public class ContractsController : ApiController
     {
         private readonly IContractService _contractService;
