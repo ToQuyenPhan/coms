@@ -3,6 +3,7 @@ using Coms.Application.Services.Authentication;
 using Coms.Application.Services.Comments;
 using Coms.Application.Services.ContractCategories;
 using Coms.Application.Services.Contracts;
+using Coms.Application.Services.TemplateFiles;
 using Coms.Application.Services.Templates;
 using Coms.Application.Services.TemplateTypes;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,7 @@ namespace Coms.Application
             services.AddScoped<IContractService, ContractService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IActionHistoryService, ActionHistoryService>();
+            services.AddScoped<ITemplateFileService, TemplateFileService>();
             return services;
         }
     }

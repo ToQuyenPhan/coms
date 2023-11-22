@@ -2,7 +2,6 @@
 using Coms.Application.Services.Templates;
 using Coms.Contracts.Templates;
 using ErrorOr;
-using Firebase.Storage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -15,10 +14,6 @@ namespace Coms.Api.Controllers
     public class TemplatesController : ApiController
     {
         private readonly ITemplateService _templateService;
-        private static string ApiKey = "AIzaSyA8ANgTas81fkGETFx-51dMA5egkEBmeJo";
-        private static string Bucket = "coms-64e4a.appspot.com";
-        private static string AuthEmail = "quyen@gmail.com";
-        private static string AuthPassword = "123456";
 
         public TemplatesController(ITemplateService templateService)
         {
@@ -68,13 +63,9 @@ namespace Coms.Api.Controllers
         [HttpPut]
         [SwaggerOperation(Summary = "Edit a template in Coms")]
         [AllowAnonymous]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit([FromQuery]int id)
         {
-            FirebaseStorage storage = new FirebaseStorage("coms-64e4a.appspot.com");
-            var starsRef = storage.Child("files").Child("sample.docx");
-            var link = starsRef.GetDownloadUrlAsync().Result;
-            var info = starsRef.GetMetaDataAsync().Result;
-            ErrorOr<string> result = starsRef.GetDownloadUrlAsync().Result;
+            ErrorOr<TemplateSfdtResult> result = _templateService.GetTemplate(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
