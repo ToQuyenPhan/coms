@@ -20,6 +20,8 @@ namespace Coms.Application
             services.AddScoped<IContractService, ContractService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IActionHistoryService, ActionHistoryService>();
+            //add attachment service
+            services.AddScoped<IAttachmentService, AttachmentService>();
             return services;
         }
     }

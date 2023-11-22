@@ -38,5 +38,14 @@ namespace Coms.Infrastructure.Persistence.Repositories
             list = list.OrderByDescending(ah => ah.CreatedAt).ToList();
             return (list.Count() > 0) ? list : null;
         }
+
+        //add get all comments by contract id
+        public async Task<IList<ActionHistory>> GetCreateActionByContractId(int contractId)
+        {
+            var list = await _genericRepository.WhereAsync(ah => ah.ContractId.Equals(contractId) &&
+                           ah.ActionType.Equals(ActionType.Created), new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User,
+                                                  ah => ah.Contract });
+            return (list.Count() > 0) ? list : null;
+        }                                                                   
     }
 }

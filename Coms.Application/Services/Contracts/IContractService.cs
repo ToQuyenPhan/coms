@@ -9,5 +9,7 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<PagingResult<ContractResult>>> GetYourContracts(int userId,
                 string name, string creatorName, int? status, int currentPage, int pageSize);
         Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport(int userId);
+        //add get contract by id
+        Task<ErrorOr<ContractResult>> GetContract(int id);
     }
 }

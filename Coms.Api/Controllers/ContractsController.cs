@@ -26,7 +26,7 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<PagingResult<ContractResult>> result = _contractService.GetYourContracts(
                 int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
-                request.ContractName, request.CreatorName, request.Status, request.CurrentPage, 
+                request.ContractName, request.CreatorName, request.Status, request.CurrentPage,
                 request.PageSize).Result;
             return result.Match(
                 result => Ok(result),
@@ -51,6 +51,18 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<IList<GeneralReportResult>> result = _contractService.GetGeneralReport(
                 int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value)).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        //get contract by id
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get contract by id in Coms")]
+        public IActionResult GetContractById(int id)
+        {
+            ErrorOr<ContractResult> result = _contractService.GetContract(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
