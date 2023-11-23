@@ -3,6 +3,11 @@ using Coms.Application.Services.ActionHistories;
 using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
@@ -38,5 +43,18 @@ namespace Coms.Infrastructure.Persistence.Repositories
             list = list.OrderByDescending(ah => ah.CreatedAt).ToList();
             return (list.Count() > 0) ? list : null;
         }
+
+        public async Task<ActionHistory> GetActionHistoryById(int id)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(a => a.Id.Equals(id),
+                    new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[]
+                    { a => a.Contract, a => a.User});
+        }
+        public async Task AddActionHistory(ActionHistory actionHistory)
+        {
+            await _genericRepository.CreateAsync(actionHistory);
+        }
     }
-}
+
+    }
+

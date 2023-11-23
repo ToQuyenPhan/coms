@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Services.ActionHistories;
 using Coms.Application.Services.Common;
+using Coms.Contracts.ActionHistories;
 using Coms.Contracts.Common.Paging;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
@@ -30,6 +31,18 @@ namespace Coms.Api.Controllers
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
+            );
+        }
+        [Authorize(Roles = "Staff")]
+        [HttpPost("add")]
+        [SwaggerOperation(Summary = "Add a action history in Coms")]
+        public IActionResult Add(ActionHistoryFormRequest request)
+        {
+            ErrorOr<ActionHistoryResult> result =
+                _actionHistoryService.AddActionHistory(int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.ContractId, request.ActionType).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem()
             );
         }
     }

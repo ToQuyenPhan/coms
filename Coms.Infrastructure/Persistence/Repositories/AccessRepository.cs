@@ -18,5 +18,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     new System.Linq.Expressions.Expression<Func<Access, object>>[]
                     { a => a.Contract});
         }
+        public async Task AddAccess(Access access)
+        {
+            await _genericRepository.CreateAsync(access);
+        }
     }
 }
