@@ -17,6 +17,7 @@ namespace Coms.Application.Services.Contracts
         private readonly ITemplateRepository _templateRepository;
         private readonly IUserRepository _userRepository;
         private readonly IPartnerRepository _partnerRepository;
+        private readonly IContractCostRepository _contractCostRepository;
 
         public ContractService(IAccessRepository accessRepository,
                 IUserAccessRepository userAccessRepository,
@@ -24,7 +25,8 @@ namespace Coms.Application.Services.Contracts
                 IContractRepository contractRepository,
                 ITemplateRepository templateRepository, 
                 IUserRepository userRepository,
-                IPartnerRepository partnerRepository)
+                IPartnerRepository partnerRepository,
+                IContractCostRepository contractCostRepository)
         {
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
@@ -33,6 +35,7 @@ namespace Coms.Application.Services.Contracts
             _templateRepository = templateRepository;
             _userRepository = userRepository;
             _partnerRepository = partnerRepository;
+            _contractCostRepository = contractCostRepository;
         }
 
         public async Task<ErrorOr<ContractResult>> DeleteContract(int id)
@@ -160,7 +163,7 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<ContractResult>> AddContract(string name,string code, int authorId, int partnerId, int templateId, DateTime effectiveDate,
-               string link, int status)
+               string link, int[] contractCosts)
         {
             try
             {              
@@ -173,8 +176,7 @@ namespace Coms.Application.Services.Contracts
                     CreatedDate = DateTime.Now,
                     UpdatedDate = DateTime.Now,
                     EffectiveDate = effectiveDate,
-                    Version = 1,
-                    Status = (DocumentStatus)status,                
+                    Version = 1             
                 };
                 await _contractRepository.AddContract(contract);
                 var access = new Access
@@ -189,6 +191,7 @@ namespace Coms.Application.Services.Contracts
                     UserId = authorId,
                     AccessId = access.Id,
                 };
+                await _userAccessRepository.AddUserAccess(userAccess);
                 var partnerReview = new PartnerReview
                 {
                     ContractId = contract.Id ,
@@ -200,7 +203,7 @@ namespace Coms.Application.Services.Contracts
 
                 };
                 await _partnerReviewRepository.AddPartnerReview(partnerReview);
-                await _userAccessRepository.AddUserAccess(userAccess);
+                await _contractCostRepository.AddContractCostsToContract(contractCosts,contract.Id);
                 var partner = _partnerRepository.GetPartner(partnerId).Result;
                 var template = _templateRepository.GetTemplate(templateId).Result;
                 var user =  _userRepository.GetUser(userAccess.UserId ?? throw new InvalidOperationException("Value cannot be null")).Result;
@@ -208,25 +211,25 @@ namespace Coms.Application.Services.Contracts
                 {
                     Id = contract.Id,
                     Code = contract.Code,
-                    ContractName = name,
+                    ContractName = contract.ContractName,
                     CreatedDate = contract.CreatedDate,
                     CreatedDateString = contract.CreatedDate.ToString(),
                     UpdatedDate = contract.UpdatedDate,
                     UpdatedDateString = contract.UpdatedDate.ToString(),
                     EffectiveDate = contract.EffectiveDate,
                     EffectiveDateString = contract.EffectiveDate.ToString(),
-                    Link = link,
-                    Status = status,
-                    StatusString = template.Status.ToString(),
+                    Link = contract.Link,
+                    Status = (int)contract.Status,
+                    StatusString = contract.Status.ToString(),
                     CreatorId = userAccess.UserId,
                     CreatorName = user.FullName,
                     CreatorEmail = user.Email,
                     CreatorImage = user.Image,
                     TemplateID = contract.TemplateId,
                     Version = 1,
-                    PartnerId= partnerReview.PartnerId,
+                    PartnerId = partnerReview.PartnerId,
                     PartnerName = partner.CompanyName
-                };
+                 };
                 return contractResult;
             }
             catch (Exception ex)

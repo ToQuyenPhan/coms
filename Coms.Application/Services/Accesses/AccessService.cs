@@ -39,7 +39,7 @@ namespace Coms.Application.Services.Accesses
                 {
                     Id = access.Id,
                     ContractId = access.ContractId,
-                    AccessRole = accessRole,
+                    AccessRole = access.AccessRole.ToString(),
                     ContractName = contract.ContractName
                 };
                 return accessResult;

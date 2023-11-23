@@ -11,6 +11,6 @@ namespace Coms.Application.Services.Accesses
         public int Id { get; set; }
         public int? ContractId { get; set; }
         public string ContractName { get; set; }
-        public int AccessRole { get; set; }
+        public string AccessRole { get; set; }
     }
 }

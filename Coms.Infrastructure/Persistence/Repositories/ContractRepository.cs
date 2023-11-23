@@ -14,7 +14,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
 
         public async Task<Contract> GetContract(int id)
         {
-            return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id), null);
+            return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id),
+                new System.Linq.Expressions.Expression<Func<Contract, object>>[]
+                    { a => a.Accesses,a=> a.ContractCosts, a=>a.ContractAnnexes, a=> a.ActionHistories});
         }
 
         public async Task UpdateContract(Contract contract)

@@ -18,10 +18,6 @@ namespace Coms.Contracts.Contracts
         [Required(ErrorMessage = "EffectiveDate is not null")]
         [DataType(DataType.Date)]
         public DateTime EffectiveDate { get; set; }
-
-        [Range(1, int.MaxValue, ErrorMessage = "Status must be greater than 0")]
-        public int Status { get; set; }
-
         [Url(ErrorMessage = "Link must be a valid URL")]
         public string Link { get; set; }
 
@@ -32,6 +28,8 @@ namespace Coms.Contracts.Contracts
         public int PartnerId { get; set; }
         [Required(ErrorMessage = "AuthorId is not null")]
         public int AuhtorId { get; set; }
+        [Required(ErrorMessage = "ServiceId is not null")]
+        public int[] Services { get; set; }
 
     }
 }
