@@ -26,6 +26,7 @@ namespace Coms.Application
             services.AddScoped<IContractService, ContractService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IActionHistoryService, ActionHistoryService>();
+            services.AddScoped<IAttachmentService, AttachmentService>();
             services.AddScoped<ITemplateFileService, TemplateFileService>();
             services.AddScoped<IAccessService, AccessService>();
             services.AddScoped<IPartnerReviewService, PartnerReviewService>();

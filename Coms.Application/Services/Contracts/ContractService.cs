@@ -334,6 +334,41 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
+        public async Task<ErrorOr<ContractResult>> GetContract(int id)
+        {
+            try
+            {
+                if(_contractRepository.GetContract(id).Result is not null)
+                {
+                    var contract = await _contractRepository.GetContract(id);
+                    var contractResult = new ContractResult
+                    {
+                        Id = contract.Id,
+                        ContractName = contract.ContractName,
+                        Version = contract.Version,
+                        CreatedDate = contract.CreatedDate,
+                        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        UpdatedDate = contract.UpdatedDate,
+                        UpdatedDateString = contract.UpdatedDate.ToString(),
+                        EffectiveDate = contract.EffectiveDate,
+                        EffectiveDateString = contract.EffectiveDate.ToString(),
+                        Status = (int)contract.Status,
+                        StatusString = contract.Status.ToString(),
+                        TemplateID = contract.TemplateId,
+                        Code = contract.Code,
+                        Link = contract.Link,
+                    };
+                    return contractResult;
+                }
+                else
+                {
+                    return Error.NotFound();
+                }
+            }
+            catch(Exception ex){
+                return Error.Failure("500", ex.Message);
+            }
+        }
         public async Task<ErrorOr<ContractResult>> AddContract(string name,string code, int authorId, int partnerId, int templateId, DateTime effectiveDate,
                string link, int[] contractCosts)
         {

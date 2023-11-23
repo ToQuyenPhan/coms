@@ -43,5 +43,18 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        //get all comment of a contract
+        [HttpGet("contract")]
+        [SwaggerOperation(Summary = "Get all comment of a contract in Coms")]
+        public IActionResult GetContractComments([FromQuery] int contractId, [FromQuery] PagingRequest request)
+        {
+            ErrorOr<PagingResult<CommentResult>> result =
+                _commentService.GetContractComments(contractId, request.CurrentPage, request.PageSize).Result;
+            return result.Match(
+                               result => Ok(result),
+                                              errors => Problem(errors)
+                                                         );
+        }
     }
 }

@@ -12,5 +12,7 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<ContractResult>> AddContract(string name, string code, int auhtor,int partnerId, int templateId, DateTime effectiveDate,
                 string link, int[] service);
         Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport(int userId);
+        //add get contract by id
+        Task<ErrorOr<ContractResult>> GetContract(int id);
     }
 }
