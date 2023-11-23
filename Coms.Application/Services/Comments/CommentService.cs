@@ -108,6 +108,66 @@ namespace Coms.Application.Services.Comments
             }
         }
 
+        //add get all comment of a contract
+        public async Task<ErrorOr<PagingResult<CommentResult>>> GetContractComments(int contractId, int currentPage,
+                           int pageSize)
+        {
+            if (_actionHistoryRepository.GetCreateActionByContractId(contractId).Result is not null)
+            {
+                var createHistories = await _actionHistoryRepository.GetCreateActionByContractId(contractId);
+                IList<ActionHistory> commentHistories = new List<ActionHistory>();
+                foreach (var history in createHistories)
+                {
+                    var commentHistoryList = await _actionHistoryRepository
+                            .GetCommentActionByContractId(history.ContractId, (int)history.UserId);
+                    if (commentHistoryList is not null)
+                    {
+                        foreach (var commentHistory in commentHistoryList)
+                        {
+                            if (!commentHistories.Contains(commentHistory))
+                            {
+                                commentHistories.Add(commentHistory);
+                            }
+                        }
+                    }
+                }
+                IList<CommentResult> comments = new List<CommentResult>();
+                foreach (var commentHistory in commentHistories)
+                {
+                    var comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);
+                    if (comment is not null)
+                    {
+                        var commentResult = new CommentResult()
+                        {
+                            Id = comment.Id,
+                            Content = comment.Content,
+                            ActionHistoryId = comment.ActionHistoryId,
+                            ReplyId = comment.ReplyId,
+                            Status = (int)comment.Status,
+                            StatusString = comment.Status.ToString()
+                        };
+                        commentResult.Long = AsTimeAgo(comment.ActionHistory.CreatedAt);
+                        commentResult.CreatedAt = comment.ActionHistory.CreatedAt.ToString();
+                        var user = await _userRepository.GetUser((int)comment.ActionHistory.UserId);
+                        commentResult.UserId = user.Id;
+                        commentResult.FullName = user.FullName;
+                        comments.Add(commentResult);
+                    }
+                }
+                int total = comments.Count();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    comments = comments.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+                }
+                return new PagingResult<CommentResult>(comments, total, currentPage, pageSize);
+            }
+            else
+            {
+                return new PagingResult<CommentResult>(new List<CommentResult>(), 0, currentPage,
+                                       pageSize);
+            }
+        }
+
         private string AsTimeAgo(DateTime dateTime)
         {
             TimeSpan timeSpan = DateTime.Now.Subtract(dateTime);

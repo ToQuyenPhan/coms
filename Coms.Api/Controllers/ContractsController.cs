@@ -27,7 +27,7 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<PagingResult<ContractResult>> result = _contractService.GetYourContracts(
                 int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
-                request.ContractName, request.CreatorName, request.Status, request.CurrentPage, 
+                request.ContractName, request.CreatorName, request.Status, request.CurrentPage,
                 request.PageSize).Result;
             return result.Match(
                 result => Ok(result),
@@ -58,6 +58,13 @@ namespace Coms.Api.Controllers
             );
         }
 
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get contract by id in Coms")]
+        public IActionResult GetContractById(int id)
+        {
+            ErrorOr<ContractResult> result = _contractService.GetContract(id).Result;
+        }
+
         [HttpPost("add")]
         [SwaggerOperation(Summary = "Add a contract in Coms")]
         public IActionResult Add(ContractFormRequest request)
@@ -70,6 +77,5 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
-      
     }
 }
