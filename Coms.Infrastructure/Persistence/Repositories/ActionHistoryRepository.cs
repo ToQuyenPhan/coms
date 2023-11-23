@@ -55,6 +55,6 @@ namespace Coms.Infrastructure.Persistence.Repositories
             await _genericRepository.CreateAsync(actionHistory);
         }
     }
-}
+
     }
-}
+

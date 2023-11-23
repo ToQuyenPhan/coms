@@ -24,8 +24,7 @@ namespace Coms.Application.Services.Contracts
                 IUserAccessRepository userAccessRepository,
                 IPartnerReviewRepository partnerReviewRepository,
                 IContractRepository contractRepository,
-                IActionHistoryRepository actionHistoryRepository)
-                IContractRepository contractRepository,
+                IActionHistoryRepository actionHistoryRepository,
                 ITemplateRepository templateRepository, 
                 IUserRepository userRepository,
                 IPartnerRepository partnerRepository,
@@ -34,12 +33,12 @@ namespace Coms.Application.Services.Contracts
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
             _partnerReviewRepository = partnerReviewRepository;
-            _contractRepository = contractRepository;
             _templateRepository = templateRepository;
             _userRepository = userRepository;
             _partnerRepository = partnerRepository;
             _contractCostRepository = contractCostRepository;
             _actionHistoryRepository = actionHistoryRepository;
+            _contractRepository = contractRepository;
         }
 
         public async Task<ErrorOr<ContractResult>> DeleteContract(int id)
@@ -349,7 +348,9 @@ namespace Coms.Application.Services.Contracts
                     CreatedDate = DateTime.Now,
                     UpdatedDate = DateTime.Now,
                     EffectiveDate = effectiveDate,
-                    Version = 1             
+                    Version = 1,
+                    Status = DocumentStatus.Draft
+
                 };
                 await _contractRepository.AddContract(contract);
                 var access = new Access

@@ -11,10 +11,10 @@ namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
     [Authorize(Roles = "Staff")]
-    public class ContractCostController : Controller
+    public class ContractCostsController : Controller
     {
         private readonly IContractCostService _contractCostService;
-        public ContractCostController(IContractCostService contractCostService)
+        public ContractCostsController(IContractCostService contractCostService)
         {
             _contractCostService = contractCostService;
         }

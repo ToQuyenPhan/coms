@@ -91,13 +91,16 @@ namespace Coms.Application.Services.ActionHistories
                 var created = _actionHistoryRepository.GetActionHistoryById(actionHistory.Id).Result;
                 var IActionHistoryResult = new ActionHistoryResult
                 {
-                    Id = actionHistory.Id,
-                    ActionType = actionHistory.ActionType.ToString(),
-                    ContractId = actionHistory.ContractId,
+                    Id = created.Id,
+                    ActionType = (int)created.ActionType,
+                    ContractId = created.ContractId,
                     ContractName = created.Contract.ContractName,
-                    CreatedAt = actionHistory.CreatedAt,
-                    UserId = actionHistory.UserId,
-                    UserName = created.User.FullName
+                    CreatedAt = created.CreatedAt,
+                    CreatedAtString = created.CreatedAt.ToString(),
+                    UserId = created.UserId,
+                    FullName = created.User.FullName,
+                    UserImage = created.User.Image,
+                    ActionTypeString = created.ActionType.ToString(),
                 };
                 return IActionHistoryResult;
 

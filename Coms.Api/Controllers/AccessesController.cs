@@ -12,10 +12,10 @@ namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
     [Authorize(Roles = "Staff")]
-    public class AccessController : Controller
+    public class AccessesController : Controller
     {
         private readonly IAccessService _accessService;
-        public AccessController(IAccessService accessService)
+        public AccessesController(IAccessService accessService)
         {
             _accessService = accessService;
         }
