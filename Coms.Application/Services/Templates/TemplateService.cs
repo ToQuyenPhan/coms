@@ -1,8 +1,8 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
-using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
+using Syncfusion.EJ2.DocumentEditor;
 
 namespace Coms.Application.Services.Templates
 {
@@ -11,14 +11,17 @@ namespace Coms.Application.Services.Templates
         private readonly ITemplateRepository _templateRepository;
         private readonly IContractCategoryRepository _contractCategoryRepository;
         private readonly ITemplateTypeRepository _templateTypeRepository;
+        private readonly ITemplateFileRepository _templateFileRepository;
 
-        public TemplateService(ITemplateRepository templateRepository, 
+        public TemplateService(ITemplateRepository templateRepository,
                 IContractCategoryRepository contractCategoryRepository,
-                ITemplateTypeRepository templateTypeRepository)
+                ITemplateTypeRepository templateTypeRepository,
+                ITemplateFileRepository templateFileRepository)
         {
             _templateRepository = templateRepository;
             _contractCategoryRepository = contractCategoryRepository;
             _templateTypeRepository = templateTypeRepository;
+            _templateFileRepository = templateFileRepository;
         }
 
         public async Task<ErrorOr<PagingResult<TemplateResult>>> GetTemplates(string name, int? category, 
@@ -63,18 +66,17 @@ namespace Coms.Application.Services.Templates
             }
         }
 
-        public async Task<ErrorOr<TemplateResult>> AddTemplate(string name, string description, int category, int type,
-                string link, int status, int userId)
+        public async Task<ErrorOr<TemplateResult>> AddTemplate(string name, string description, int category, int type, int status, int userId)
         {
             try
             {
-                var template = new Template
+                var template = new Domain.Entities.Template
                 {
                     TemplateName = name,
                     Description = description,
                     ContractCategoryId = category,
                     TemplateTypeId = type,
-                    TemplateLink = link,
+                    TemplateLink = "",
                     CreatedDate = DateTime.Now,
                     Status = (TemplateStatus) status,
                     UserId = userId
@@ -144,6 +146,62 @@ namespace Coms.Application.Services.Templates
             catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<TemplateSfdtResult>> GetTemplate(int templateId)
+        {
+            try
+            {
+                var templateFile = await _templateFileRepository
+                    .GetTemplateFileByTemplateId(templateId);
+                string filePath = 
+                        Path.Combine(Environment.CurrentDirectory, "Data", 
+                        templateFile.FileName + ".docx");
+                var stream = File.Create(filePath);
+                stream.Write(templateFile.FileData, 0, templateFile.FileData.Length);
+                int index = templateFile.FileName.LastIndexOf('.');
+                string type = index > -1 && index < templateFile.FileName.Length - 1 ?
+                    templateFile.FileName.Substring(index) : ".docx";
+                stream.Position = 0;
+                WordDocument document = WordDocument.Load(stream, GetFormatType(type.ToLower()));
+                string sfdt = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                document.Dispose();
+                stream.Close();
+                TemplateSfdtResult result = new TemplateSfdtResult()
+                {
+                    Sfdt = sfdt
+                };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        private FormatType GetFormatType(string format)
+        {
+            if (string.IsNullOrEmpty(format))
+                throw new NotSupportedException("This file format is not supported!");
+            switch (format.ToLower())
+            {
+                case ".dotx":
+                case ".docx":
+                case ".docm":
+                case ".dotm":
+                    return FormatType.Docx;
+                case ".dot":
+                case ".doc":
+                    return FormatType.Doc;
+                case ".rtf":
+                    return FormatType.Rtf;
+                case ".txt":
+                    return FormatType.Txt;
+                case ".xml":
+                    return FormatType.WordML;
+                default:
+                    throw new NotSupportedException("This file format is not supported!");
             }
         }
     }

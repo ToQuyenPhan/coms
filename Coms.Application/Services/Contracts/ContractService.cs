@@ -4,6 +4,7 @@ using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
 using LinqKit;
+using static Coms.Domain.Common.Errors.Errors;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -14,18 +15,30 @@ namespace Coms.Application.Services.Contracts
         private readonly IPartnerReviewRepository _partnerReviewRepository;
         private readonly IContractRepository _contractRepository;
         private readonly IActionHistoryRepository _actionHistoryRepository;
+        private readonly ITemplateRepository _templateRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IPartnerRepository _partnerRepository;
+        private readonly IContractCostRepository _contractCostRepository;
 
         public ContractService(IAccessRepository accessRepository,
                 IUserAccessRepository userAccessRepository,
                 IPartnerReviewRepository partnerReviewRepository,
                 IContractRepository contractRepository,
-                IActionHistoryRepository actionHistoryRepository)
+                IActionHistoryRepository actionHistoryRepository,
+                ITemplateRepository templateRepository, 
+                IUserRepository userRepository,
+                IPartnerRepository partnerRepository,
+                IContractCostRepository contractCostRepository)
         {
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
             _partnerReviewRepository = partnerReviewRepository;
-            _contractRepository = contractRepository;
+            _templateRepository = templateRepository;
+            _userRepository = userRepository;
+            _partnerRepository = partnerRepository;
+            _contractCostRepository = contractCostRepository;
             _actionHistoryRepository = actionHistoryRepository;
+            _contractRepository = contractRepository;
         }
 
         public async Task<ErrorOr<ContractResult>> DeleteContract(int id)
@@ -352,7 +365,83 @@ namespace Coms.Application.Services.Contracts
                     return Error.NotFound();
                 }
             }
-            catch(Exception ex)
+            catch(Exception ex){
+                return Error.Failure("500", ex.Message);
+            }
+        }
+        public async Task<ErrorOr<ContractResult>> AddContract(string name,string code, int authorId, int partnerId, int templateId, DateTime effectiveDate,
+               string link, int[] contractCosts)
+        {
+            try
+            {              
+                var contract = new Contract
+                {
+                    ContractName = name,
+                    Code = code,
+                    TemplateId = templateId,
+                    Link = link,
+                    CreatedDate = DateTime.Now,
+                    UpdatedDate = DateTime.Now,
+                    EffectiveDate = effectiveDate,
+                    Version = 1,
+                    Status = DocumentStatus.Draft
+
+                };
+                await _contractRepository.AddContract(contract);
+                var access = new Access
+                {
+                    ContractId = contract.Id,
+                   AccessRole = AccessRole.Author
+                };
+                await _accessRepository.AddAccess(access);
+
+                var userAccess = new User_Access
+                {
+                    UserId = authorId,
+                    AccessId = access.Id,
+                };
+                await _userAccessRepository.AddUserAccess(userAccess);
+                var partnerReview = new PartnerReview
+                {
+                    ContractId = contract.Id ,
+                    PartnerId = partnerId,
+                    UserId = authorId,
+                    IsApproved = false,
+                    SendDate = DateTime.Now,
+                    ReviewAt = DateTime.Now,
+
+                };
+                await _partnerReviewRepository.AddPartnerReview(partnerReview);
+                await _contractCostRepository.AddContractCostsToContract(contractCosts,contract.Id);
+                var partner = _partnerRepository.GetPartner(partnerId).Result;
+                var template = _templateRepository.GetTemplate(templateId).Result;
+                var user =  _userRepository.GetUser(userAccess.UserId ?? throw new InvalidOperationException("Value cannot be null")).Result;
+                var contractResult = new ContractResult
+                {
+                    Id = contract.Id,
+                    Code = contract.Code,
+                    ContractName = contract.ContractName,
+                    CreatedDate = contract.CreatedDate,
+                    CreatedDateString = contract.CreatedDate.ToString(),
+                    UpdatedDate = contract.UpdatedDate,
+                    UpdatedDateString = contract.UpdatedDate.ToString(),
+                    EffectiveDate = contract.EffectiveDate,
+                    EffectiveDateString = contract.EffectiveDate.ToString(),
+                    Link = contract.Link,
+                    Status = (int)contract.Status,
+                    StatusString = contract.Status.ToString(),
+                    CreatorId = userAccess.UserId,
+                    CreatorName = user.FullName,
+                    CreatorEmail = user.Email,
+                    CreatorImage = user.Image,
+                    TemplateID = contract.TemplateId,
+                    Version = 1,
+                    PartnerId = partnerReview.PartnerId,
+                    PartnerName = partner.CompanyName
+                 };
+                return contractResult;
+            }
+            catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }

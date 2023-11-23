@@ -18,5 +18,16 @@ namespace Coms.Infrastructure.Persistence.Repositories
                 new System.Linq.Expressions.Expression<Func<PartnerReview, object>>[] {
                     pr => pr.User, pr => pr.Contract, pr => pr.Partner });
         }
+        public async Task<PartnerReview> GetPartnerReview(int id)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(pr => pr.Id.Equals(id),
+                new System.Linq.Expressions.Expression<Func<PartnerReview, object>>[] {
+                    pr => pr.User, pr => pr.Contract, pr => pr.Partner });
+        }
+
+        public async Task AddPartnerReview(PartnerReview partnerReview)
+        {
+            await _genericRepository.CreateAsync(partnerReview);
+        }
     }
 }

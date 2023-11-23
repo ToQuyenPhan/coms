@@ -1,6 +1,7 @@
 ﻿using Coms.Application.Services.Common;
 using Coms.Application.Services.Contracts;
 using Coms.Contracts.Contracts;
+using Coms.Domain.Entities;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -57,12 +58,20 @@ namespace Coms.Api.Controllers
             );
         }
 
-        //get contract by id
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get contract by id in Coms")]
         public IActionResult GetContractById(int id)
         {
             ErrorOr<ContractResult> result = _contractService.GetContract(id).Result;
+        }
+
+        [HttpPost("add")]
+        [SwaggerOperation(Summary = "Add a contract in Coms")]
+        public IActionResult Add(ContractFormRequest request)
+        {
+            ErrorOr<ContractResult> result =
+                _contractService.AddContract(request.ContractName,request.Code,request.PartnerId, int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value)
+                , request.TemplateId, request.EffectiveDate, request.Link, request.Services).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

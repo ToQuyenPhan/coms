@@ -748,6 +748,52 @@ namespace Coms.Infrastructure.Migrations
                     b.ToTable("TemplateFields");
                 });
 
+            modelBuilder.Entity("Coms.Domain.Entities.TemplateFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<byte[]>("FileData")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("FileSize")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TemplateId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("UploadedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TemplateId");
+
+                    b.ToTable("TemplateFiles");
+                });
+
             modelBuilder.Entity("Coms.Domain.Entities.TemplateTerm", b =>
                 {
                     b.Property<int>("TemplateId")
@@ -1126,6 +1172,17 @@ namespace Coms.Infrastructure.Migrations
                     b.HasOne("Coms.Domain.Entities.Template", "Template")
                         .WithMany("TemplateFields")
                         .HasForeignKey("TemplateId");
+
+                    b.Navigation("Template");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.TemplateFile", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.Template", "Template")
+                        .WithMany()
+                        .HasForeignKey("TemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Template");
                 });
