@@ -63,6 +63,10 @@ namespace Coms.Api.Controllers
         public IActionResult GetContractById(int id)
         {
             ErrorOr<ContractResult> result = _contractService.GetContract(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
         }
 
         [HttpPost("add")]
