@@ -66,8 +66,7 @@ namespace Coms.Application.Services.Templates
             }
         }
 
-        public async Task<ErrorOr<TemplateResult>> AddTemplate(string name, string description, int category, int type,
-                string link, int status, int userId)
+        public async Task<ErrorOr<TemplateResult>> AddTemplate(string name, string description, int category, int type, int status, int userId)
         {
             try
             {
@@ -77,7 +76,7 @@ namespace Coms.Application.Services.Templates
                     Description = description,
                     ContractCategoryId = category,
                     TemplateTypeId = type,
-                    TemplateLink = link,
+                    TemplateLink = "",
                     CreatedDate = DateTime.Now,
                     Status = (TemplateStatus) status,
                     UserId = userId
@@ -156,8 +155,6 @@ namespace Coms.Application.Services.Templates
             {
                 var templateFile = await _templateFileRepository
                     .GetTemplateFileByTemplateId(templateId);
-                var directory = Environment
-                        .GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
                 string filePath = 
                         Path.Combine(Environment.CurrentDirectory, "Data", 
                         templateFile.FileName + ".docx");

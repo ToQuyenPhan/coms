@@ -39,10 +39,9 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<TemplateResult> result =
                 _templateService.AddTemplate(request.TemplateName, request.Description, 
-                    request.ContractCategoryId, request.TemplateTypeId, request.TemplateLink, 
-                    request.Status, int.Parse(this.User.Claims
-                    .First(i => i.Type == ClaimTypes.NameIdentifier).Value))
-                    .Result;
+                    request.ContractCategoryId, request.TemplateTypeId, request.Status, 
+                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier)
+                    .Value)).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
