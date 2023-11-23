@@ -6,5 +6,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
     {
         Task<IList<User_Access>> GetYourAccesses(int userId);
         Task<User_Access> GetByAccessId(int accessId);
+        Task AddUserAccess(User_Access userAccess);
     }
 }
