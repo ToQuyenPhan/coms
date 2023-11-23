@@ -11,5 +11,6 @@ namespace Coms.Application.Services.Contracts
                 string name, string creatorName, int? status, int currentPage, int pageSize);
         Task<ErrorOr<ContractResult>> AddContract(string name, string code, int auhtor,int partnerId, int templateId, DateTime effectiveDate,
                 string link, int[] service);
+        Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport(int userId);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Coms.Application.Services.Accesses;
+﻿using Coms.Application.Services.Common;
+using Coms.Application.Services.Accesses;
 using Coms.Domain.Enum;
 using ErrorOr;
 using System;
@@ -13,5 +14,6 @@ namespace Coms.Application.Services.ActionHistories
     {
         Task<ErrorOr<ActionHistoryResult>> AddActionHistory(int userId, int contractId, int actionType);
 
+        Task<ErrorOr<PagingResult<ActionHistoryResult>>> GetRecentActivities(int userId, int currentPage, int pageSize);
     }
 }

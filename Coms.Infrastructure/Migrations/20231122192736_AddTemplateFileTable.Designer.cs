@@ -4,6 +4,7 @@ using Coms.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coms.Infrastructure.Migrations
 {
     [DbContext(typeof(ComsDBContext))]
-    partial class ComsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20231122192736_AddTemplateFileTable")]
+    partial class AddTemplateFileTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -781,7 +783,7 @@ namespace Coms.Infrastructure.Migrations
                     b.Property<int>("TemplateId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("UpdatedDate")
+                    b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("UploadedDate")
