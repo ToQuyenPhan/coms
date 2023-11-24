@@ -25,7 +25,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet("gets")]
         [SwaggerOperation(Summary = "Get services by serviceName in Coms")]
-        public IActionResult GetServicesByServiceName([FromQuery]string serviceName)
+        public IActionResult GetServicesByServiceName([FromQuery]string? serviceName)
         {
             ErrorOr<IList<ServiceResult>> result = _serviceService.GetServicesByName(serviceName).Result;
             return result.Match(

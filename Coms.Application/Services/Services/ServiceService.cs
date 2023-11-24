@@ -22,12 +22,17 @@ namespace Coms.Application.Services.Services
             _serviceRepository = serviceRepository;
         }
         
-        public async Task<ErrorOr<IList<ServiceResult>>> GetServicesByName(string serviceName)
+        public async Task<ErrorOr<IList<ServiceResult>>> GetServicesByName(string? serviceName)
         {
-            if (_serviceRepository.GetContractCostByServiceName(serviceName).Result is not null)
-            {              
-                var serviceList = _serviceRepository.GetContractCostByServiceName(serviceName).Result;
-                
+            try
+            {
+                IList<Service> serviceList =new  List<Service>();
+                if (serviceName == null) {
+                    serviceList = _serviceRepository.GetServices().Result;
+                }
+                else {
+                   serviceList  = _serviceRepository.GetServicesByServiceName(serviceName).Result; 
+                }                            
                 var results = new List<ServiceResult>();
                 foreach (var service in serviceList)
                 {
@@ -44,8 +49,7 @@ namespace Coms.Application.Services.Services
                 }
                 return results;
             }
-            else
-            {
+            catch (Exception ex) {         
                 return Error.NotFound("Service not found!");
             }
         }

@@ -17,10 +17,17 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        public async Task<IList<Service>> GetContractCostByServiceName(string serviceName)
+        public async Task<IList<Service>> GetServicesByServiceName(string serviceName)
         {
             var list = await _genericRepository.WhereAsync(a => a.ServiceName.ToLower().Contains(serviceName.ToLower()) 
             && a.Status == Domain.Enum.ServiceStatus.Active ,
+                new System.Linq.Expressions.Expression<Func<Service, object>>[] {
+                    a => a.ContractCosts});
+            return (list.Count() > 0) ? list : null;
+        }
+        public async Task<IList<Service>> GetServices()
+        {
+            var list = await _genericRepository.WhereAsync(a=> a.Status == Domain.Enum.ServiceStatus.Active,
                 new System.Linq.Expressions.Expression<Func<Service, object>>[] {
                     a => a.ContractCosts});
             return (list.Count() > 0) ? list : null;

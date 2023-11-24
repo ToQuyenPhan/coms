@@ -9,7 +9,8 @@ namespace Coms.Application.Common.Intefaces.Persistence
 {
     public interface IServiceRepository
     {
-        Task<IList<Service>> GetContractCostByServiceName(string serviceName);
+        Task<IList<Service>> GetServicesByServiceName(string serviceName);
+        Task<IList<Service>> GetServices();
         Task<Service> GetServiceById(int id);
         Task AddService(Service service);
     }
