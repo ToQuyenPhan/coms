@@ -45,6 +45,7 @@ namespace Coms.Api.Controllers
             );
         }
 
+        [Authorize(Roles = "Sale Manager")]
         [HttpPost("add")]
         [SwaggerOperation(Summary = "Add a service in Coms")]
         public IActionResult Add(ServiceFormRequest request)
