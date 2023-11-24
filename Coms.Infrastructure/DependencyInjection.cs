@@ -38,6 +38,7 @@ namespace Coms.Infrastructure
             services.AddScoped<IPartnerRepository, PartnerRepository>();
             services.AddScoped<IActionHistoryRepository, ActionHistoryRepository>();
             services.AddScoped<IContractCostRepository, ContractCostRepository>();
+            services.AddScoped<IServiceRepository, ServiceRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             //add attachment repository
             services.AddScoped<IAttachmentRepository, AttachmentRepository>();

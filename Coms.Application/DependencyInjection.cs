@@ -12,6 +12,7 @@ using Coms.Application.Services.TemplateFiles;
 using Coms.Application.Services.Templates;
 using Coms.Application.Services.TemplateTypes;
 using Microsoft.Extensions.DependencyInjection;
+using Coms.Application.Services.Services;
 
 namespace Coms.Application
 {
@@ -32,6 +33,7 @@ namespace Coms.Application
             services.AddScoped<IPartnerReviewService, PartnerReviewService>();
             services.AddScoped<IActionHistoryService, ActionHistoryService>();
             services.AddScoped<IContractCostService, ContractCostService>();
+            services.AddScoped<IServiceService, ServiceService>();
             return services;
         }
     }
