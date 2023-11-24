@@ -1,7 +1,6 @@
 ﻿using Coms.Application.Services.Common;
 using Coms.Application.Services.Contracts;
 using Coms.Contracts.Contracts;
-using Coms.Domain.Entities;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

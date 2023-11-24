@@ -10,7 +10,6 @@ using System.Security.Claims;
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
-    [Authorize(Roles = "Sale Manager")]
     public class TemplatesController : ApiController
     {
         private readonly ITemplateService _templateService;
@@ -22,6 +21,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet]
         [SwaggerOperation(Summary = "Get all templates (with filter) in Coms")]
+        [Authorize(Roles = "Sale Manager, Staff")]
         public IActionResult Get([FromQuery]TemplateFilterRequest request)
         {
             ErrorOr<PagingResult<TemplateResult>> result =
@@ -35,6 +35,7 @@ namespace Coms.Api.Controllers
 
         [HttpPost("add")]
         [SwaggerOperation(Summary = "Add a new template in Coms")]
+        [Authorize(Roles = "Sale Manager")]
         public IActionResult Add(TemplateFormRequest request)
         {
             ErrorOr<TemplateResult> result =
@@ -50,6 +51,7 @@ namespace Coms.Api.Controllers
 
         [HttpDelete]
         [SwaggerOperation(Summary = "Delete a template in Coms")]
+        [Authorize(Roles = "Sale Manager")]
         public IActionResult Delete(int id)
         {
             ErrorOr<TemplateResult> result = _templateService.DeleteTemplate(id).Result;

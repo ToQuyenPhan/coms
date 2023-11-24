@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
-    [Authorize(Roles = "Sale Manager")]
+    [Authorize(Roles = "Sale Manager, Staff")]
     public class ContractCategoriesController : ApiController
     {
         public readonly IContractCategoryService _contractCategoryService;
