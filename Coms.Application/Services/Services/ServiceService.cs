@@ -34,18 +34,21 @@ namespace Coms.Application.Services.Services
                    serviceList  = _serviceRepository.GetServicesByServiceName(serviceName).Result; 
                 }                            
                 var results = new List<ServiceResult>();
-                foreach (var service in serviceList)
+                if (serviceList != null)
                 {
-                    var result = new ServiceResult()
+                    foreach (var service in serviceList)
                     {
-                        Id = service.Id,
-                        ServiceName= service.ServiceName,
-                        Description= service.Description,
-                        Price= service.Price,
-                        Status = (int)service.Status,
-                        StatusString = service.Status.ToString(), 
-                    };
-                    results.Add(result);
+                        var result = new ServiceResult()
+                        {
+                            Id = service.Id,
+                            ServiceName = service.ServiceName,
+                            Description = service.Description,
+                            Price = service.Price,
+                            Status = (int)service.Status,
+                            StatusString = service.Status.ToString(),
+                        };
+                        results.Add(result);
+                    }
                 }
                 return results;
             }

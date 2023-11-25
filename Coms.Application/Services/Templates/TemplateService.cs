@@ -149,7 +149,7 @@ namespace Coms.Application.Services.Templates
             }
         }
 
-        public async Task<ErrorOr<TemplateSfdtResult>> GetTemplate(int templateId)
+        public async Task<ErrorOr<string>> GetTemplate(int templateId)
         {
             try
             {
@@ -172,7 +172,7 @@ namespace Coms.Application.Services.Templates
                 {
                     Sfdt = sfdt
                 };
-                return result;
+                return sfdt;
             }
             catch (Exception ex)
             {

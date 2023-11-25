@@ -61,12 +61,12 @@ namespace Coms.Api.Controllers
             );
         }
 
-        [HttpPut]
-        [SwaggerOperation(Summary = "Edit a template in Coms")]
+        [HttpGet("get-template")]
+        [SwaggerOperation(Summary = "Get a template in Coms")]
         [AllowAnonymous]
-        public async Task<IActionResult> Edit([FromQuery]int id)
+        public async Task<IActionResult> GetTemplate([FromQuery]int id)
         {
-            ErrorOr<TemplateSfdtResult> result = _templateService.GetTemplate(id).Result;
+            ErrorOr<string> result = _templateService.GetTemplate(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
