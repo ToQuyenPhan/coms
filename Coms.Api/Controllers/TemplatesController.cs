@@ -66,7 +66,7 @@ namespace Coms.Api.Controllers
         [Authorize(Roles = "Sale Manager, Staff")]
         public async Task<IActionResult> GetTemplate([FromQuery]int id)
         {
-            ErrorOr<TemplateSfdtResult> result = _templateService.GetTemplate(id).Result;
+            ErrorOr<TemplateSfdtResult> result = await _templateService.GetTemplate(id);
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
@@ -82,6 +82,18 @@ namespace Coms.Api.Controllers
                 _templateService.UpdateTemplate(request.TemplateName, request.Description,
                     request.ContractCategoryId, request.TemplateTypeId, request.Status,
                     templateId).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet("get-template-info")]
+        [SwaggerOperation(Summary = "Get a template information in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public async Task<IActionResult> GetTemplateInformation([FromQuery] int id)
+        {
+            ErrorOr<TemplateResult> result = _templateService.GetTemplateInformation(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

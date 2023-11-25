@@ -34,17 +34,16 @@ namespace Coms.Api.Controllers
         }
 
         [HttpPost("pdf")]
-        public IActionResult Pdf([FromQuery] int id, [FromBody] PdfDataRequest request)
+        public async Task<IActionResult> Pdf([FromQuery] int id, [FromBody] PdfDataRequest request)
         {
-            ErrorOr<TemplateFileResult> result = _templateFileService.ExportPDf(request.Content, id)
-                .Result;
+            ErrorOr<TemplateFileResult> result = await _templateFileService.ExportPDf(request.Content, id);
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
             );
         }
 
-        [HttpPut]
+        [HttpPost("update-template")]
         public IActionResult Update([FromQuery] int templateId, string templateName, [FromForm] FormUploadRequest file)
         {
             var ms = new MemoryStream();

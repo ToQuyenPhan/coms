@@ -1,6 +1,5 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
-using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
 using Syncfusion.EJ2.DocumentEditor;
@@ -157,24 +156,31 @@ namespace Coms.Application.Services.Templates
             {
                 var templateFile = await _templateFileRepository
                     .GetTemplateFileByTemplateId(templateId);
-                string filePath = 
-                        Path.Combine(Environment.CurrentDirectory, "Data", 
-                        templateFile.FileName + ".docx");
-                var stream = File.Create(filePath);
-                stream.Write(templateFile.FileData, 0, templateFile.FileData.Length);
-                int index = templateFile.FileName.LastIndexOf('.');
-                string type = index > -1 && index < templateFile.FileName.Length - 1 ?
-                    templateFile.FileName.Substring(index) : ".docx";
-                stream.Position = 0;
-                WordDocument document = WordDocument.Load(stream, GetFormatType(type.ToLower()));
-                string sfdt = Newtonsoft.Json.JsonConvert.SerializeObject(document);
-                document.Dispose();
-                stream.Close();
-                TemplateSfdtResult result = new TemplateSfdtResult()
+                if(templateFile is not null)
                 {
-                    Sfdt = sfdt
-                };
-                return result;
+                    string filePath =
+                        Path.Combine(Environment.CurrentDirectory, "Data",
+                        templateFile.FileName + ".docx");
+                    var stream = File.Create(filePath);
+                    stream.Write(templateFile.FileData, 0, templateFile.FileData.Length);
+                    int index = templateFile.FileName.LastIndexOf('.');
+                    string type = index > -1 && index < templateFile.FileName.Length - 1 ?
+                        templateFile.FileName.Substring(index) : ".docx";
+                    stream.Position = 0;
+                    WordDocument document = WordDocument.Load(stream, GetFormatType(type.ToLower()));
+                    string sfdt = Newtonsoft.Json.JsonConvert.SerializeObject(document);
+                    document.Dispose();
+                    stream.Close();
+                    TemplateSfdtResult result = new TemplateSfdtResult()
+                    {
+                        Sfdt = sfdt
+                    };
+                    return result;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Template file is not found!");
+                }
             }
             catch (Exception ex)
             {
@@ -208,28 +214,73 @@ namespace Coms.Application.Services.Templates
                     template.UpdatedDate = DateTime.Now;
                     template.Status = (TemplateStatus)status;
                     await _templateRepository.UpdateTemplate(template);
+                    var templateResult = new TemplateResult
+                    {
+                        Id = template.Id,
+                        TemplateName = template.TemplateName,
+                        Description = template.Description,
+                        CreatedDate = template.CreatedDate,
+                        CreatedDateString = template.CreatedDate.ToString(),
+                        ContractCategoryId = template.ContractCategory.Id,
+                        ContractCategoryName = template.ContractCategory.CategoryName,
+                        TemplateTypeId = template.TemplateType.Id,
+                        TemplateTypeName = template.TemplateType.Name,
+                        TemplateLink = template.TemplateLink,
+                        Status = (int)template.Status,
+                        StatusString = template.Status.ToString(),
+                        UserId = template.User.Id,
+                        UserName = template.User.Username,
+                        Email = template.User.Email
+                    };
+                    return templateResult;
                 }
-                var templateResult = new TemplateResult
+                else
                 {
-                    Id = template.Id,
-                    TemplateName = template.TemplateName,
-                    Description = template.Description,
-                    CreatedDate = template.CreatedDate,
-                    CreatedDateString = template.CreatedDate.ToString(),
-                    UpdatedDate = template.CreatedDate,
-                    UpdatedDateString = AsTimeAgo((DateTime)template.UpdatedDate),
-                    ContractCategoryId = template.ContractCategory.Id,
-                    ContractCategoryName = template.ContractCategory.CategoryName,
-                    TemplateTypeId = template.TemplateType.Id,
-                    TemplateTypeName = template.TemplateType.Name,
-                    TemplateLink = template.TemplateLink,
-                    Status = (int)template.Status,
-                    StatusString = template.Status.ToString(),
-                    UserId = template.User.Id,
-                    UserName = template.User.Username,
-                    Email = template.User.Email
-                };
-                return templateResult;
+                    return Error.NotFound("404", "Template is not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<TemplateResult>> GetTemplateInformation(int templateId)
+        {
+            try
+            {
+                var template = await _templateRepository.GetTemplate(templateId);
+                if(template is not null)
+                {
+                    var templateResult = new TemplateResult
+                    {
+                        Id = template.Id,
+                        TemplateName = template.TemplateName,
+                        Description = template.Description,
+                        CreatedDate = template.CreatedDate,
+                        CreatedDateString = template.CreatedDate.ToString(),
+                        ContractCategoryId = template.ContractCategory.Id,
+                        ContractCategoryName = template.ContractCategory.CategoryName,
+                        TemplateTypeId = template.TemplateType.Id,
+                        TemplateTypeName = template.TemplateType.Name,
+                        TemplateLink = template.TemplateLink,
+                        Status = (int)template.Status,
+                        StatusString = template.Status.ToString(),
+                        UserId = template.User.Id,
+                        UserName = template.User.Username,
+                        Email = template.User.Email
+                    };
+                    if(template.UpdatedDate is not null)
+                    {
+                        templateResult.UpdatedDate = template.UpdatedDate;
+                        templateResult.UpdatedDateString = AsTimeAgo((DateTime)template.UpdatedDate);
+                    }
+                    return templateResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Template is not found!");
+                }
             }
             catch (Exception ex)
             {

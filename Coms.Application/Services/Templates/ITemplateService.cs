@@ -13,5 +13,6 @@ namespace Coms.Application.Services.Templates
         Task<ErrorOr<TemplateSfdtResult>> GetTemplate(int templateId);
         Task<ErrorOr<TemplateResult>> UpdateTemplate(string name, string description, int category,
                 int type, int status, int templateId);
+        Task<ErrorOr<TemplateResult>> GetTemplateInformation(int templateId);
     }
 }
