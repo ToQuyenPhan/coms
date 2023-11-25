@@ -1,10 +1,4 @@
 ﻿using Coms.Domain.Entities;
-using Coms.Domain.Enum;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Coms.Application.Common.Intefaces.Persistence
 {
@@ -12,5 +6,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
     {
         Task<Partner> GetPartner(int id);
         Task<IList<Partner>?> GetActivePartners();
+        Task<Partner?> GetPartnerByCode(string code);
     }
 }

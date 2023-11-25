@@ -29,5 +29,16 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpPost("enter-code")]
+        [SwaggerOperation(Summary = "Enter partner code in Coms")]
+        public IActionResult EnterCode(string code)
+        {
+            ErrorOr<AuthenticationResult> result = _authenticationService.EnterCode(code);
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

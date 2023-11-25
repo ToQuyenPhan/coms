@@ -30,5 +30,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return (list.Count > 0) ? list : null;
         }
 
+        public async Task<Partner?> GetPartnerByCode(string code)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(c => c.Code.Equals(code), null);
+        }
     }
 }
