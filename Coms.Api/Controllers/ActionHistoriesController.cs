@@ -42,7 +42,7 @@ namespace Coms.Api.Controllers
                 _actionHistoryService.AddActionHistory(int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.ContractId, request.ActionType).Result;
             return result.Match(
                 result => Ok(result),
-                errors => Problem()
+                errors => Problem(errors)
             );
         }
     }

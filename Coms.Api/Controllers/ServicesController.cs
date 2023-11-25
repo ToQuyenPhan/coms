@@ -14,7 +14,7 @@ namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
     [Authorize(Roles = "Staff")]
-    public class ServicesController : Controller
+    public class ServicesController : ApiController
     {
         private readonly IServiceService _serviceService;
 
@@ -30,7 +30,7 @@ namespace Coms.Api.Controllers
             ErrorOr<IList<ServiceResult>> result = _serviceService.GetServicesByName(serviceName).Result;
             return result.Match(
                 result => Ok(result),
-                errors => Problem()
+                errors => Problem(errors)
             );
         }
 
@@ -41,7 +41,7 @@ namespace Coms.Api.Controllers
             ErrorOr<ServiceResult> result = _serviceService.GetService(serviceId).Result;
             return result.Match(
                 result => Ok(result),
-                errors => Problem()
+                errors => Problem(errors)
             );
         }
 
@@ -54,7 +54,7 @@ namespace Coms.Api.Controllers
                 _serviceService.AddService(request.ServiceName,request.Description, request.Price ).Result;
             return result.Match(
                 result => Ok(result),
-                errors => Problem()
+                errors => Problem(errors)
             );
         }
 
@@ -65,7 +65,7 @@ namespace Coms.Api.Controllers
             ErrorOr<ServiceResult> result = _serviceService.UpdateService(serviceId,request.ServiceName,request.Description,request.Price).Result;
             return result.Match(
                 result => Ok(result),
-                errors => Problem()
+                errors => Problem(errors)
             );
         }
 
@@ -76,7 +76,7 @@ namespace Coms.Api.Controllers
             ErrorOr<ServiceResult> result = _serviceService.DeleteService(serviceId).Result;
             return result.Match(
                 result => Ok(result),
-                errors => Problem()
+                errors => Problem(errors)
             );
         }
     }

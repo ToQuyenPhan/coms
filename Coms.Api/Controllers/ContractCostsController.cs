@@ -11,7 +11,7 @@ namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
     [Authorize(Roles = "Staff")]
-    public class ContractCostsController : Controller
+    public class ContractCostsController : ApiController
     {
         private readonly IContractCostService _contractCostService;
         public ContractCostsController(IContractCostService contractCostService)
@@ -27,7 +27,7 @@ namespace Coms.Api.Controllers
                 _contractCostService.AddContractCost( request.ContractId, request.ServiceId).Result;
             return result.Match(
                 result => Ok(result),
-                errors => Problem()
+                errors => Problem(errors)
             );
         }
     }
