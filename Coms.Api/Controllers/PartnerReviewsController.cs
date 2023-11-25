@@ -12,7 +12,7 @@ namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
     [Authorize(Roles = "Staff")]
-    public class PartnerReviewsController : Controller
+    public class PartnerReviewsController : ApiController
     {
         private readonly IPartnerReviewService _partnerReviewService;
         public PartnerReviewsController(IPartnerReviewService partnerReviewService)
@@ -28,7 +28,7 @@ namespace Coms.Api.Controllers
                 _partnerReviewService.AddPartnerReview(int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.PartnerId,request.ContractId).Result;
             return result.Match(
                 result => Ok(result),
-                errors => Problem()
+                errors => Problem(errors)
             );
         }
     }

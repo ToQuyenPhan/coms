@@ -26,8 +26,6 @@ namespace Coms.Contracts.Contracts
 
         [Required(ErrorMessage = "PartnerId is not null")]
         public int PartnerId { get; set; }
-        [Required(ErrorMessage = "AuthorId is not null")]
-        public int AuhtorId { get; set; }
         [Required(ErrorMessage = "ServiceId is not null")]
         public int[] Services { get; set; }
 

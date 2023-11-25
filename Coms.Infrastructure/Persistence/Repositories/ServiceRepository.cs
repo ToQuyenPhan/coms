@@ -43,5 +43,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             await _genericRepository.CreateAsync(service);
         }
+        public async Task UpdateService(Service service)
+        {
+            await _genericRepository.UpdateAsync(service);
+        }
     }
 }

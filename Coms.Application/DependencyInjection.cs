@@ -13,6 +13,8 @@ using Coms.Application.Services.Templates;
 using Coms.Application.Services.TemplateTypes;
 using Microsoft.Extensions.DependencyInjection;
 using Coms.Application.Services.Services;
+using Coms.Application.Services.ContractFiles;
+using Coms.Application.Services.Partners;
 
 namespace Coms.Application
 {
@@ -34,6 +36,8 @@ namespace Coms.Application
             services.AddScoped<IActionHistoryService, ActionHistoryService>();
             services.AddScoped<IContractCostService, ContractCostService>();
             services.AddScoped<IServiceService, ServiceService>();
+            services.AddScoped<IContractFileService, ContractFileService>();
+            services.AddScoped<IPartnerService, PartnerService>();
             return services;
         }
     }

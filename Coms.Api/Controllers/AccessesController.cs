@@ -12,7 +12,7 @@ namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
     [Authorize(Roles = "Staff")]
-    public class AccessesController : Controller
+    public class AccessesController : ApiController
     {
         private readonly IAccessService _accessService;
         public AccessesController(IAccessService accessService)
@@ -28,7 +28,7 @@ namespace Coms.Api.Controllers
                 _accessService.AddAccess(contractId,accessRoleId).Result;
             return result.Match(
                 result => Ok(result),
-                errors => Problem()
+                errors => Problem(errors)
             );
         }
     }

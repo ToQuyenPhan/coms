@@ -369,14 +369,14 @@ namespace Coms.Application.Services.Contracts
                 return Error.Failure("500", ex.Message);
             }
         }
-        public async Task<ErrorOr<ContractResult>> AddContract(string name,string code, int authorId, int partnerId, int templateId, DateTime effectiveDate,
+        public async Task<ErrorOr<ContractResult>> AddContract(string contractName, string code, int partnerId, int authorId, int templateId, DateTime effectiveDate,
                string link, int[] contractCosts)
         {
             try
             {              
                 var contract = new Contract
                 {
-                    ContractName = name,
+                    ContractName = contractName,
                     Code = code,
                     TemplateId = templateId,
                     Link = link,

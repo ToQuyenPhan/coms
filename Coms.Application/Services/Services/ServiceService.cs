@@ -115,5 +115,69 @@ namespace Coms.Application.Services.Services
                 return Error.Failure("500", ex.Message);
             }
         }
+
+        public async Task<ErrorOr<ServiceResult>> UpdateService(int serviceId, string serviceName, string description, double price)
+        {
+            try
+            {
+                if (_serviceRepository.GetServiceById(serviceId).Result is not null)
+                {
+                    var service = await _serviceRepository.GetServiceById(serviceId);
+                    service.ServiceName = serviceName;
+                    service.Description = description;
+                    service.Price = price;
+                    await _serviceRepository.UpdateService(service);
+                    var result = new ServiceResult
+                    {
+                        Id = service.Id,
+                        ServiceName = service.ServiceName,
+                        Description = service.Description,
+                        Price = service.Price,
+                        Status = (int)service.Status,
+                        StatusString = service.Status.ToString()
+                    };
+                    return result;
+                }
+                else
+                {
+                    return Error.NotFound("Service not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<ServiceResult>> DeleteService(int serviceId)
+        {
+            try
+            {
+                if (_serviceRepository.GetServiceById(serviceId).Result is not null)
+                {
+                    var service = await _serviceRepository.GetServiceById(serviceId);
+                    service.Status = ServiceStatus.Inactive;
+                    await _serviceRepository.UpdateService(service);    
+                    var result = new ServiceResult
+                    {
+                        Id = service.Id,
+                        ServiceName = service.ServiceName,
+                        Description = service.Description,
+                        Price = service.Price,
+                        Status = (int)service.Status,
+                        StatusString = service.Status.ToString()
+                    };
+                    return result;
+                }
+                else
+                {
+                    return Error.NotFound("Service not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
     }
 }

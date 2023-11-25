@@ -13,5 +13,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<IList<Service>> GetServices();
         Task<Service> GetServiceById(int id);
         Task AddService(Service service);
+        Task UpdateService(Service service);
+
     }
 }
