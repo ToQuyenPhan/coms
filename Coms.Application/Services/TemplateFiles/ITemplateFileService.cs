@@ -7,5 +7,6 @@ namespace Coms.Application.Services.TemplateFiles
         Task<ErrorOr<TemplateFileResult>> Add(string name, string extension, string contenType, byte[] document,
                 int size, int templateId);
         Task<ErrorOr<TemplateFileResult>> ExportPDf(string content, int id);
+        Task<ErrorOr<TemplateFileResult>> Update(int templateId, string templateName, byte[] document);
     }
 }

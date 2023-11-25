@@ -43,5 +43,20 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpPut]
+        public IActionResult Update([FromQuery] int templateId, string templateName, [FromForm] FormUploadRequest file)
+        {
+            var ms = new MemoryStream();
+            file.File.CopyTo(ms);
+            var fileContent = ms.ToArray();
+            ErrorOr<TemplateFileResult> result = _templateFileService.Update(templateId, templateName,
+                    fileContent)
+                    .Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

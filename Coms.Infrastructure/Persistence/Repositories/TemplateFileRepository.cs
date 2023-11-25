@@ -17,6 +17,11 @@ namespace Coms.Infrastructure.Persistence.Repositories
             await _genericRepository.CreateAsync(templateFile);
         }
 
+        public async Task Update(TemplateFile templateFile)
+        {
+            await _genericRepository.UpdateAsync(templateFile);
+        }
+
         public async Task<TemplateFile?> GetTemplateFileByTemplateId(int templateId)
         {
             return await _genericRepository

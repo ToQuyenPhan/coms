@@ -63,10 +63,25 @@ namespace Coms.Api.Controllers
 
         [HttpGet("get-template")]
         [SwaggerOperation(Summary = "Get a template in Coms")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Sale Manager, Staff")]
         public async Task<IActionResult> GetTemplate([FromQuery]int id)
         {
             ErrorOr<TemplateSfdtResult> result = _templateService.GetTemplate(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpPut]
+        [SwaggerOperation(Summary = "Edit a template in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public IActionResult Edit(TemplateFormRequest request, [FromQuery] int templateId)
+        {
+            ErrorOr<TemplateResult> result =
+                _templateService.UpdateTemplate(request.TemplateName, request.Description,
+                    request.ContractCategoryId, request.TemplateTypeId, request.Status,
+                    templateId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
