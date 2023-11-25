@@ -48,10 +48,32 @@ namespace Coms.Api.Controllers
         [Authorize(Roles = "Sale Manager")]
         [HttpPost("add")]
         [SwaggerOperation(Summary = "Add a service in Coms")]
-        public IActionResult Add(ServiceFormRequest request)
+        public IActionResult Add([FromBody]ServiceFormRequest request)
         {
             ErrorOr<ServiceResult> result =
                 _serviceService.AddService(request.ServiceName,request.Description, request.Price ).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem()
+            );
+        }
+
+        [HttpPut("update")]
+        [SwaggerOperation(Summary = "Update a service in Coms")]
+        public IActionResult Update([FromQuery] int serviceId, [FromBody]ServiceFormRequest request)
+        {
+            ErrorOr<ServiceResult> result = _serviceService.UpdateService(serviceId,request.ServiceName,request.Description,request.Price).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem()
+            );
+        }
+
+        [HttpDelete("delete")]
+        [SwaggerOperation(Summary = "Delete a service by serviceId in Coms")]
+        public IActionResult Delete([FromQuery] int serviceId)
+        {
+            ErrorOr<ServiceResult> result = _serviceService.DeleteService(serviceId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem()
