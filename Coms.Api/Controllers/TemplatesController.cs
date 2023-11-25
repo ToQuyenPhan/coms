@@ -66,7 +66,7 @@ namespace Coms.Api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetTemplate([FromQuery]int id)
         {
-            ErrorOr<string> result = _templateService.GetTemplate(id).Result;
+            ErrorOr<TemplateSfdtResult> result = _templateService.GetTemplate(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

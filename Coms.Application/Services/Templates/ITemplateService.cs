@@ -10,6 +10,6 @@ namespace Coms.Application.Services.Templates
         Task<ErrorOr<PagingResult<TemplateResult>>> GetTemplates(string name, int? category,
                 int? type, int? status, string email, int currentPage, int pageSize);
         Task<ErrorOr<TemplateResult>> DeleteTemplate(int id);
-        Task<ErrorOr<string>> GetTemplate(int templateId);
+        Task<ErrorOr<TemplateSfdtResult>> GetTemplate(int templateId);
     }
 }
