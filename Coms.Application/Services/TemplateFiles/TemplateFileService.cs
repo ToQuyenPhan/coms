@@ -2,9 +2,11 @@
 using Coms.Domain.Entities;
 using ErrorOr;
 using Firebase.Storage;
+using Microsoft.Office.Interop.Word;
 using Syncfusion.DocIORenderer;
 using Syncfusion.EJ2.DocumentEditor;
 using Syncfusion.Pdf;
+using System.Xml.Linq;
 
 namespace Coms.Application.Services.TemplateFiles
 {
@@ -80,6 +82,31 @@ namespace Coms.Application.Services.TemplateFiles
                 return new TemplateFileResult() { Result = "OK" };
             }
             catch(Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<TemplateFileResult>> Update(int templateId, string templateName,
+                byte[] document)
+        {
+            try
+            {
+                var templateFile = await _templateFileRepository.GetTemplateFileByTemplateId(templateId);
+                if(templateFile is not null)
+                {
+                    templateFile.FileName = templateName;
+                    templateFile.FileData = document;
+                    await _templateFileRepository.Update(templateFile);
+                    return new TemplateFileResult() { Result = "OK" };
+                }
+                else
+                {
+                    return Error.NotFound("404", "Template is not exist");
+                }
+                
+            }
+            catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }

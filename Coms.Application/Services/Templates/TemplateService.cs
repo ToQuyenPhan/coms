@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
+using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
 using Syncfusion.EJ2.DocumentEditor;
@@ -66,7 +67,8 @@ namespace Coms.Application.Services.Templates
             }
         }
 
-        public async Task<ErrorOr<TemplateResult>> AddTemplate(string name, string description, int category, int type, int status, int userId)
+        public async Task<ErrorOr<TemplateResult>> AddTemplate(string name, string description, int category, 
+                int type, int status, int userId)
         {
             try
             {
@@ -180,6 +182,61 @@ namespace Coms.Application.Services.Templates
             }
         }
 
+        public async Task<ErrorOr<TemplateResult>> UpdateTemplate(string name, string description, int category,
+                int type, int status, int templateId)
+        {
+            try
+            {
+                var template = await _templateRepository.GetTemplate(templateId);
+                if(template is not null)
+                {
+                    var contractCategory = await _contractCategoryRepository
+                            .GetActiveContractCategoryById(category);
+                    if(contractCategory is not null)
+                    {
+                        template.ContractCategory = contractCategory;
+                    }
+                    var templateType = await _templateTypeRepository.GetTemplateTypeById(type);
+                    if(templateType is not null)
+                    {
+                        template.TemplateType = templateType;
+                    }
+                    template.TemplateName = name;
+                    template.Description = description;
+                    template.ContractCategoryId = category;
+                    template.TemplateTypeId = type;
+                    template.UpdatedDate = DateTime.Now;
+                    template.Status = (TemplateStatus)status;
+                    await _templateRepository.UpdateTemplate(template);
+                }
+                var templateResult = new TemplateResult
+                {
+                    Id = template.Id,
+                    TemplateName = template.TemplateName,
+                    Description = template.Description,
+                    CreatedDate = template.CreatedDate,
+                    CreatedDateString = template.CreatedDate.ToString(),
+                    UpdatedDate = template.CreatedDate,
+                    UpdatedDateString = AsTimeAgo((DateTime)template.UpdatedDate),
+                    ContractCategoryId = template.ContractCategory.Id,
+                    ContractCategoryName = template.ContractCategory.CategoryName,
+                    TemplateTypeId = template.TemplateType.Id,
+                    TemplateTypeName = template.TemplateType.Name,
+                    TemplateLink = template.TemplateLink,
+                    Status = (int)template.Status,
+                    StatusString = template.Status.ToString(),
+                    UserId = template.User.Id,
+                    UserName = template.User.Username,
+                    Email = template.User.Email
+                };
+                return templateResult;
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
         private FormatType GetFormatType(string format)
         {
             if (string.IsNullOrEmpty(format))
@@ -203,6 +260,38 @@ namespace Coms.Application.Services.Templates
                 default:
                     throw new NotSupportedException("This file format is not supported!");
             }
+        }
+
+        private string AsTimeAgo(DateTime dateTime)
+        {
+            TimeSpan timeSpan = DateTime.Now.Subtract(dateTime);
+
+            return timeSpan.TotalSeconds switch
+            {
+                <= 60 => $"{timeSpan.Seconds} seconds ago",
+
+                _ => timeSpan.TotalMinutes switch
+                {
+                    <= 1 => "About a minute ago",
+                    < 60 => $"About {timeSpan.Minutes} minutes ago",
+                    _ => timeSpan.TotalHours switch
+                    {
+                        <= 1 => "About an hour ago",
+                        < 24 => $"About {timeSpan.Hours} hours ago",
+                        _ => timeSpan.TotalDays switch
+                        {
+                            <= 1 => "yesterday",
+                            <= 30 => $"About {timeSpan.Days} days ago",
+
+                            <= 60 => "About a month ago",
+                            < 365 => $"About {timeSpan.Days / 30} months ago",
+
+                            <= 365 * 2 => "About a year ago",
+                            _ => $"About {timeSpan.Days / 365} years ago"
+                        }
+                    }
+                }
+            };
         }
     }
 }

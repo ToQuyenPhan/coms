@@ -6,5 +6,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
     {
         Task Add(TemplateFile templateFile);
         Task<TemplateFile?> GetTemplateFileByTemplateId(int templateId);
+        Task Update(TemplateFile templateFile);
     }
 }
