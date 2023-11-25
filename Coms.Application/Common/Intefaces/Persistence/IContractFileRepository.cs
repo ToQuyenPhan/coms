@@ -1,5 +1,4 @@
 ﻿using Coms.Domain.Entities;
-using Coms.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Coms.Application.Common.Intefaces.Persistence
 {
-    public interface IPartnerRepository
+    public interface IContractFileRepository
     {
-        Task<Partner> GetPartner(int id);
-        Task<IList<Partner>?> GetActivePartners();
+        Task Add(ContractFile contractFile);
+        Task<ContractFile?> GetContractFileByContractId(int templateId);
     }
 }
