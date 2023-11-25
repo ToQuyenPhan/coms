@@ -43,6 +43,9 @@ namespace Coms.Infrastructure.Persistence.Context
         public DbSet<PartnerSign> PartnerSigns { get; set; }
         public DbSet<TemplateContent> TemplateContents { get; set; }
         public DbSet<TemplateFile> TemplateFiles { get; set; }
+        public DbSet<ContractFile> ContractFiles { get; set; }
+        public DbSet<ContractAnnexFile> ContractAnnexFiles { get; set; }
+        public DbSet<LiquidationRecordFile> LiquidationRecordFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
