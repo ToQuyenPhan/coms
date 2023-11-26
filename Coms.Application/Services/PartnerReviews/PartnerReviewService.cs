@@ -43,7 +43,7 @@ namespace Coms.Application.Services.PartnerReviews
                     IsApproved = false,
                     SendDate = DateTime.Now,
                     ReviewAt = DateTime.Now,
-                    
+                    Status = PartnerReviewStatus.Active 
                 };
                 await _partnerReviewRepository.AddPartnerReview(partnerReview);
                 var createdPartnerReview = await _partnerReviewRepository.GetPartnerReview(partnerReview.Id);

@@ -54,7 +54,8 @@ namespace Coms.Infrastructure.Authentication
                 new Claim("CompanyName", partner.CompanyName.ToString()),
                 new Claim("Position", partner.RepresentativePosition.ToString()),
                 new Claim("Email", partner.Email.ToString()),
-                new Claim("Id", partner.Id.ToString())
+                new Claim("Id", partner.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, partner.Id.ToString())
             };
             var securityToken = new JwtSecurityToken(issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,

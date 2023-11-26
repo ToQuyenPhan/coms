@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Domain.Entities;
+using Coms.Domain.Enum;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
@@ -33,8 +34,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
 
         public async Task<IList<PartnerReview>?> GetByPartnerId(int partnerId, bool isApproved)
         {
-            var list = await _genericRepository.WhereAsync(pr => pr.PartnerId.Equals(partnerId) &&
-                    pr.IsApproved.Equals(isApproved), new System.Linq.Expressions.Expression<Func<PartnerReview, object>>[] {
+            var list = await _genericRepository.WhereAsync(pr => pr.PartnerId == partnerId &&
+                    pr.IsApproved == isApproved && pr.Status.Equals(PartnerReviewStatus.Active), 
+                    new System.Linq.Expressions.Expression<Func<PartnerReview, object>>[] {
                     pr => pr.User, pr => pr.Contract, pr => pr.Partner });
             return (list.Count() > 0) ? list : null;
         }
