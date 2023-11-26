@@ -15,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Coms.Application.Services.Services;
 using Coms.Application.Services.ContractFiles;
 using Coms.Application.Services.Partners;
+using Coms.Application.Services.Users;
+using Coms.Application.Services.UserAccesses;
 
 namespace Coms.Application
 {
@@ -38,6 +40,8 @@ namespace Coms.Application
             services.AddScoped<IServiceService, ServiceService>();
             services.AddScoped<IContractFileService, ContractFileService>();
             services.AddScoped<IPartnerService, PartnerService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserAccessService, UserAccessService>();
             return services;
         }
     }

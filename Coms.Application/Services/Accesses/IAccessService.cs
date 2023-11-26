@@ -12,5 +12,6 @@ namespace Coms.Application.Services.Accesses
     public interface IAccessService
     {
         Task<ErrorOr<AccessResult>> AddAccess(int contractId, int accessRoleId);
+        Task<ErrorOr<AccessResult>> AddViewers(int[] users, int contractId);
     }
 }

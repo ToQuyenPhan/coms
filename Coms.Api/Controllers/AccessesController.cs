@@ -31,5 +31,17 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
-    }
+        [HttpPost("addViewers")]
+        [SwaggerOperation(Summary = "Add a viewers in Coms")]
+        public IActionResult AddViewers([FromBody]int[] users, int contractId)
+        {
+            ErrorOr<AccessResult> result =
+                _accessService.AddViewers(users, contractId).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+    
+}
 }

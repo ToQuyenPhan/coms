@@ -18,8 +18,6 @@ namespace Coms.Contracts.Contracts
         [Required(ErrorMessage = "EffectiveDate is not null")]
         [DataType(DataType.Date)]
         public DateTime EffectiveDate { get; set; }
-        [Url(ErrorMessage = "Link must be a valid URL")]
-        public string Link { get; set; }
 
         [Required(ErrorMessage = "TemplateId is not null")]
         public int TemplateId { get; set; }
