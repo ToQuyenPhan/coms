@@ -97,6 +97,7 @@ namespace Coms.Application.Services.TemplateFiles
                 {
                     templateFile.FileName = templateName;
                     templateFile.FileData = document;
+                    templateFile.UpdatedDate = DateTime.Now;
                     await _templateFileRepository.Update(templateFile);
                     return new TemplateFileResult() { Result = "OK" };
                 }

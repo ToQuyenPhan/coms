@@ -1,8 +1,4 @@
-﻿using Coms.Domain.Entities;
-using Coms.Domain.Enum;
-using System.ComponentModel.DataAnnotations;
-
-namespace Coms.Application.Services.Templates
+﻿namespace Coms.Application.Services.Templates
 {
     public class TemplateResult
     {

@@ -10,11 +10,14 @@ namespace Coms.Application.Services.Authentication
     {
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
         private readonly IUserRepository _userRepository;
+        private readonly IPartnerRepository _partnerRepository;
 
-        public AuthenticationService(IJwtTokenGenerator jwtTokenGenerator, IUserRepository userRepository)
+        public AuthenticationService(IJwtTokenGenerator jwtTokenGenerator, 
+            IUserRepository userRepository, IPartnerRepository partnerRepository)
         {
             _jwtTokenGenerator = jwtTokenGenerator;
             _userRepository = userRepository;
+            _partnerRepository = partnerRepository;
         }
 
         public ErrorOr<AuthenticationResult> Login(string username, string password)
@@ -31,6 +34,18 @@ namespace Coms.Application.Services.Authentication
             }
             //Create JWT Token
             var token = _jwtTokenGenerator.GenerateToken(user);
+            return new AuthenticationResult(token);
+        }
+
+        public ErrorOr<AuthenticationResult> EnterCode(string code)
+        {
+            // Validate the partner code exist
+            if (_partnerRepository.GetPartnerByCode(code).Result is not Partner partner)
+            {
+                return Errors.Partner.IncorrectPartnerCode;
+            }
+            //Create JWT Token
+            var token = _jwtTokenGenerator.GeneratePartnerToken(partner);
             return new AuthenticationResult(token);
         }
     }

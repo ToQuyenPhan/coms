@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Coms.Domain.Enum;
 
 namespace Coms.Domain.Entities
 {
@@ -17,6 +18,9 @@ namespace Coms.Domain.Entities
 
         [Required]
         public bool IsApproved { get; set; }
+
+        [Required]
+        public PartnerReviewStatus Status { get; set; }
 
         public int? PartnerId { get; set; }
         public virtual Partner Partner { get; set; }

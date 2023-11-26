@@ -1,12 +1,4 @@
-﻿using Coms.Application.Services.ContractCosts;
-using Coms.Application.Services.Contracts;
-using Coms.Domain.Entities;
-using ErrorOr;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ErrorOr;
 
 namespace Coms.Application.Services.Services
 {

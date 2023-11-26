@@ -1,11 +1,5 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
-using Coms.Application.Services.ContractCategories;
 using ErrorOr;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Coms.Application.Services.Partners
 {

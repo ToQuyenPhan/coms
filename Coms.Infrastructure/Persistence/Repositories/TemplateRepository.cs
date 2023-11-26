@@ -30,7 +30,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return (list.Count() > 0) ? new PagingResult<Template>(list, totalCount, currentPage, pageSize) : null;
         }
 
-        public async Task<Template> GetTemplate(int id)
+        public async Task<Template?> GetTemplate(int id)
         {
             return await _genericRepository.FirstOrDefaultAsync(t => t.Id.Equals(id),
                 new System.Linq.Expressions.Expression<Func<Template, object>>[]

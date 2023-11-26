@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Domain.Entities;
+using Coms.Domain.Enum;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
@@ -18,9 +19,18 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     new System.Linq.Expressions.Expression<Func<Access, object>>[]
                     { a => a.Contract});
         }
+
         public async Task AddAccess(Access access)
         {
             await _genericRepository.CreateAsync(access);
+        }
+
+        public async Task<Access?> GetManagerAccess(int id)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(a => a.Id.Equals(id) 
+                && a.AccessRole.Equals(AccessRole.Approver),
+                new System.Linq.Expressions.Expression<Func<Access, object>>[]
+                    { a => a.Contract});
         }
     }
 }

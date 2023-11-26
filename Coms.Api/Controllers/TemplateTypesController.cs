@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
-    [Authorize(Roles = "Sale Manager, Staff")]
+    [Authorize(Roles = "Sale Manager, Staff, Manager")]
     public class TemplateTypesController : ApiController
     {
         private readonly ITemplateTypeService _templateTypeService;

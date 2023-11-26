@@ -40,5 +40,28 @@ namespace Coms.Infrastructure.Authentication
                 claims: claims, signingCredentials: signingCredentials);
             return new JwtSecurityTokenHandler().WriteToken(securityToken);
         }
+
+        public string GeneratePartnerToken(Partner partner)
+        {
+            var signingCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret)),
+                SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, partner.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, partner.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Name, partner.Representative),
+                new Claim("CompanyName", partner.CompanyName.ToString()),
+                new Claim("Position", partner.RepresentativePosition.ToString()),
+                new Claim("Email", partner.Email.ToString()),
+                new Claim("Id", partner.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, partner.Id.ToString())
+            };
+            var securityToken = new JwtSecurityToken(issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
+                expires: _dateTimeProvider.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+                claims: claims, signingCredentials: signingCredentials);
+            return new JwtSecurityTokenHandler().WriteToken(securityToken);
+        }
     }
 }

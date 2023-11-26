@@ -12,5 +12,11 @@ namespace Coms.Domain.Common.Errors
             public static Error IncorrectPassword => Error.Validation(code: "User.IncorrectPassword",
                 description: "Your password is incorrect");
         }
+
+        public static class Partner
+        {
+            public static Error IncorrectPartnerCode => Error.Validation(code: "Partner.IncorrectCode",
+                description: "Your code is incorrect");
+        }
     }
 }

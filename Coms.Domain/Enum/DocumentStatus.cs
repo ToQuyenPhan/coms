@@ -9,6 +9,7 @@
         Rejected,
         Signed,
         Finalized,
-        Liquidated
+        Liquidated,
+        Waiting
     }
 }
