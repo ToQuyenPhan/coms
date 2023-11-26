@@ -24,7 +24,7 @@ namespace Coms.Application.Services.Contracts
                 IPartnerReviewRepository partnerReviewRepository,
                 IContractRepository contractRepository,
                 IActionHistoryRepository actionHistoryRepository,
-                ITemplateRepository templateRepository, 
+                ITemplateRepository templateRepository,
                 IUserRepository userRepository,
                 IPartnerRepository partnerRepository,
                 IContractCostRepository contractCostRepository)
@@ -44,7 +44,7 @@ namespace Coms.Application.Services.Contracts
         {
             try
             {
-                if(_contractRepository.GetContract(id).Result is not null)
+                if (_contractRepository.GetContract(id).Result is not null)
                 {
                     var contract = await _contractRepository.GetContract(id);
                     contract.Status = DocumentStatus.Deleted;
@@ -73,18 +73,18 @@ namespace Coms.Application.Services.Contracts
                     return Error.NotFound();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }
         }
 
-        public async Task<ErrorOr<PagingResult<ContractResult>>> GetYourContracts(int userId, 
+        public async Task<ErrorOr<PagingResult<ContractResult>>> GetYourContracts(int userId,
                 string name, string creatorName, int? status, int currentPage, int pageSize)
         {
             if (_userAccessRepository.GetYourAccesses(userId).Result is not null)
             {
-                if(string.IsNullOrEmpty(creatorName))
+                if (string.IsNullOrEmpty(creatorName))
                 {
                     creatorName = "";
                 }
@@ -94,7 +94,7 @@ namespace Coms.Application.Services.Contracts
                 {
                     predicate = predicate.And(a => a.Contract.ContractName.Contains(name.Trim()));
                 }
-                if(status is not null)
+                if (status is not null)
                 {
                     if (status >= 0)
                     {
@@ -103,7 +103,7 @@ namespace Coms.Application.Services.Contracts
                 }
                 var yourAccesses = _userAccessRepository.GetYourAccesses(userId).Result;
                 IList<Access> accesses = new List<Access>();
-                foreach(var userAccess in yourAccesses)
+                foreach (var userAccess in yourAccesses)
                 {
                     if (userAccess.User.Email.Contains(creatorName))
                     {
@@ -116,14 +116,14 @@ namespace Coms.Application.Services.Contracts
                 }
                 IList<Access> filteredList = accesses.Where(predicate).ToList();
                 var total = filteredList.Count();
-                if(currentPage > 0 && pageSize > 0)
+                if (currentPage > 0 && pageSize > 0)
                 {
                     filteredList = filteredList.Skip((currentPage - 1) * pageSize).Take(pageSize)
                             .ToList();
                 }
                 IList<ContractResult> responses = new List<ContractResult>();
                 foreach (var contract in filteredList)
-                {                    
+                {
                     var contractResult = new ContractResult()
                     {
                         Id = contract.Contract.Id,
@@ -174,12 +174,12 @@ namespace Coms.Application.Services.Contracts
                 IList<Contract> approvedContracts = new List<Contract>();
                 IList<Contract> signedContracts = new List<Contract>();
                 IList<Contract> finalizedContracts = new List<Contract>();
-                foreach(var actionHistory in actionHistories)
+                foreach (var actionHistory in actionHistories)
                 {
                     switch ((int)actionHistory.Contract.Status)
                     {
                         case 2:
-                            drafts.Add(actionHistory.Contract); 
+                            drafts.Add(actionHistory.Contract);
                             break;
                         case 3:
                             approvedContracts.Add(actionHistory.Contract);
@@ -194,11 +194,12 @@ namespace Coms.Application.Services.Contracts
                             break;
                     }
                 }
-                if(drafts.Count() > 0) {
+                if (drafts.Count() > 0)
+                {
                     var generalReportResult = new GeneralReportResult()
                     {
                         Total = drafts.Count(),
-                        Status = (int) DocumentStatus.Draft,
+                        Status = (int)DocumentStatus.Draft,
                         StatusString = DocumentStatus.Draft.ToString(),
                         Percent = (drafts.Count() * 100 / actionHistories.Count()),
                         Title = "Draft Contracts"
@@ -337,7 +338,7 @@ namespace Coms.Application.Services.Contracts
         {
             try
             {
-                if(_contractRepository.GetContract(id).Result is not null)
+                if (_contractRepository.GetContract(id).Result is not null)
                 {
                     var contract = await _contractRepository.GetContract(id);
                     var contractResult = new ContractResult
@@ -364,7 +365,8 @@ namespace Coms.Application.Services.Contracts
                     return Error.NotFound();
                 }
             }
-            catch(Exception ex){
+            catch (Exception ex)
+            {
                 return Error.Failure("500", ex.Message);
             }
         }
@@ -372,7 +374,7 @@ namespace Coms.Application.Services.Contracts
                string link, int[] contractCosts)
         {
             try
-            {              
+            {
                 var contract = new Contract
                 {
                     ContractName = contractName,
@@ -390,7 +392,7 @@ namespace Coms.Application.Services.Contracts
                 var access = new Access
                 {
                     ContractId = contract.Id,
-                   AccessRole = AccessRole.Author
+                    AccessRole = AccessRole.Author
                 };
                 await _accessRepository.AddAccess(access);
 
@@ -402,7 +404,7 @@ namespace Coms.Application.Services.Contracts
                 await _userAccessRepository.AddUserAccess(userAccess);
                 var partnerReview = new PartnerReview
                 {
-                    ContractId = contract.Id ,
+                    ContractId = contract.Id,
                     PartnerId = partnerId,
                     UserId = authorId,
                     IsApproved = false,
@@ -411,10 +413,10 @@ namespace Coms.Application.Services.Contracts
 
                 };
                 await _partnerReviewRepository.AddPartnerReview(partnerReview);
-                await _contractCostRepository.AddContractCostsToContract(contractCosts,contract.Id);
+                await _contractCostRepository.AddContractCostsToContract(contractCosts, contract.Id);
                 var partner = _partnerRepository.GetPartner(partnerId).Result;
                 var template = _templateRepository.GetTemplate(templateId).Result;
-                var user =  _userRepository.GetUser(userAccess.UserId ?? throw new InvalidOperationException("Value cannot be null")).Result;
+                var user = _userRepository.GetUser(userAccess.UserId ?? throw new InvalidOperationException("Value cannot be null")).Result;
                 var contractResult = new ContractResult
                 {
                     Id = contract.Id,
@@ -437,7 +439,7 @@ namespace Coms.Application.Services.Contracts
                     Version = 1,
                     PartnerId = partnerReview.PartnerId,
                     PartnerName = partner.CompanyName
-                 };
+                };
                 return contractResult;
             }
             catch (Exception ex)
@@ -533,5 +535,71 @@ namespace Coms.Application.Services.Contracts
                     pageSize);
             }
         }
+
+        //public async Task<ErrorOr<PagingResult<ContractResult>>> GetContractForPartner(int partnerId,
+        //        string name, string code, bool isApproved, int currentPage, int pageSize)
+        //{
+        //    if (_partnerReviewRepository.GetByPartnerId(partnerId, isApproved).Result is not null)
+        //    {
+        //        var predicate = PredicateBuilder.New<Access>(true);
+        //        predicate = predicate.And(a => a.Contract.Status != DocumentStatus.Deleted);
+        //        if (!string.IsNullOrEmpty(name))
+        //        {
+        //            predicate = predicate.And(a => a.Contract.ContractName.Contains(name.Trim()));
+        //        }
+        //        if (!string.IsNullOrEmpty(code))
+        //        {
+        //            predicate = predicate.And(a => a.Contract.Code.Contains(code.Trim()));
+        //        }
+        //        var reviews = await _partnerReviewRepository.GetByPartnerId(partnerId, isApproved);
+        //        IList<Access> filteredList = accesses.Where(predicate).ToList();
+        //        var total = filteredList.Count();
+        //        if (currentPage > 0 && pageSize > 0)
+        //        {
+        //            filteredList = filteredList.Skip((currentPage - 1) * pageSize).Take(pageSize)
+        //                    .ToList();
+        //        }
+        //        IList<ContractResult> responses = new List<ContractResult>();
+        //        foreach (var contract in filteredList)
+        //        {
+        //            var contractResult = new ContractResult()
+        //            {
+        //                Id = contract.Contract.Id,
+        //                ContractName = contract.Contract.ContractName,
+        //                Version = contract.Contract.Version,
+        //                CreatedDate = contract.Contract.CreatedDate,
+        //                CreatedDateString = contract.Contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+        //                UpdatedDate = contract.Contract.UpdatedDate,
+        //                UpdatedDateString = contract.Contract.UpdatedDate.ToString(),
+        //                EffectiveDate = contract.Contract.EffectiveDate,
+        //                EffectiveDateString = contract.Contract.EffectiveDate.ToString(),
+        //                Status = (int)contract.Contract.Status,
+        //                StatusString = contract.Contract.Status.ToString(),
+        //                TemplateID = contract.Contract.TemplateId,
+        //                Code = contract.Contract.Code,
+        //                Link = contract.Contract.Link
+        //            };
+        //            var access = await _userAccessRepository.GetByAccessId(contract.Id);
+        //            if (contract.AccessRole.Equals(AccessRole.Author))
+        //            {
+        //                contractResult.CreatorId = access.User.Id;
+        //                contractResult.CreatorName = access.User.FullName;
+        //                contractResult.CreatorEmail = access.User.Email;
+        //                contractResult.CreatorImage = access.User.Image;
+        //            }
+        //            var partner = await _partnerReviewRepository.GetByContractId(contract.Contract.Id);
+        //            contractResult.PartnerId = partner.Partner.Id;
+        //            contractResult.PartnerName = partner.Partner.CompanyName;
+        //            responses.Add(contractResult);
+        //        }
+        //        return new
+        //            PagingResult<ContractResult>(responses, total, currentPage, pageSize);
+        //    }
+        //    else
+        //    {
+        //        return new PagingResult<ContractResult>(new List<ContractResult>(), 0, currentPage,
+        //            pageSize);
+        //    }
+        //}
     }
 }

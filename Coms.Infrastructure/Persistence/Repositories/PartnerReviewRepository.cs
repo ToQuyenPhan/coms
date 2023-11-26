@@ -18,6 +18,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
                 new System.Linq.Expressions.Expression<Func<PartnerReview, object>>[] {
                     pr => pr.User, pr => pr.Contract, pr => pr.Partner });
         }
+
         public async Task<PartnerReview> GetPartnerReview(int id)
         {
             return await _genericRepository.FirstOrDefaultAsync(pr => pr.Id.Equals(id),
@@ -28,6 +29,14 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public async Task AddPartnerReview(PartnerReview partnerReview)
         {
             await _genericRepository.CreateAsync(partnerReview);
+        }
+
+        public async Task<IList<PartnerReview>?> GetByPartnerId(int partnerId, bool isApproved)
+        {
+            var list = await _genericRepository.WhereAsync(pr => pr.PartnerId.Equals(partnerId) &&
+                    pr.IsApproved.Equals(isApproved), new System.Linq.Expressions.Expression<Func<PartnerReview, object>>[] {
+                    pr => pr.User, pr => pr.Contract, pr => pr.Partner });
+            return (list.Count() > 0) ? list : null;
         }
     }
 }

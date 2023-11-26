@@ -27,6 +27,7 @@ namespace Coms.Application.Services.PartnerReviews
             _contractRepository = contractRepository;
             _partnerRepository = partnerRepository;
         }
+
         public async Task<ErrorOr<PartnerReviewResult>> AddPartnerReview(int partnerId, int userId, int contractId)
         {
             try

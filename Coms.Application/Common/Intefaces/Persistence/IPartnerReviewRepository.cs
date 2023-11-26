@@ -7,5 +7,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<PartnerReview> GetByContractId(int contractId);
         Task<PartnerReview> GetPartnerReview(int id);
         Task AddPartnerReview(PartnerReview partnerReview);
+        Task<IList<PartnerReview>?> GetByPartnerId(int partnerId, bool isApproved);
     }
 }

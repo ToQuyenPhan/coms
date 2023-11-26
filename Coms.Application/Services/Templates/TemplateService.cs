@@ -170,7 +170,7 @@ namespace Coms.Application.Services.Templates
                     WordDocument document = WordDocument.Load(stream, GetFormatType(type.ToLower()));
                     string sfdt = Newtonsoft.Json.JsonConvert.SerializeObject(document);
                     document.Dispose();
-                    stream.Close();
+                    stream.Dispose();
                     TemplateSfdtResult result = new TemplateSfdtResult()
                     {
                         Sfdt = sfdt
