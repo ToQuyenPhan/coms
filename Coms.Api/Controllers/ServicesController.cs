@@ -2,7 +2,6 @@
 using Coms.Application.Services.Common;
 using Coms.Application.Services.Contracts;
 using Coms.Application.Services.Services;
-using Coms.Contracts.Contracts;
 using Coms.Contracts.Services;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +12,6 @@ using System.Security.Claims;
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
-    [Authorize(Roles = "Staff")]
     public class ServicesController : ApiController
     {
         private readonly IServiceService _serviceService;
@@ -25,6 +23,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet("gets")]
         [SwaggerOperation(Summary = "Get services by serviceName in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
         public IActionResult GetServicesByServiceName([FromQuery]string? serviceName)
         {
             ErrorOr<IList<ServiceResult>> result = _serviceService.GetServicesByName(serviceName).Result;
@@ -36,6 +35,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet("get")]
         [SwaggerOperation(Summary = "Get services by serviceName in Coms")]
+        [Authorize(Roles = "Staff")]
         public IActionResult GetServiceByServiceId([FromQuery] int serviceId)
         {
             ErrorOr<ServiceResult> result = _serviceService.GetService(serviceId).Result;
@@ -60,6 +60,7 @@ namespace Coms.Api.Controllers
 
         [HttpPut("update")]
         [SwaggerOperation(Summary = "Update a service in Coms")]
+        [Authorize(Roles = "Sale Manger")]
         public IActionResult Update([FromQuery] int serviceId, [FromBody]ServiceFormRequest request)
         {
             ErrorOr<ServiceResult> result = _serviceService.UpdateService(serviceId,request.ServiceName,request.Description,request.Price).Result;
@@ -71,6 +72,7 @@ namespace Coms.Api.Controllers
 
         [HttpDelete("delete")]
         [SwaggerOperation(Summary = "Delete a service by serviceId in Coms")]
+        [Authorize(Roles = "Sale Manager")]
         public IActionResult Delete([FromQuery] int serviceId)
         {
             ErrorOr<ServiceResult> result = _serviceService.DeleteService(serviceId).Result;

@@ -4,7 +4,6 @@ using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
 using LinqKit;
-using static Coms.Domain.Common.Errors.Errors;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -444,6 +443,94 @@ namespace Coms.Application.Services.Contracts
             catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContracts(int userId,
+                string name, string creatorName, int? status, int currentPage, int pageSize)
+        {
+            if (_userAccessRepository.GetYourAccesses(userId).Result is not null)
+            {
+                if (string.IsNullOrEmpty(creatorName))
+                {
+                    creatorName = "";
+                }
+                var predicate = PredicateBuilder.New<Access>(true);
+                predicate = predicate.And(a => a.Contract.Status != DocumentStatus.Deleted);
+                if (!string.IsNullOrEmpty(name))
+                {
+                    predicate = predicate.And(a => a.Contract.ContractName.Contains(name.Trim()));
+                }
+                if (status is not null)
+                {
+                    if (status >= 0)
+                    {
+                        predicate = predicate.And(c => c.Contract.Status.Equals((DocumentStatus)status));
+                    }
+                }
+                var yourAccesses = _userAccessRepository.GetYourAccesses(userId).Result;
+                IList<Access> accesses = new List<Access>();
+                foreach (var userAccess in yourAccesses)
+                {
+                    if (userAccess.User.Email.Contains(creatorName))
+                    {
+                        var access = await _accessRepository.GetManagerAccess((int)userAccess.AccessId);
+                        if (access is not null)
+                        {
+                            if (!accesses.Contains(access))
+                            {
+                                accesses.Add(access);
+                            }
+                        }
+                    }
+                }
+                IList<Access> filteredList = accesses.Where(predicate).ToList();
+                var total = filteredList.Count();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    filteredList = filteredList.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                            .ToList();
+                }
+                IList<ContractResult> responses = new List<ContractResult>();
+                foreach (var contract in filteredList)
+                {
+                    var contractResult = new ContractResult()
+                    {
+                        Id = contract.Contract.Id,
+                        ContractName = contract.Contract.ContractName,
+                        Version = contract.Contract.Version,
+                        CreatedDate = contract.Contract.CreatedDate,
+                        CreatedDateString = contract.Contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        UpdatedDate = contract.Contract.UpdatedDate,
+                        UpdatedDateString = contract.Contract.UpdatedDate.ToString(),
+                        EffectiveDate = contract.Contract.EffectiveDate,
+                        EffectiveDateString = contract.Contract.EffectiveDate.ToString(),
+                        Status = (int)contract.Contract.Status,
+                        StatusString = contract.Contract.Status.ToString(),
+                        TemplateID = contract.Contract.TemplateId,
+                        Code = contract.Contract.Code,
+                        Link = contract.Contract.Link
+                    };
+                    var access = await _userAccessRepository.GetByAccessId(contract.Id);
+                    if (contract.AccessRole.Equals(AccessRole.Author))
+                    {
+                        contractResult.CreatorId = access.User.Id;
+                        contractResult.CreatorName = access.User.FullName;
+                        contractResult.CreatorEmail = access.User.Email;
+                        contractResult.CreatorImage = access.User.Image;
+                    }
+                    var partner = await _partnerReviewRepository.GetByContractId(contract.Contract.Id);
+                    contractResult.PartnerId = partner.Partner.Id;
+                    contractResult.PartnerName = partner.Partner.CompanyName;
+                    responses.Add(contractResult);
+                }
+                return new
+                    PagingResult<ContractResult>(responses, total, currentPage, pageSize);
+            }
+            else
+            {
+                return new PagingResult<ContractResult>(new List<ContractResult>(), 0, currentPage,
+                    pageSize);
             }
         }
     }

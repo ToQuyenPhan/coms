@@ -10,7 +10,7 @@ using System.Security.Claims;
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
-    [Authorize(Roles = "Staff")]
+    [Authorize(Roles = "Staff, Manager")]
     public class CommentsController : ApiController
     {
         private readonly ICommentService _commentService;

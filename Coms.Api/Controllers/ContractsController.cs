@@ -10,7 +10,6 @@ using System.Security.Claims;
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
-    [Authorize(Roles = "Staff")]
     public class ContractsController : ApiController
     {
         private readonly IContractService _contractService;
@@ -22,6 +21,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet("yours")]
         [SwaggerOperation(Summary = "Get your contracts in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
         public IActionResult GetYourContracts([FromQuery] YourContractsFilterRequest request)
         {
             ErrorOr<PagingResult<ContractResult>> result = _contractService.GetYourContracts(
@@ -36,6 +36,7 @@ namespace Coms.Api.Controllers
 
         [HttpDelete]
         [SwaggerOperation(Summary = "Get your contracts in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
         public IActionResult Delete([FromQuery] int id)
         {
             ErrorOr<ContractResult> result = _contractService.DeleteContract(id).Result;
@@ -47,6 +48,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet("general-report")]
         [SwaggerOperation(Summary = "Get contract general report in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
         public IActionResult GetGeneralReport()
         {
             ErrorOr<IList<GeneralReportResult>> result = _contractService.GetGeneralReport(
@@ -59,6 +61,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet("{id}")]
         [SwaggerOperation(Summary = "Get contract by id in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
         public IActionResult GetContractById([FromQuery] int id)
         {
             ErrorOr<ContractResult> result = _contractService.GetContract(id).Result;
@@ -70,11 +73,27 @@ namespace Coms.Api.Controllers
 
         [HttpPost("add")]
         [SwaggerOperation(Summary = "Add a contract in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
         public IActionResult Add(ContractFormRequest request)
         {
             ErrorOr<ContractResult> result =
                 _contractService.AddContract(request.ContractName,request.Code,request.PartnerId, int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value)
                 , request.TemplateId, request.EffectiveDate, request.Link, request.Services).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet("manager")]
+        [SwaggerOperation(Summary = "Get contract list for manager in Coms")]
+        [Authorize(Roles = "Manager")]
+        public IActionResult GetManagerContracts([FromQuery] YourContractsFilterRequest request)
+        {
+            ErrorOr<PagingResult<ContractResult>> result = _contractService.GetManagerContracts(
+                int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
+                request.ContractName, request.CreatorName, request.Status, request.CurrentPage,
+                request.PageSize).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

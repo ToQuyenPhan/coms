@@ -21,7 +21,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet]
         [SwaggerOperation(Summary = "Get all templates (with filter) in Coms")]
-        [Authorize(Roles = "Sale Manager, Staff")]
+        [Authorize(Roles = "Sale Manager, Staff, Manager")]
         public IActionResult Get([FromQuery]TemplateFilterRequest request)
         {
             ErrorOr<PagingResult<TemplateResult>> result =
