@@ -543,7 +543,14 @@ namespace Coms.Application.Services.Contracts
             if (reviews is not null)
             {
                 var predicate = PredicateBuilder.New<Contract>(true);
-                predicate = predicate.And(c => c.Status == DocumentStatus.Waiting);
+                if (isApproved)
+                {
+                    predicate = predicate.And(c => c.Status == DocumentStatus.Completed);
+                }
+                else
+                {
+                    predicate = predicate.And(c => c.Status == DocumentStatus.Waiting);
+                }
                 if (!string.IsNullOrEmpty(name))
                 {
                     predicate = predicate.And(c => c.ContractName.Contains(name.Trim()));
