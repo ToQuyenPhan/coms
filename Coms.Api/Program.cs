@@ -1,10 +1,8 @@
 using Coms.Api.Common.Errors;
 using Coms.Application;
-using Coms.Domain.Entities;
 using Coms.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.OpenApi.Models;
-using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +58,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NHaF5cXmVCf1FpRGVGfV5yd0VCal9YTnRdUiweQnxTdEZiWH1ZcHdVQGFfUkB0Wg==");
 
 //Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
