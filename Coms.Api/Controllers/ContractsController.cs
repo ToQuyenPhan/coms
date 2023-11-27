@@ -78,7 +78,7 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<ContractResult> result =
                 _contractService.AddContract(request.ContractName,request.Code,request.PartnerId, int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value)
-                , request.TemplateId, request.EffectiveDate, request.Link, request.Services).Result;
+                , request.TemplateId, request.EffectiveDate, request.Services).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

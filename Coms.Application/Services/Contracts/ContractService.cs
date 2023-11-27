@@ -371,7 +371,7 @@ namespace Coms.Application.Services.Contracts
             }
         }
         public async Task<ErrorOr<ContractResult>> AddContract(string contractName, string code, int partnerId, int authorId, int templateId, DateTime effectiveDate,
-               string link, int[] contractCosts)
+                int[] contractCosts)
         {
             try
             {
@@ -380,7 +380,7 @@ namespace Coms.Application.Services.Contracts
                     ContractName = contractName,
                     Code = code,
                     TemplateId = templateId,
-                    Link = link,
+                    Link = " ",
                     CreatedDate = DateTime.Now,
                     UpdatedDate = DateTime.Now,
                     EffectiveDate = effectiveDate,
