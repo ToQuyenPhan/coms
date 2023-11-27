@@ -1,6 +1,7 @@
 ﻿using Coms.Application.Services.Accesses;
 using Coms.Application.Services.Contracts;
 using Coms.Contracts.Contracts;
+using Coms.Contracts.UserAccess;
 using Coms.Domain.Entities;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
@@ -33,10 +34,10 @@ namespace Coms.Api.Controllers
         }
         [HttpPost("addViewers")]
         [SwaggerOperation(Summary = "Add a viewers in Coms")]
-        public IActionResult AddViewers([FromBody]int[] users, int contractId)
+        public IActionResult AddViewers(AddViewerOrApproverFormRequest request)
         {
             ErrorOr<IList<AccessResult>> results =
-                _accessService.AddViewers(users, contractId).Result;
+                _accessService.AddViewers(request.Users, request.ContractId).Result;
             return results.Match(
                 result => Ok(result),
                 errors => Problem(errors)
@@ -44,10 +45,10 @@ namespace Coms.Api.Controllers
         }
         [HttpPost("addApprovers")]
         [SwaggerOperation(Summary = "Add a approvers in Coms")]
-        public IActionResult AddApprovers([FromBody] int[] users, int contractId)
+        public IActionResult AddApprovers(AddViewerOrApproverFormRequest request)
         {
             ErrorOr<IList<AccessResult>> results =
-                _accessService.AddApproves(users, contractId).Result;
+                _accessService.AddApproves(request.Users, request.ContractId).Result;
             return results.Match(
                 result => Ok(result),
                 errors => Problem(errors)
