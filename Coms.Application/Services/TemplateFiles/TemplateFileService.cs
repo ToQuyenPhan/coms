@@ -62,14 +62,14 @@ namespace Coms.Application.Services.TemplateFiles
                       Path.Combine(Environment.CurrentDirectory, "Data",
                         fileName);
                 // Saves the document to server machine file system, you can customize here to save into databases or file servers based on requirement.
-                FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
 
                 //Saves the PDF file
                 pdfDocument.Save(fileStream);
                 pdfDocument.Close();
                 fileStream.Close();
                 document.Close();
-                var stream = File.Open(filePath, FileMode.Open);
+                var stream = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
                 var task = new FirebaseStorage(Bucket)
                     .Child("files")
                     .Child(fileName)
