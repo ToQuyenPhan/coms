@@ -18,7 +18,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        public async Task<Partner> GetPartner(int id)
+        public async Task<Partner?> GetPartner(int id)
         {
             return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id), null);
         }

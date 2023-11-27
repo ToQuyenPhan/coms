@@ -11,6 +11,7 @@ namespace Coms.Application.Services.Partners
         {
             _partnerRepository = partnerRepository;
         }
+
         public ErrorOr<IList<PartnerResult>> GetActivePartners()
         {
             if (_partnerRepository.GetActivePartners().Result is not null)
@@ -41,6 +42,34 @@ namespace Coms.Application.Services.Partners
             else
             {
                 return new List<PartnerResult>();
+            }
+        }
+
+        public async Task<ErrorOr<PartnerResult>> GetPartner(int id)
+        {
+            var partner = await _partnerRepository.GetPartner(id);
+            if (partner is not null)
+            {
+                var response = new PartnerResult
+                {
+                    Id = partner.Id,
+                    Address = partner.Address,
+                    Code = partner.Code,
+                    CompanyName = partner.CompanyName,
+                    Email = partner.Email,
+                    Image = partner.Image,
+                    Phone = partner.Phone,
+                    Representative = partner.Representative,
+                    RepresentativePosition = partner.RepresentativePosition,
+                    TaxCode = partner.TaxCode,
+                    Status = (int)partner.Status,
+                    StatusString = partner.Status.ToString()
+                };
+                return response;
+            }
+            else
+            {
+                return Error.NotFound("404", "Partner is not found!");
             }
         }
     }

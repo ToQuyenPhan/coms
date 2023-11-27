@@ -5,11 +5,11 @@ using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
 
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
-    [Authorize(Roles = "Staff")]
     public class PartnersController : ApiController
     {
         private readonly IPartnerService _partnerService;
@@ -20,10 +20,24 @@ namespace Coms.Api.Controllers
 
         [HttpGet("active")]
         [SwaggerOperation(Summary = "Get all active partners of Coms")]
+        [Authorize(Roles = "Staff")]
         public IActionResult GetActiveContractCategories()
         {
             ErrorOr<IList<PartnerResult>> result =
                 _partnerService.GetActivePartners();
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet("current-partner")]
+        [SwaggerOperation(Summary = "Get current partner in Coms")]
+        public IActionResult GetCurrentPartner()
+        {
+            ErrorOr<PartnerResult> result =
+                _partnerService.GetPartner(int.Parse(this.User.Claims.First(i =>
+                i.Type == ClaimTypes.NameIdentifier).Value)).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
