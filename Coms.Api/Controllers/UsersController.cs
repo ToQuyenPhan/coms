@@ -1,16 +1,13 @@
-﻿using Coms.Application.Services.Contracts;
-using Coms.Application.Services.Services;
-using Coms.Application.Services.Users;
+﻿using Coms.Application.Services.Users;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
 
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
-    [Authorize(Roles = "Staff")]
     public class UsersController : ApiController
     {
         private readonly IUserService _userService;
@@ -22,6 +19,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet("gets")]
         [SwaggerOperation(Summary = "Get all users in Coms")]
+        [Authorize(Roles = "Staff")]
         public IActionResult GetUsers()
         {
             ErrorOr<IList<UserResult>> result = _userService.GetUsers().Result;
@@ -30,8 +28,10 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
         [HttpGet("getManagers")]
         [SwaggerOperation(Summary = "Get all Manager in Coms")]
+        [Authorize(Roles = "Staff")]
         public IActionResult GetManagers()
         {
             ErrorOr<IList<UserResult>> result = _userService.GetManagers().Result;
@@ -41,5 +41,16 @@ namespace Coms.Api.Controllers
             );
         }
 
+        [HttpGet("current-user")]
+        [SwaggerOperation(Summary = "Get current user in Coms")]
+        public IActionResult GetCurrentUser()
+        {
+            ErrorOr<UserResult> result = _userService.GetUser(int.Parse(this.User.Claims.First(i => 
+                i.Type == ClaimTypes.NameIdentifier).Value)).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

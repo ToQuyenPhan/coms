@@ -11,5 +11,6 @@ namespace Coms.Application.Services.Users
     {
         Task<ErrorOr<IList<UserResult>>> GetUsers();
         Task<ErrorOr<IList<UserResult>>> GetManagers();
+        Task<ErrorOr<UserResult>> GetUser(int id);
     }
 }
