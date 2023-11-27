@@ -330,7 +330,7 @@ namespace Coms.Application.Services.Contracts
                 responses.Add(approvedReport);
                 responses.Add(signedReport);
                 responses.Add(finalizedReport);
-                return new List<GeneralReportResult>();
+                return responses.ToList();
             }
         }
 
