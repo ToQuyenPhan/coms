@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
-    public class AproveWorkflowRepository
+    public class AproveWorkflowRepository : IAproveWorkflowRepository
     {
         private readonly IGenericRepository<ApproveWorkflow> _genericRepository;
 
@@ -16,6 +16,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             _genericRepository = genericRepository;
         }
-
+        public async Task AddUserAccess(ApproveWorkflow approveWorkflow)
+        {
+            await _genericRepository.CreateAsync(approveWorkflow);
+        }
     }
 }
