@@ -1,6 +1,7 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
+using System.Diagnostics.Contracts;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
@@ -30,6 +31,22 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public async Task AddUserAccess(User_Access userAccess)
         {
             await _genericRepository.CreateAsync(userAccess);
+        }
+
+        public async Task AddUserToUserAccess(int[] users, int accessId)
+        {
+            if (users.Any())
+            {
+                for (int i = 0; i < users.Length; i++)
+                {
+                    var userAccess = new User_Access
+                    {
+                        AccessId = accessId,
+                        UserId = int.Parse(users[i].ToString())
+                    };
+                    await _genericRepository.CreateAsync(userAccess);
+                }
+            }
         }
     }
 }
