@@ -17,5 +17,6 @@ namespace Coms.Application.Services.Contracts
                 string name, string creatorName, int? status, int currentPage, int pageSize);
         Task<ErrorOr<PagingResult<ContractResult>>> GetContractForPartner(int partnerId,
                 string name, string code, bool isApproved, int currentPage, int pageSize);
+        Task<ErrorOr<ContractResult>> ApproveContract(int contractId);
     }
 }

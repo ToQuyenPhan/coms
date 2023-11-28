@@ -113,5 +113,17 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpPut("approve")]
+        [SwaggerOperation(Summary = "Approve a contract by manager in Coms")]
+        [Authorize(Roles = "Manager")]
+        public IActionResult ApproveContract([FromQuery] int id)
+        {
+            ErrorOr<ContractResult> result = _contractService.ApproveContract(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }
