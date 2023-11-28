@@ -410,7 +410,7 @@ namespace Coms.Application.Services.Contracts
                     IsApproved = false,
                     SendDate = DateTime.Now,
                     ReviewAt = DateTime.Now,
-
+                    Status = PartnerReviewStatus.Active
                 };
                 await _partnerReviewRepository.AddPartnerReview(partnerReview);
                 await _contractCostRepository.AddContractCostsToContract(contractCosts, contract.Id);
