@@ -11,16 +11,19 @@ namespace Coms.Application.Services.Comments
         private readonly IActionHistoryRepository _actionHistoryRepository;
         private readonly IUserRepository _userRepository;
         private readonly IAccessRepository _accessRepository;
+        private readonly IUserAccessRepository _userAccessRepository;
 
         public CommentService(ICommentRepository commentRepository,
             IActionHistoryRepository actionHistoryRepository,
             IUserRepository userRepository,
-            IAccessRepository accessRepository)
+            IAccessRepository accessRepository,
+            IUserAccessRepository userAccessRepository)
         {
             _commentRepository = commentRepository;
             _actionHistoryRepository = actionHistoryRepository;
             _userRepository = userRepository;
             _accessRepository = accessRepository;
+            _userAccessRepository = userAccessRepository;
         }
 
         public async Task<ErrorOr<PagingResult<CommentResult>>> GetAllComments(int userId, int currentPage,
@@ -120,14 +123,20 @@ namespace Coms.Application.Services.Comments
                 var histories = await _actionHistoryRepository.GetCommentActionByContractId(contractId);
                 IList<CommentResult> comments = new List<CommentResult>();
                 var accesses = await _accessRepository.GetAccessByContractId(contractId);
-                IList<User> users = new List<User>();
+                IList<User_Access> userAccesses = new List<User_Access>();
                 foreach(var access in accesses)
                 {
-
+                    var userAccess = await _userAccessRepository.GetByAccessId(access.Id);
+                    if(userAccess is not null)
+                    {
+                        userAccesses.Add(userAccess);
+                    }
                 }
                 foreach (var commentHistory in histories)
                 {
                     var comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);
+                    var userRole = userAccesses.Where(ua => ua.UserId.Equals(commentHistory.UserId)).FirstOrDefault();
+                    string accessRole = userRole.Access.AccessRole.ToString();
                     if (comment is not null)
                     {
                         var commentResult = new CommentResult()
@@ -137,7 +146,8 @@ namespace Coms.Application.Services.Comments
                             ActionHistoryId = comment.ActionHistoryId,
                             ReplyId = comment.ReplyId,
                             Status = (int)comment.Status,
-                            StatusString = comment.Status.ToString()
+                            StatusString = comment.Status.ToString(),
+                            AccessRole = accessRole,
                         };
                         commentResult.Long = AsTimeAgo(comment.ActionHistory.CreatedAt);
                         commentResult.CreatedAt = comment.ActionHistory.CreatedAt.ToString();
