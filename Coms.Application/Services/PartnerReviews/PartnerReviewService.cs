@@ -3,11 +3,6 @@ using Coms.Application.Services.Templates;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Coms.Application.Services.PartnerReviews
 {
@@ -61,6 +56,42 @@ namespace Coms.Application.Services.PartnerReviews
                     UserName = createdPartnerReview.User.Username
                 };
                 return partnerReviewResult;
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<PartnerReviewResult>> ApprovePartnerReview(int id)
+        {
+            try
+            {
+                var partnerPreview = await _partnerReviewRepository.GetPartnerReview(id);
+                if(partnerPreview is not null)
+                {
+                    partnerPreview.IsApproved = true;
+                    partnerPreview.ReviewAt = DateTime.Now;
+                    await _partnerReviewRepository.UpdatePartnerPreview(partnerPreview);
+                    var partnerReviewResult = new PartnerReviewResult
+                    {
+                        Id = partnerPreview.Id,
+                        ContractId = partnerPreview.Id,
+                        ContractName = partnerPreview.Contract.ContractName,
+                        IsApproved = partnerPreview.IsApproved,
+                        PartnerId = partnerPreview.Id,
+                        PartnerCompanyName = partnerPreview.Partner.CompanyName,
+                        ReviewAt = partnerPreview.ReviewAt,
+                        SendDate = partnerPreview.SendDate,
+                        UserId = partnerPreview.UserId,
+                        UserName = partnerPreview.User.Username
+                    };
+                    return partnerReviewResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Partner Review is not found!");
+                }
             }
             catch (Exception ex)
             {

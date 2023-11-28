@@ -40,5 +40,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     pr => pr.User, pr => pr.Contract, pr => pr.Partner });
             return (list.Count() > 0) ? list : null;
         }
+
+        public async Task UpdatePartnerPreview(PartnerReview partnerReview)
+        {
+            await _genericRepository.UpdateAsync(partnerReview);
+        }
     }
 }
