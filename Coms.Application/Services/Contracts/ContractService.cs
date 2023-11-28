@@ -4,6 +4,7 @@ using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
 using LinqKit;
+using System.Linq;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -359,13 +360,13 @@ namespace Coms.Application.Services.Contracts
                         StatusString = contract.Status.ToString(),
                         TemplateID = contract.TemplateId,
                         Code = contract.Code,
-                        Link = contract.Link,
+                        Link = contract.Link
                     };
                     return contractResult;
                 }
                 else
                 {
-                    return Error.NotFound();
+                    return Error.NotFound("404", "Contract is not found!");
                 }
             }
             catch (Exception ex)
@@ -490,9 +491,16 @@ namespace Coms.Application.Services.Contracts
                         var access = await _accessRepository.GetManagerAccess((int)userAccess.AccessId);
                         if (access is not null)
                         {
-                            if (!accesses.Contains(access))
+                            var approveWorkflow = await _aproveWorkflowRepository.GetByAccessId(access.Id);
+                            if(approveWorkflow is not null)
                             {
-                                accesses.Add(access);
+                                if (approveWorkflow.Status.Equals(ApproveWorkflowStatus.Waiting))
+                                {
+                                    if (!accesses.Contains(access))
+                                    {
+                                        accesses.Add(access);
+                                    }
+                                }
                             }
                         }
                     }
@@ -615,31 +623,54 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
-        public async Task<ErrorOr<ContractResult>> ApproveContract(int contractId, int userId, 
+        public async Task<ErrorOr<ContractResult>> ApproveContract(int contractId, int userId,
                 bool isApproved)
         {
             try
             {
                 var yourAccesses = await _userAccessRepository.GetYourAccesses(userId);
-                if(yourAccesses is not null)
+                if (yourAccesses is not null)
                 {
                     var isAuthorized = false;
-                    foreach(var yourAccess in yourAccesses)
+                    var isSentToPartner = false;
+                    var isPreviousApproved = true;
+                    var accesses = await _accessRepository.GetAccessByContractId(contractId);
+                    int totalApprovers = accesses.Where(a => a.AccessRole.Equals(AccessRole.Approver)).Count();
+                    foreach (var yourAccess in yourAccesses)
                     {
                         var access = await _accessRepository.GetAccessById((int)yourAccess.AccessId);
                         if (access.AccessRole.Equals(AccessRole.Approver) && access.ContractId.Equals(contractId))
                         {
                             isAuthorized = true;
-                            var approveWorkflow = await _aproveWorkflowRepository.GetByAccessId(access.Id);
+                            var currentWorkflow = await _aproveWorkflowRepository.GetByAccessId(access.Id);
+                            var approverAccesses = accesses.Where(a => a.AccessRole.Equals(AccessRole.Approver)).ToList();
+                            foreach (var approverAccess in approverAccesses)
+                            {
+                                var approveWorkflow = await _aproveWorkflowRepository.GetByAccessId(approverAccess.Id);
+                                if((approveWorkflow.Order < currentWorkflow.Order) && approveWorkflow.Status.Equals(ApproveWorkflowStatus.Waiting))
+                                {
+                                    isPreviousApproved = false;
+                                    break;
+                                }
+
+                            }
+                            if (!isPreviousApproved)
+                            {
+                                return Error.Conflict("403", "The previous approver has not approved yet!");
+                            }
+                            if (currentWorkflow.Order.Equals(totalApprovers))
+                            {
+                                isSentToPartner = true;
+                            }
                             if (isApproved)
                             {
-                                approveWorkflow.Status = ApproveWorkflowStatus.Approved;
+                                currentWorkflow.Status = ApproveWorkflowStatus.Approved;
                             }
                             else
                             {
-                                approveWorkflow.Status = ApproveWorkflowStatus.Rejected;
+                                currentWorkflow.Status = ApproveWorkflowStatus.Rejected;
                             }
-                            await _aproveWorkflowRepository.UpdateApproveWorkflow(approveWorkflow);
+                            await _aproveWorkflowRepository.UpdateApproveWorkflow(currentWorkflow);
                         }
                     }
                     if (isAuthorized)
@@ -647,8 +678,11 @@ namespace Coms.Application.Services.Contracts
                         var contract = await _contractRepository.GetContract(contractId);
                         if (contract is not null)
                         {
-                            contract.Status = DocumentStatus.Approved;
-                            await _contractRepository.UpdateContract(contract);
+                            if (isSentToPartner)
+                            {
+                                contract.Status = DocumentStatus.Approved;
+                                await _contractRepository.UpdateContract(contract);
+                            }
                             var actionHistory = new ActionHistory
                             {
                                 ActionType = isApproved ? ActionType.Approved : ActionType.Rejected,
@@ -690,7 +724,8 @@ namespace Coms.Application.Services.Contracts
                 {
                     return Error.NotFound("404", "You do not have any accesses");
                 }
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }

@@ -17,7 +17,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id),
                 new System.Linq.Expressions.Expression<Func<Contract, object>>[]
-                    { a => a.Accesses,a=> a.ContractCosts, a=>a.ContractAnnexes, a=> a.ActionHistories});
+                    { a => a.Accesses,a=> a.ContractCosts, a=>a.ContractAnnexes, a=> a.ActionHistories, a => a.Template});
         }
 
         public async Task UpdateContract(Contract contract)

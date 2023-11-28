@@ -26,5 +26,11 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             return await _genericRepository.FirstOrDefaultAsync(wf => wf.AccessId.Equals(accessId), null);
         }
+
+        public async Task<ApproveWorkflow?> GetByAccessIdAndOrder(int accessId, int order)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(wf => wf.AccessId.Equals(accessId) 
+                && wf.Order.Equals(order), null);
+        }
     }
 }

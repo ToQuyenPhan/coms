@@ -23,5 +23,6 @@
         public string PartnerName { get; set;}
         public string Code { get; set; }
         public string Link { get; set; }
+        public string ContractCategory { get; set; }
     }
 }

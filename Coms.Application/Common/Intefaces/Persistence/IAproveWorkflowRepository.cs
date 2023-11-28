@@ -7,5 +7,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task AddUserAccess(ApproveWorkflow approveWorkflow);
         Task UpdateApproveWorkflow(ApproveWorkflow approveWorkflow);
         Task<ApproveWorkflow?> GetByAccessId(int accessId);
+        Task<ApproveWorkflow?> GetByAccessIdAndOrder(int accessId, int order);
     }
 }
