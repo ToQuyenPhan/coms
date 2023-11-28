@@ -27,6 +27,10 @@ namespace Coms.Application.Services.TemplateFiles
         {
             try
             {
+                if(name == null)
+                {
+                    name = "Untitled";
+                }
                 var templateFile = new TemplateFile()
                 {
                     FileName = name,

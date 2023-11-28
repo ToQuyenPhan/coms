@@ -19,7 +19,7 @@ namespace Coms.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add([FromQuery] int templateId, string templateName, [FromForm]FormUploadRequest file)
+        public IActionResult Add([FromQuery] int templateId, string? templateName, [FromForm]FormUploadRequest file)
         {
             var ms = new MemoryStream();
             file.File.CopyTo(ms);

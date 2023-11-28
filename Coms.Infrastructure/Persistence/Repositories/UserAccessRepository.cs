@@ -20,11 +20,11 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return (list.Count() > 0) ? list : null;
         }
 
-        public async Task<User_Access> GetByAccessId(int accessId)
+        public async Task<User_Access?> GetByAccessId(int accessId)
         {
             return await _genericRepository.FirstOrDefaultAsync(ua => ua.AccessId.Equals(accessId),
                 new System.Linq.Expressions.Expression<Func<User_Access, object>>[] {
-                    ua => ua.User });
+                    ua => ua.User, ua => ua.Access });
         }
         public async Task AddUserAccess(User_Access userAccess)
         {

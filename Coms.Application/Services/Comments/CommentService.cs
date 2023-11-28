@@ -10,14 +10,17 @@ namespace Coms.Application.Services.Comments
         private readonly ICommentRepository _commentRepository;
         private readonly IActionHistoryRepository _actionHistoryRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IAccessRepository _accessRepository;
 
         public CommentService(ICommentRepository commentRepository,
             IActionHistoryRepository actionHistoryRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IAccessRepository accessRepository)
         {
             _commentRepository = commentRepository;
             _actionHistoryRepository = actionHistoryRepository;
             _userRepository = userRepository;
+            _accessRepository = accessRepository;
         }
 
         public async Task<ErrorOr<PagingResult<CommentResult>>> GetAllComments(int userId, int currentPage,
@@ -115,8 +118,13 @@ namespace Coms.Application.Services.Comments
             if (_actionHistoryRepository.GetCommentActionByContractId(contractId).Result is not null)
             {
                 var histories = await _actionHistoryRepository.GetCommentActionByContractId(contractId);
-                
                 IList<CommentResult> comments = new List<CommentResult>();
+                var accesses = await _accessRepository.GetAccessByContractId(contractId);
+                IList<User> users = new List<User>();
+                foreach(var access in accesses)
+                {
+
+                }
                 foreach (var commentHistory in histories)
                 {
                     var comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);

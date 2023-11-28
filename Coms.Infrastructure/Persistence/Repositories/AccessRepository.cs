@@ -32,5 +32,13 @@ namespace Coms.Infrastructure.Persistence.Repositories
                 new System.Linq.Expressions.Expression<Func<Access, object>>[]
                     { a => a.Contract});
         }
+
+        public async Task<IList<Access>?> GetAccessByContractId(int contractId)
+        {
+            var list = await _genericRepository.WhereAsync(a => a.ContractId.Equals(contractId),
+                    new System.Linq.Expressions.Expression<Func<Access, object>>[]
+                    { a => a.Contract});
+            return (list.Count() > 0) ? list : null;
+        }
     }
 }
