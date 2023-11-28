@@ -14,5 +14,7 @@ namespace Coms.Application.Services.Templates
         Task<ErrorOr<TemplateResult>> UpdateTemplate(string name, string description, int category,
                 int type, int status, int templateId);
         Task<ErrorOr<TemplateResult>> GetTemplateInformation(int templateId);
+        //add get template by id
+        Task<ErrorOr<TemplateResult>> GetTemplateById(int id);
     }
 }

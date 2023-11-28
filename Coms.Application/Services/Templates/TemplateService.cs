@@ -313,6 +313,45 @@ namespace Coms.Application.Services.Templates
             }
         }
 
+        //add get template by id
+        public async Task<ErrorOr<TemplateResult>> GetTemplateById(int id)
+        {
+            try
+            {
+                if (_templateRepository.GetTemplate(id).Result is not null)
+                {
+                    var template = await _templateRepository.GetTemplate(id);
+                    var templateResult = new TemplateResult
+                    {
+                        Id = template.Id,
+                        TemplateName = template.TemplateName,
+                        Description = template.Description,
+                        CreatedDate = template.CreatedDate,
+                        CreatedDateString = template.CreatedDate.ToString(),
+                        ContractCategoryId = template.ContractCategory.Id,
+                        ContractCategoryName = template.ContractCategory.CategoryName,
+                        TemplateTypeId = template.TemplateType.Id,
+                        TemplateTypeName = template.TemplateType.Name,
+                        TemplateLink = template.TemplateLink,
+                        Status = (int)template.Status,
+                        StatusString = template.Status.ToString(),
+                        UserId = template.User.Id,
+                        UserName = template.User.Username,
+                        Email = template.User.Email
+                    };
+                    return templateResult;
+                }
+                else
+                {
+                    return Error.NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
         private string AsTimeAgo(DateTime dateTime)
         {
             TimeSpan timeSpan = DateTime.Now.Subtract(dateTime);

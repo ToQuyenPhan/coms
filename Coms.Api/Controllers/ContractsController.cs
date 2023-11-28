@@ -59,7 +59,7 @@ namespace Coms.Api.Controllers
             );
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("id")]
         [SwaggerOperation(Summary = "Get contract by id in Coms")]
         [Authorize(Roles = "Staff, Manager")]
         public IActionResult GetContractById([FromQuery] int id)

@@ -112,27 +112,12 @@ namespace Coms.Application.Services.Comments
         public async Task<ErrorOr<PagingResult<CommentResult>>> GetContractComments(int contractId, int currentPage,
                            int pageSize)
         {
-            if (_actionHistoryRepository.GetCreateActionByContractId(contractId).Result is not null)
+            if (_actionHistoryRepository.GetCommentActionByContractId(contractId).Result is not null)
             {
-                var createHistories = await _actionHistoryRepository.GetCreateActionByContractId(contractId);
-                IList<ActionHistory> commentHistories = new List<ActionHistory>();
-                foreach (var history in createHistories)
-                {
-                    var commentHistoryList = await _actionHistoryRepository
-                            .GetCommentActionByContractId(history.ContractId, (int)history.UserId);
-                    if (commentHistoryList is not null)
-                    {
-                        foreach (var commentHistory in commentHistoryList)
-                        {
-                            if (!commentHistories.Contains(commentHistory))
-                            {
-                                commentHistories.Add(commentHistory);
-                            }
-                        }
-                    }
-                }
+                var histories = await _actionHistoryRepository.GetCommentActionByContractId(contractId);
+                
                 IList<CommentResult> comments = new List<CommentResult>();
-                foreach (var commentHistory in commentHistories)
+                foreach (var commentHistory in histories)
                 {
                     var comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);
                     if (comment is not null)
@@ -167,6 +152,8 @@ namespace Coms.Application.Services.Comments
                                        pageSize);
             }
         }
+        
+        
 
         private string AsTimeAgo(DateTime dateTime)
         {

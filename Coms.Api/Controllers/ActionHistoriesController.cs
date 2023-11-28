@@ -45,5 +45,17 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        //add get action history by contract id
+        [HttpGet("contractId")]
+        [SwaggerOperation(Summary = "Get action history by contract id in Coms")]
+        public IActionResult GetActionHistoryByContractId([FromQuery] int contractId)
+        {
+            ErrorOr<IList<ActionHistoryResult>> result = _actionHistoryService.GetActionHistoryByContractId(contractId).Result;
+            return result.Match(
+                               result => Ok(result),
+                                              errors => Problem(errors)
+                                                         );
+        }
     }
 }

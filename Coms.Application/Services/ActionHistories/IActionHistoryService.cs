@@ -15,5 +15,8 @@ namespace Coms.Application.Services.ActionHistories
         Task<ErrorOr<ActionHistoryResult>> AddActionHistory(int userId, int contractId, int actionType);
 
         Task<ErrorOr<PagingResult<ActionHistoryResult>>> GetRecentActivities(int userId, int currentPage, int pageSize);
+
+        //add get action history by contract id
+        Task<ErrorOr<IList<ActionHistoryResult>>> GetActionHistoryByContractId(int contractId);
     }
 }

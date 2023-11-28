@@ -52,5 +52,17 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+        
+        //add get user by id
+        [HttpGet("id")]
+        [SwaggerOperation(Summary = "Get user by id in Coms")]
+        public IActionResult GetUserById([FromQuery] int id)
+        {
+            ErrorOr<UserResult> result = _userService.GetUser(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

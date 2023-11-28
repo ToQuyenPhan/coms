@@ -99,5 +99,17 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        //add get template by id
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get template by id in Coms")]
+        public IActionResult GetTemplateById(int id)
+        {
+            ErrorOr<TemplateResult> result = _templateService.GetTemplateById(id).Result;
+            return result.Match(
+                                              result => Ok(result),
+                                                                                           errors => Problem(errors)
+                                                                                                                                                   );
+        }
     }
 }

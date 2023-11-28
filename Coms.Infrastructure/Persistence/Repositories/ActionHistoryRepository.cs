@@ -50,20 +50,29 @@ namespace Coms.Infrastructure.Persistence.Repositories
                            ah.ActionType.Equals(ActionType.Created), new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User,
                                                   ah => ah.Contract });
             return (list.Count() > 0) ? list : null;
-        }        
-        
+        }
+
         public async Task<ActionHistory> GetActionHistoryById(int id)
         {
             return await _genericRepository.FirstOrDefaultAsync(a => a.Id.Equals(id),
                     new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[]
                     { a => a.Contract, a => a.User});
         }
-        
+
         public async Task AddActionHistory(ActionHistory actionHistory)
         {
             await _genericRepository.CreateAsync(actionHistory);
         }
+
+        //add get comment action by contract id
+        public async Task<IList<ActionHistory>> GetCommentActionByContractId(int contractId)
+        {
+            var list = await _genericRepository.WhereAsync(ah => ah.ContractId.Equals(contractId) &&
+                           ah.ActionType.Equals(ActionType.Commented), new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User,
+                                                  ah => ah.Contract });
+            return (list.Count() > 0) ? list : null;
+        }
     }
-    
-    }
+
+}
 

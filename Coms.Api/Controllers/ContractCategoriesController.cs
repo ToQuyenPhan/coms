@@ -28,5 +28,17 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        //add get contract category by id
+        [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Get contract category by id in Coms")]
+        public IActionResult GetContractCategoryById(int id)
+        {
+            ErrorOr<ContractCategoryResult> result = _contractCategoryService.GetContractCategoryById(id);
+            return result.Match(
+                               result => Ok(result),
+                                              errors => Problem(errors)
+                                                         );
+        }
     }
 }

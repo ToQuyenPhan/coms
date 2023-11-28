@@ -36,5 +36,24 @@ namespace Coms.Application.Services.ContractCategories
                 return new List<ContractCategoryResult>();
             }
         }
+        //add get contract category by id
+        public ErrorOr<ContractCategoryResult> GetContractCategoryById(int id)
+        {
+            if (_contractCategoryRepository.GetActiveContractCategoryById(id).Result is not null)
+            {
+                var result = _contractCategoryRepository.GetActiveContractCategoryById(id).Result;
+                var response = new ContractCategoryResult
+                {
+                    Id = result.Id,
+                    CategoryName = result.CategoryName,
+                    Status = result.Status,
+                };
+                return response;
+            }
+            else
+            {
+                return new ContractCategoryResult();
+            }
+        }
     }
 }
