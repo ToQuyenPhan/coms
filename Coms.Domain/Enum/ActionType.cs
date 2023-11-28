@@ -8,6 +8,7 @@
         Approved,
         Deleted,
         Updated,
-        Created
+        Created,
+        Rejected
     }
 }

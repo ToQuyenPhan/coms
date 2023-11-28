@@ -615,7 +615,8 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
-        public async Task<ErrorOr<ContractResult>> ApproveContract(int contractId, int userId)
+        public async Task<ErrorOr<ContractResult>> ApproveContract(int contractId, int userId, 
+                bool isApproved)
         {
             try
             {
@@ -630,7 +631,14 @@ namespace Coms.Application.Services.Contracts
                         {
                             isAuthorized = true;
                             var approveWorkflow = await _aproveWorkflowRepository.GetByAccessId(access.Id);
-                            approveWorkflow.Status = ApproveWorkflowStatus.Approved;
+                            if (isApproved)
+                            {
+                                approveWorkflow.Status = ApproveWorkflowStatus.Approved;
+                            }
+                            else
+                            {
+                                approveWorkflow.Status = ApproveWorkflowStatus.Rejected;
+                            }
                             await _aproveWorkflowRepository.UpdateApproveWorkflow(approveWorkflow);
                         }
                     }
@@ -643,7 +651,7 @@ namespace Coms.Application.Services.Contracts
                             await _contractRepository.UpdateContract(contract);
                             var actionHistory = new ActionHistory
                             {
-                                ActionType = ActionType.Approved,
+                                ActionType = isApproved ? ActionType.Approved : ActionType.Rejected,
                                 CreatedAt = DateTime.Now,
                                 UserId = userId,
                                 ContractId = contractId,

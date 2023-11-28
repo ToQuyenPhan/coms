@@ -114,14 +114,14 @@ namespace Coms.Api.Controllers
             );
         }
 
-        [HttpPut("approve")]
+        [HttpPut("approveOrReject")]
         [SwaggerOperation(Summary = "Approve a contract by manager in Coms")]
         [Authorize(Roles = "Manager")]
-        public IActionResult ApproveContract([FromQuery] int id)
+        public IActionResult ApproveContract([FromQuery] int id, bool isApproved)
         {
             ErrorOr<ContractResult> result = _contractService
                     .ApproveContract(id, int.Parse(this.User.Claims.First(i => 
-                    i.Type == ClaimTypes.NameIdentifier).Value)).Result;
+                    i.Type == ClaimTypes.NameIdentifier).Value), isApproved).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
