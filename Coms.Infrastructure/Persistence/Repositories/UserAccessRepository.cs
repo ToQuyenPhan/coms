@@ -1,7 +1,5 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Domain.Entities;
-using Coms.Domain.Enum;
-using System.Diagnostics.Contracts;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
@@ -14,7 +12,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        public async Task<IList<User_Access>> GetYourAccesses(int userId)
+        public async Task<IList<User_Access>?> GetYourAccesses(int userId)
         {
             var list = await _genericRepository.WhereAsync(ua => ua.UserId.Equals(userId), 
                 new System.Linq.Expressions.Expression<Func<User_Access, object>>[] { 

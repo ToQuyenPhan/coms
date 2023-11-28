@@ -119,7 +119,9 @@ namespace Coms.Api.Controllers
         [Authorize(Roles = "Manager")]
         public IActionResult ApproveContract([FromQuery] int id)
         {
-            ErrorOr<ContractResult> result = _contractService.ApproveContract(id).Result;
+            ErrorOr<ContractResult> result = _contractService
+                    .ApproveContract(id, int.Parse(this.User.Claims.First(i => 
+                    i.Type == ClaimTypes.NameIdentifier).Value)).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
