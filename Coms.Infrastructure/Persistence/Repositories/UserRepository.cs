@@ -26,7 +26,8 @@ namespace Coms.Infrastructure.Persistence.Repositories
 
         public async Task<IList<User>> GetUsers()
         {
-            var list = await _genericRepository.WhereAsync(a=>a.Status == (int)UserStatus.Active,
+            var list = await _genericRepository.WhereAsync(a=>a.Status == (int)UserStatus.Active
+            && a.RoleId != 4,
                new System.Linq.Expressions.Expression<Func<User, object>>[] {
                     a => a.UserAccesses,a=> a.Templates,a=>a.ActionHistories, a=> a.Role});
             return (list.Count() > 0) ? list : null;
