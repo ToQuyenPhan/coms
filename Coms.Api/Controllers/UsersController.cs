@@ -41,6 +41,19 @@ namespace Coms.Api.Controllers
             );
         }
 
+        [HttpGet("getStaffs")]
+        [SwaggerOperation(Summary = "Get all Staff in Coms")]
+        [Authorize(Roles = "Staff")]
+        public IActionResult GetStaffs()
+        {
+            ErrorOr<IList<UserResult>> result = _userService.GetStaffs(int.Parse(this.User.Claims.First(i =>
+                i.Type == ClaimTypes.NameIdentifier).Value)).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
         [HttpGet("current-user")]
         [SwaggerOperation(Summary = "Get current user in Coms")]
         public IActionResult GetCurrentUser()

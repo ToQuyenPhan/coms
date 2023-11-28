@@ -25,6 +25,10 @@ namespace Coms.Application.Services.ContractFiles
         {
             try
             {
+                if (name == null)
+                {
+                    name = "Untitled";
+                }
                 var contractFile = new ContractFile()
                 {
                     FileName = name,
