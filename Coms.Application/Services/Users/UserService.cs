@@ -88,6 +88,43 @@ namespace Coms.Application.Services.Users
             }
         }
 
+        public async Task<ErrorOr<IList<UserResult>>> GetStaffs(int userId)
+        {
+            try
+            {
+                IList<User> users = new List<User>();
+                users = _userRepository.GetStaffs().Result;
+                var results = new List<UserResult>();
+                if (users != null)
+                {
+                    foreach (var user in users)
+                    {
+                        if(user.Id != userId) {
+                            var result = new UserResult()
+                            {
+                                Id = user.Id,
+                                FullName = user.FullName,
+                                Username = user.Username,
+                                Dob = user.Dob,
+                                Email = user.Email,
+                                Image = user.Image,
+                                Password = user.Password,
+                                Status = user.Status,
+                                RoleId = user.RoleId,
+                                Role = user.Role.RoleName
+                            };
+                            results.Add(result);
+                        }                     
+                    }
+                }
+                return results;
+            }
+            catch (Exception ex)
+            {
+                return Error.NotFound("Users not found!");
+            }
+        }
+
         public async Task<ErrorOr<UserResult>> GetUser(int id)
         {
             try

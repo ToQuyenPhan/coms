@@ -374,8 +374,8 @@ namespace Coms.Application.Services.Contracts
                 return Error.Failure("500", ex.Message);
             }
         }
-        public async Task<ErrorOr<ContractResult>> AddContract(string contractName, string code, int partnerId, int authorId, int templateId, DateTime effectiveDate,
-                int[] contractCosts)
+        public async Task<ErrorOr<ContractResult>> AddContract(string contractName, string code, int partnerId, int authorId,int signerId, int templateId, DateTime effectiveDate,
+                int[] contractCosts,int status)
         {
             try
             {
@@ -389,7 +389,7 @@ namespace Coms.Application.Services.Contracts
                     UpdatedDate = DateTime.Now,
                     EffectiveDate = effectiveDate,
                     Version = 1,
-                    Status = DocumentStatus.Draft
+                    Status = (DocumentStatus)status
 
                 };
                 await _contractRepository.AddContract(contract);
@@ -410,7 +410,7 @@ namespace Coms.Application.Services.Contracts
                 {
                     ContractId = contract.Id,
                     PartnerId = partnerId,
-                    UserId = authorId,
+                    UserId = signerId,
                     IsApproved = false,
                     SendDate = DateTime.Now,
                     ReviewAt = DateTime.Now,

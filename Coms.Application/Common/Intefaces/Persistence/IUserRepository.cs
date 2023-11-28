@@ -8,5 +8,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<User?> GetUser(int id);
         Task<IList<User>> GetUsers();
         Task<IList<User>> GetManagers();
+        Task<IList<User>> GetStaffs();
     }
 }

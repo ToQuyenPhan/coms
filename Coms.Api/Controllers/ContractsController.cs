@@ -74,11 +74,11 @@ namespace Coms.Api.Controllers
         [HttpPost("add")]
         [SwaggerOperation(Summary = "Add a contract in Coms")]
         [Authorize(Roles = "Staff, Manager")]
-        public IActionResult Add(ContractFormRequest request)
+        public IActionResult Add([FromBody]ContractFormRequest request)
         {
             ErrorOr<ContractResult> result =
                 _contractService.AddContract(request.ContractName,request.Code,request.PartnerId, int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value)
-                , request.TemplateId, request.EffectiveDate, request.Services).Result;
+                ,request.SignerId, request.TemplateId, request.EffectiveDate, request.Services,request.Status).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

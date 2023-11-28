@@ -9,23 +9,19 @@ namespace Coms.Contracts.Contracts
 {
     public class ContractFormRequest
     {
-        [Required(ErrorMessage = "ContractName is not null")]
         public string ContractName { get; set; }
 
-        [Required(ErrorMessage = "Code is required")]
         public string Code { get; set; }
 
-        [Required(ErrorMessage = "EffectiveDate is not null")]
         [DataType(DataType.Date)]
         public DateTime EffectiveDate { get; set; }
 
-        [Required(ErrorMessage = "TemplateId is not null")]
         public int TemplateId { get; set; }
 
-        [Required(ErrorMessage = "PartnerId is not null")]
         public int PartnerId { get; set; }
-        [Required(ErrorMessage = "ServiceId is not null")]
         public int[] Services { get; set; }
+        public int SignerId { get; set; }
+        public int Status { get; set; }
 
     }
 }

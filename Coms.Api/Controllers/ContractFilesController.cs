@@ -21,7 +21,7 @@ namespace Coms.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add([FromQuery] int contractId, string contractName, [FromForm] FormUploadRequest file)
+        public IActionResult Add([FromQuery] int contractId, string? contractName, [FromForm] FormUploadRequest file)
         {
             var ms = new MemoryStream();
             file.File.CopyTo(ms);
