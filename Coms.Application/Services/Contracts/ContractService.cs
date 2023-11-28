@@ -413,6 +413,14 @@ namespace Coms.Application.Services.Contracts
                     Status = PartnerReviewStatus.Active
                 };
                 await _partnerReviewRepository.AddPartnerReview(partnerReview);
+                var actionHistory = new ActionHistory
+                {
+                    ActionType = ActionType.Created,
+                    UserId = authorId,
+                    CreatedAt = DateTime.Now,
+                    ContractId = contract.Id,
+                };
+                await _actionHistoryRepository.AddActionHistory(actionHistory);
                 await _contractCostRepository.AddContractCostsToContract(contractCosts, contract.Id);
                 var partner = _partnerRepository.GetPartner(partnerId).Result;
                 var template = _templateRepository.GetTemplate(templateId).Result;
