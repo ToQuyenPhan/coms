@@ -4,27 +4,18 @@ using Coms.Domain.Enum;
 
 namespace Coms.Domain.Entities
 {
-    public class Service
+    public class Flow
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(50)]
-        public string ServiceName { get; set; }
-
-        [Required]
-        public string Description { get; set; }
-
-        [Required]
-        public double Price { get; set; }
-
-        [Required]
-        public ServiceStatus Status { get; set; }
+        public CommonStatus Status { get; set; }
 
         public int? ContractCategoryId { get; set; }
         public virtual ContractCategory? ContractCategory { get; set; }
-        public virtual ICollection<ContractCost>? ContractCosts { get; set; }
+
+        public virtual ICollection<FlowDetail>? FlowDetails { get; set;}
     }
 }

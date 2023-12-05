@@ -35,21 +35,22 @@ namespace Coms.Application.Services.Accesses
         {
             try
             {
-                var access = new Access
-                {
-                    ContractId = contractId,
-                    AccessRole = (AccessRole)accessRole
-                };
-                await _accessRepository.AddAccess(access);
-                var contract = _contractRepository.GetContract(contractId).Result;
-                var accessResult = new AccessResult
-                {
-                    Id = access.Id,
-                    ContractId = access.ContractId,
-                    AccessRole = access.AccessRole.ToString(),
-                    ContractName = contract.ContractName
-                };
-                return accessResult;
+                //var access = new Access
+                //{
+                //    ContractId = contractId,
+                //    AccessRole = (AccessRole)accessRole
+                //};
+                //await _accessRepository.AddAccess(access);
+                //var contract = _contractRepository.GetContract(contractId).Result;
+                //var accessResult = new AccessResult
+                //{
+                //    Id = access.Id,
+                //    ContractId = access.ContractId,
+                //    AccessRole = access.AccessRole.ToString(),
+                //    ContractName = contract.ContractName
+                //};
+                //return accessResult;
+                return Error.NotFound();
 
             }
             catch (Exception ex)
@@ -67,27 +68,27 @@ namespace Coms.Application.Services.Accesses
                 {
                     for (int i = 0; i < users.Length; i++)
                     {
-                        var access = new Access
-                        {
-                            ContractId = contractId,
-                            AccessRole = AccessRole.Viewer
-                        };
-                        await _accessRepository.AddAccess(access);
-                        var userAccess = new User_Access
-                        {
-                            AccessId = access.Id,
-                            UserId = users[i]
-                        };
-                        await _userAccessRepository.AddUserAccess(userAccess);
-                        var contract = _contractRepository.GetContract(contractId).Result;
-                        var result = new AccessResult
-                        {
-                            Id = access.Id,
-                            ContractId = access.ContractId,
-                            ContractName = contract.ContractName,
-                            AccessRole = access.AccessRole.ToString()
-                        };
-                        results.Add(result);
+                        //var access = new Access
+                        //{
+                        //    ContractId = contractId,
+                        //    AccessRole = AccessRole.Viewer
+                        //};
+                        //await _accessRepository.AddAccess(access);
+                        //var userAccess = new User_Access
+                        //{
+                        //    AccessId = access.Id,
+                        //    UserId = users[i]
+                        //};
+                        //await _userAccessRepository.AddUserAccess(userAccess);
+                        //var contract = _contractRepository.GetContract(contractId).Result;
+                        //var result = new AccessResult
+                        //{
+                        //    Id = access.Id,
+                        //    ContractId = access.ContractId,
+                        //    ContractName = contract.ContractName,
+                        //    AccessRole = access.AccessRole.ToString()
+                        //};
+                        //results.Add(result);
                     }
                 }
                 return results;
@@ -107,34 +108,34 @@ namespace Coms.Application.Services.Accesses
                 {
                     for (int i = 0; i < users.Length; i++)
                     {
-                        var access = new Access
-                        {
-                            ContractId = contractId,
-                            AccessRole = AccessRole.Approver
-                        };
-                        await _accessRepository.AddAccess(access);
-                        var userAccess = new User_Access
-                        {
-                            AccessId = access.Id,
-                            UserId = users[i]
-                        };
-                        await _userAccessRepository.AddUserAccess(userAccess);
-                        var approveWF = new ApproveWorkflow
-                        {
-                            AccessId=access.Id,
-                            Order = i+1,
-                            Status = ApproveWorkflowStatus.Waiting
-                        };
-                        await _aproveWorkflowRepository.AddUserAccess(approveWF);
-                        var contract = _contractRepository.GetContract(contractId).Result;
-                        var result = new AccessResult
-                        {
-                            Id = access.Id,
-                            ContractId = access.ContractId,
-                            ContractName = contract.ContractName,
-                            AccessRole = access.AccessRole.ToString()
-                        };
-                        results.Add(result);
+                        //var access = new Access
+                        //{
+                        //    ContractId = contractId,
+                        //    AccessRole = AccessRole.Approver
+                        //};
+                        //await _accessRepository.AddAccess(access);
+                        //var userAccess = new User_Access
+                        //{
+                        //    AccessId = access.Id,
+                        //    UserId = users[i]
+                        //};
+                        //await _userAccessRepository.AddUserAccess(userAccess);
+                        //var approveWF = new ApproveWorkflow
+                        //{
+                        //    AccessId=access.Id,
+                        //    Order = i+1,
+                        //    Status = ApproveWorkflowStatus.Waiting
+                        //};
+                        //await _aproveWorkflowRepository.AddUserAccess(approveWF);
+                        //var contract = _contractRepository.GetContract(contractId).Result;
+                        //var result = new AccessResult
+                        //{
+                        //    Id = access.Id,
+                        //    ContractId = access.ContractId,
+                        //    ContractName = contract.ContractName,
+                        //    AccessRole = access.AccessRole.ToString()
+                        //};
+                        //results.Add(result);
                     }
                 }
                     return results;

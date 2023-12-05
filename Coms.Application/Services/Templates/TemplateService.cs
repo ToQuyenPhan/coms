@@ -150,13 +150,13 @@ namespace Coms.Application.Services.Templates
             }
         }
 
-        public async Task<ErrorOr<TemplateSfdtResult>> GetTemplate(int templateId)
+        public async Task<ErrorOr<TemplateSfdtResult>> GetTemplate(int id)
         {
             try
             {
                 var templateFile = await _templateFileRepository
-                    .GetTemplateFileByTemplateId(templateId);
-                if(templateFile is not null)
+                    .GetTemplateFileByTemplateId(id);
+                if (templateFile is not null)
                 {
                     string filePath =
                         Path.Combine(Environment.CurrentDirectory, "Data",
@@ -181,6 +181,7 @@ namespace Coms.Application.Services.Templates
                 {
                     return Error.NotFound("404", "Template file is not found!");
                 }
+                return Error.NotFound();
             }
             catch (Exception ex)
             {
@@ -245,11 +246,11 @@ namespace Coms.Application.Services.Templates
             }
         }
 
-        public async Task<ErrorOr<TemplateResult>> GetTemplateInformation(int templateId)
+        public async Task<ErrorOr<TemplateResult>> GetTemplateInformation(int id)
         {
             try
             {
-                var template = await _templateRepository.GetTemplate(templateId);
+                var template = await _templateRepository.GetTemplate(id);
                 if(template is not null)
                 {
                     var templateResult = new TemplateResult
@@ -288,6 +289,44 @@ namespace Coms.Application.Services.Templates
             }
         }
 
+        //public async Task<ErrorOr<TemplateResult>> GetTemplateById(int id)
+        //{
+        //    try
+        //    {
+        //        if (_templateRepository.GetTemplate(id).Result is not null)
+        //        {
+        //            var template = await _templateRepository.GetTemplate(id);
+        //            var templateResult = new TemplateResult
+        //            {
+        //                Id = template.Id,
+        //                TemplateName = template.TemplateName,
+        //                Description = template.Description,
+        //                CreatedDate = template.CreatedDate,
+        //                CreatedDateString = template.CreatedDate.ToString(),
+        //                ContractCategoryId = template.ContractCategory.Id,
+        //                ContractCategoryName = template.ContractCategory.CategoryName,
+        //                TemplateTypeId = template.TemplateType.Id,
+        //                TemplateTypeName = template.TemplateType.Name,
+        //                TemplateLink = template.TemplateLink,
+        //                Status = (int)template.Status,
+        //                StatusString = template.Status.ToString(),
+        //                UserId = template.User.Id,
+        //                UserName = template.User.Username,
+        //                Email = template.User.Email
+        //            };
+        //            return templateResult;
+        //        }
+        //        else
+        //        {
+        //            return Error.NotFound();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Error.Failure("500", ex.Message);
+        //    }
+        //}
+
         private FormatType GetFormatType(string format)
         {
             if (string.IsNullOrEmpty(format))
@@ -310,45 +349,6 @@ namespace Coms.Application.Services.Templates
                     return FormatType.WordML;
                 default:
                     throw new NotSupportedException("This file format is not supported!");
-            }
-        }
-
-        //add get template by id
-        public async Task<ErrorOr<TemplateResult>> GetTemplateById(int id)
-        {
-            try
-            {
-                if (_templateRepository.GetTemplate(id).Result is not null)
-                {
-                    var template = await _templateRepository.GetTemplate(id);
-                    var templateResult = new TemplateResult
-                    {
-                        Id = template.Id,
-                        TemplateName = template.TemplateName,
-                        Description = template.Description,
-                        CreatedDate = template.CreatedDate,
-                        CreatedDateString = template.CreatedDate.ToString(),
-                        ContractCategoryId = template.ContractCategory.Id,
-                        ContractCategoryName = template.ContractCategory.CategoryName,
-                        TemplateTypeId = template.TemplateType.Id,
-                        TemplateTypeName = template.TemplateType.Name,
-                        TemplateLink = template.TemplateLink,
-                        Status = (int)template.Status,
-                        StatusString = template.Status.ToString(),
-                        UserId = template.User.Id,
-                        UserName = template.User.Username,
-                        Email = template.User.Email
-                    };
-                    return templateResult;
-                }
-                else
-                {
-                    return Error.NotFound();
-                }
-            }
-            catch (Exception ex)
-            {
-                return Error.Failure("500", ex.Message);
             }
         }
 

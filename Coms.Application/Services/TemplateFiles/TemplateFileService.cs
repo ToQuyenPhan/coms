@@ -6,7 +6,10 @@ using Microsoft.Office.Interop.Word;
 using Syncfusion.DocIORenderer;
 using Syncfusion.EJ2.DocumentEditor;
 using Syncfusion.Pdf;
+using System.Collections;
 using System.Xml.Linq;
+using Spire.Doc.Reporting;
+using Spire.Doc;
 
 namespace Coms.Application.Services.TemplateFiles
 {
@@ -15,6 +18,11 @@ namespace Coms.Application.Services.TemplateFiles
         private readonly ITemplateFileRepository _templateFileRepository;
         private readonly ITemplateRepository _templateRepository;
         private string Bucket = "coms-64e4a.appspot.com";
+        private string[] ValidFieldNames = { "Contract Title", "Contract Code", "Created Date",
+            "Contract Duration", "Execution Time", "Company Name", "Company Address",
+            "Company Tax Code", "Company Email", "Company Code", "Signer Name", "Signer Position",
+            "Partner Name", "Partner Address", "Partner Tax Code", "Partner Email", "Partner Code",
+            "Partner Signer Name", "Partner Signer Position"};
 
         public TemplateFileService(ITemplateFileRepository templateFileRepository, ITemplateRepository templateRepository)
         {
@@ -27,7 +35,7 @@ namespace Coms.Application.Services.TemplateFiles
         {
             try
             {
-                if(name == null)
+                if (name == null)
                 {
                     name = "Untitled";
                 }
@@ -41,8 +49,39 @@ namespace Coms.Application.Services.TemplateFiles
                     UploadedDate = DateTime.UtcNow,
                     TemplateId = templateId
                 };
+
+                //Write docx to computer
+                MemoryStream stream = new MemoryStream();
+                stream.Write(document, 0, (int)document.Length);
+                string filePath =
+                     Path.Combine(Environment.CurrentDirectory, "Data",
+                        templateId + ".docx");
+                File.WriteAllBytes(filePath, stream.ToArray());
+
+                //Open docx file
+                //Microsoft.Office.Interop.Word.Application application = new Microsoft.Office.Interop.Word.Application();
+                //Document checkingDocument = application.Documents.Open(filePath);
+                //foreach(var field in checkingDocument.MailMerge.Mail)
+                //{
+                //    Console.WriteLine(field.Ma)
+                //}
+                Spire.Doc.Document checkingDocument = new Spire.Doc.Document();
+                checkingDocument.LoadFromFile(filePath);
+                bool isValid = true;
+                string[] mailMergeFieldNames = checkingDocument.MailMerge.GetMergeFieldNames();
+                for (int i = 0; i < mailMergeFieldNames.Length; i++)
+                {
+                    if (!IsValidFieldName(mailMergeFieldNames[i]))
+                    {
+                        return Error.Validation("400", mailMergeFieldNames[i] + " field name is" +
+                            "   not valid!");
+                    }
+                }
                 await _templateFileRepository.Add(templateFile);
-                return new TemplateFileResult() { Result = "OK" };
+                return new TemplateFileResult()
+                {
+                    Result = "OK"
+                };
             }
             catch (Exception ex)
             {
@@ -79,13 +118,13 @@ namespace Coms.Application.Services.TemplateFiles
                     .Child(fileName)
                     .PutAsync(stream);
                 var template = await _templateRepository.GetTemplate(id);
-                string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/files%2F" + id 
+                string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/files%2F" + id
                     + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
                 template.TemplateLink = link;
                 await _templateRepository.UpdateTemplate(template);
                 return new TemplateFileResult() { Result = "OK" };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }
@@ -97,7 +136,7 @@ namespace Coms.Application.Services.TemplateFiles
             try
             {
                 var templateFile = await _templateFileRepository.GetTemplateFileByTemplateId(templateId);
-                if(templateFile is not null)
+                if (templateFile is not null)
                 {
                     templateFile.FileName = templateName;
                     templateFile.FileData = document;
@@ -109,7 +148,7 @@ namespace Coms.Application.Services.TemplateFiles
                 {
                     return Error.NotFound("404", "Template is not exist");
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -140,6 +179,20 @@ namespace Coms.Application.Services.TemplateFiles
                 default:
                     throw new NotSupportedException("This file format is not supported!");
             }
+        }
+
+        private bool IsValidFieldName(string name)
+        {
+            var check = false;
+            foreach (var fieldName in ValidFieldNames)
+            {
+                if (fieldName.Equals(name))
+                {
+                    check = true;
+                    break;
+                }
+            }
+            return check;
         }
     }
 }

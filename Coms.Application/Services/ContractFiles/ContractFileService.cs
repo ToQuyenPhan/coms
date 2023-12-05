@@ -76,11 +76,11 @@ namespace Coms.Application.Services.ContractFiles
                     .Child("files")
                     .Child(fileName)
                     .PutAsync(stream);
-                var contract = await _contractRepository.GetContract(id);
+                //var contract = await _contractRepository.GetContract(id);
                 string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/files%2F" + id
                     + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
-                contract.Link = link;
-                await _contractRepository.UpdateContract(contract);
+                //contract.Link = link;
+                //await _contractRepository.UpdateContract(contract);
                 return new ContractFileResult() { Result = "OK" };
             }
             catch (Exception ex)

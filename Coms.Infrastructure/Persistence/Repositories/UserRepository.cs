@@ -24,31 +24,31 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
         }
 
-        public async Task<IList<User>> GetUsers()
-        {
-            var list = await _genericRepository.WhereAsync(a=>a.Status == (int)UserStatus.Active
-            && a.RoleId != 4,
-               new System.Linq.Expressions.Expression<Func<User, object>>[] {
-                    a => a.UserAccesses,a=> a.Templates,a=>a.ActionHistories, a=> a.Role});
-            return (list.Count() > 0) ? list : null;
-        }
+        //public async Task<IList<User>> GetUsers()
+        //{
+        //    var list = await _genericRepository.WhereAsync(a=>a.Status == (int)UserStatus.Active
+        //    && a.RoleId != 4,
+        //       new System.Linq.Expressions.Expression<Func<User, object>>[] {
+        //            a => a.UserAccesses,a=> a.Templates,a=>a.ActionHistories, a=> a.Role});
+        //    return (list.Count() > 0) ? list : null;
+        //}
 
-        public async Task<IList<User>> GetManagers()
-        {
-            var list = await _genericRepository.WhereAsync(a => a.RoleId == 2
-                && a.Status == (int)UserStatus.Active,
-               new System.Linq.Expressions.Expression<Func<User, object>>[] {
-                    a => a.UserAccesses,a=> a.Templates,a=>a.ActionHistories, a=> a.Role});
-            return (list.Count() > 0) ? list : null;
-        }
+        //public async Task<IList<User>> GetManagers()
+        //{
+        //    var list = await _genericRepository.WhereAsync(a => a.RoleId == 2
+        //        && a.Status == (int)UserStatus.Active,
+        //       new System.Linq.Expressions.Expression<Func<User, object>>[] {
+        //            a => a.UserAccesses,a=> a.Templates,a=>a.ActionHistories, a=> a.Role});
+        //    return (list.Count() > 0) ? list : null;
+        //}
 
-        public async Task<IList<User>> GetStaffs()
-        {
-            var list = await _genericRepository.WhereAsync(a => a.RoleId == 1
-                && a.Status == (int)UserStatus.Active,
-               new System.Linq.Expressions.Expression<Func<User, object>>[] {
-                    a => a.UserAccesses,a=> a.Templates,a=>a.ActionHistories, a=> a.Role});
-            return (list.Count() > 0) ? list : null;
-        }
+        //public async Task<IList<User>> GetStaffs()
+        //{
+        //    var list = await _genericRepository.WhereAsync(a => a.RoleId == 1
+        //        && a.Status == (int)UserStatus.Active,
+        //       new System.Linq.Expressions.Expression<Func<User, object>>[] {
+        //            a => a.UserAccesses,a=> a.Templates,a=>a.ActionHistories, a=> a.Role});
+        //    return (list.Count() > 0) ? list : null;
+        //}
     }
 }

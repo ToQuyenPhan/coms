@@ -23,7 +23,7 @@ namespace Coms.Application.Services.Users
             try
             {
                 IList<User> users = new List<User>();
-                users = _userRepository.GetUsers().Result;
+                //users = _userRepository.GetUsers().Result;
                 var results = new List<UserResult>();
                 if (users != null)
                 {
@@ -58,7 +58,7 @@ namespace Coms.Application.Services.Users
             try
             {
                 IList<User> users = new List<User>();
-                users = _userRepository.GetManagers().Result;
+                //users = _userRepository.GetManagers().Result;
                 var results = new List<UserResult>();
                 if (users != null)
                 {
@@ -93,7 +93,7 @@ namespace Coms.Application.Services.Users
             try
             {
                 IList<User> users = new List<User>();
-                users = _userRepository.GetStaffs().Result;
+                //users = _userRepository.GetStaffs().Result;
                 var results = new List<UserResult>();
                 if (users != null)
                 {

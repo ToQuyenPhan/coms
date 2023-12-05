@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace Coms.Contracts.Common.Paging
+﻿namespace Coms.Contracts.Common.Paging
 {
     public class PagingRequest
     {

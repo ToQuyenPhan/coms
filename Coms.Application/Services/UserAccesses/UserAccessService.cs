@@ -26,26 +26,27 @@ namespace Coms.Application.Services.UserAccesses
         {
             try
             {
-                var access = new Access
-                {
-                    ContractId = contractId,
-                    AccessRole = (AccessRole)accessRole
-                };
-                await _accessRepository.AddAccess(access);
-                var userAccess = new User_Access
-                {
-                    UserId = userId,
-                    AccessId = access.Id,
-                };
-                await _userAccessRepository.AddUserAccess(userAccess);
-                var result = new UserAccessResult
-                {
-                    UserId= userAccess.UserId,
-                    //UserName = userAccess.User.FullName,
-                    AccessId = userAccess.AccessId,
-                    //AccessRole = userAccess.Access.AccessRole.ToString()
-                };
-                return result;
+                //var access = new Access
+                //{
+                //    ContractId = contractId,
+                //    AccessRole = (AccessRole)accessRole
+                //};
+                //await _accessRepository.AddAccess(access);
+                //var userAccess = new User_Access
+                //{
+                //    UserId = userId,
+                //    AccessId = access.Id,
+                //};
+                //await _userAccessRepository.AddUserAccess(userAccess);
+                //var result = new UserAccessResult
+                //{
+                //    UserId= userAccess.UserId,
+                //    UserName = userAccess.User.FullName,
+                //    AccessId = userAccess.AccessId,
+                //    AccessRole = userAccess.Access.AccessRole.ToString()
+                //};
+                //return result;
+                return Error.NotFound();
             }
             catch (Exception ex)
             {

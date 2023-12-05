@@ -28,7 +28,7 @@ namespace Coms.Application.Services.PartnerReviews
             try
             {
                 var user = _userRepository.GetUser(userId).Result;
-                var contract =  _contractRepository.GetContract(contractId).Result;
+                //var contract =  _contractRepository.GetContract(contractId).Result;
                 var partner =  _partnerRepository.GetPartner(partnerId).Result;
                 var partnerReview = new PartnerReview
                 {
@@ -63,11 +63,11 @@ namespace Coms.Application.Services.PartnerReviews
             }
         }
 
-        public async Task<ErrorOr<PartnerReviewResult>> ApprovePartnerReview(int id)
+        public async Task<ErrorOr<PartnerReviewResult>> ApprovePartnerReview(int contractId)
         {
             try
             {
-                var partnerPreview = await _partnerReviewRepository.GetPartnerReview(id);
+                var partnerPreview = await _partnerReviewRepository.GetByContractId(contractId);
                 if(partnerPreview is not null)
                 {
                     partnerPreview.IsApproved = true;

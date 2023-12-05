@@ -61,7 +61,6 @@ namespace Coms.Api.Controllers
 
         [HttpGet("id")]
         [SwaggerOperation(Summary = "Get contract by id in Coms")]
-        [Authorize(Roles = "Staff, Manager")]
         public IActionResult GetContractById([FromQuery] int id)
         {
             ErrorOr<ContractResult> result = _contractService.GetContract(id).Result;

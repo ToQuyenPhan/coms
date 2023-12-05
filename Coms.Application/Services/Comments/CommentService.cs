@@ -122,39 +122,39 @@ namespace Coms.Application.Services.Comments
             {
                 var histories = await _actionHistoryRepository.GetCommentActionByContractId(contractId);
                 IList<CommentResult> comments = new List<CommentResult>();
-                var accesses = await _accessRepository.GetAccessByContractId(contractId);
+                //var accesses = await _accessRepository.GetAccessByContractId(contractId);
                 IList<User_Access> userAccesses = new List<User_Access>();
-                foreach(var access in accesses)
-                {
-                    var userAccess = await _userAccessRepository.GetByAccessId(access.Id);
-                    if(userAccess is not null)
-                    {
-                        userAccesses.Add(userAccess);
-                    }
-                }
+                //foreach(var access in accesses)
+                //{
+                    //var userAccess = await _userAccessRepository.GetByAccessId(access.Id);
+                    //if(userAccess is not null)
+                    //{
+                    //    userAccesses.Add(userAccess);
+                    //}
+                //}
                 foreach (var commentHistory in histories)
                 {
                     var comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);
-                    var userRole = userAccesses.Where(ua => ua.UserId.Equals(commentHistory.UserId)).FirstOrDefault();
-                    string accessRole = userRole.Access.AccessRole.ToString();
+                    //var userRole = userAccesses.Where(ua => ua.UserId.Equals(commentHistory.UserId)).FirstOrDefault();
+                    //string accessRole = userRole.Access.AccessRole.ToString();
                     if (comment is not null)
                     {
-                        var commentResult = new CommentResult()
-                        {
-                            Id = comment.Id,
-                            Content = comment.Content,
-                            ActionHistoryId = comment.ActionHistoryId,
-                            ReplyId = comment.ReplyId,
-                            Status = (int)comment.Status,
-                            StatusString = comment.Status.ToString(),
-                            AccessRole = accessRole,
-                        };
-                        commentResult.Long = AsTimeAgo(comment.ActionHistory.CreatedAt);
-                        commentResult.CreatedAt = comment.ActionHistory.CreatedAt.ToString();
-                        var user = await _userRepository.GetUser((int)comment.ActionHistory.UserId);
-                        commentResult.UserId = user.Id;
-                        commentResult.FullName = user.FullName;
-                        comments.Add(commentResult);
+                        //var commentResult = new CommentResult()
+                        //{
+                        //    Id = comment.Id,
+                        //    Content = comment.Content,
+                        //    ActionHistoryId = comment.ActionHistoryId,
+                        //    ReplyId = comment.ReplyId,
+                        //    Status = (int)comment.Status,
+                        //    StatusString = comment.Status.ToString(),
+                        //    AccessRole = accessRole,
+                        //};
+                        //commentResult.Long = AsTimeAgo(comment.ActionHistory.CreatedAt);
+                        //commentResult.CreatedAt = comment.ActionHistory.CreatedAt.ToString();
+                        //var user = await _userRepository.GetUser((int)comment.ActionHistory.UserId);
+                        //commentResult.UserId = user.Id;
+                        //commentResult.FullName = user.FullName;
+                        //comments.Add(commentResult);
                     }
                 }
                 int total = comments.Count();

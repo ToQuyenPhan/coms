@@ -13,9 +13,9 @@ namespace Coms.Domain.Entities
         [Required]
         public AccessRole AccessRole { get; set; }
 
-        public int? ContractId { get; set; }
-        public virtual Contract? Contract { get; set; }
-        public virtual ICollection<User_Access>? User_Accesses { get; set; }
+        //public int? ContractId { get; set; }
+        //public virtual Contract? Contract { get; set; }
+        //public virtual ICollection<User_Access>? User_Accesses { get; set; }
         public virtual ICollection<ApproveWorkflow>? ApproveWorkflows { get; set; }
     }
 }

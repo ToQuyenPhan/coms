@@ -17,5 +17,6 @@ namespace Coms.Domain.Entities
         [Required]
         public ContractCategoryStatus Status { get; set; }
         public virtual ICollection<Template>? Templates { get; set; }
+        public virtual ICollection<Service>? Services { get; set; }
     }
 }

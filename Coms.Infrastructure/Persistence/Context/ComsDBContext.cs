@@ -32,7 +32,7 @@ namespace Coms.Infrastructure.Persistence.Context
         public DbSet<ContractCost> ContractCosts { get; set; }
         public DbSet<ContractAnnexCost> ContractAnnexCosts { get; set; }
         public DbSet<Access> Accesses { get; set; }
-        public DbSet<User_Access> UserAccesses { get; set; }
+        //public DbSet<User_Access> UserAccesses { get; set; }
         public DbSet<ApproveWorkflow> ApproveWorkflows { get; set; }
         public DbSet<ActionHistory> ActionHistories { get; set; }
         public DbSet<Comment> Comments { get; set; }   
@@ -46,6 +46,9 @@ namespace Coms.Infrastructure.Persistence.Context
         public DbSet<ContractFile> ContractFiles { get; set; }
         public DbSet<ContractAnnexFile> ContractAnnexFiles { get; set; }
         public DbSet<LiquidationRecordFile> LiquidationRecordFiles { get; set; }
+        public DbSet<Flow> Flows { get; set; }
+        public DbSet<FlowDetail> FlowDetails { get; set; }
+        public DbSet<User_FlowDetail> UserFlowDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -55,7 +58,7 @@ namespace Coms.Infrastructure.Persistence.Context
             modelBuilder.Entity<LiquidationRecordTerm>().HasKey(lrt => new { lrt.LiquidationRecordId, lrt.Number });
             modelBuilder.Entity<ContractAnnexTerm>().HasKey(cat => new { cat.ContractAnnexId, cat.Number });
             modelBuilder.Entity<ContractAnnexCost>().HasKey(cac => new { cac.ContractAnnexId, cac.ContractCostId });
-            modelBuilder.Entity<User_Access>().HasKey(uc => new { uc.UserId, uc.AccessId });
+            //modelBuilder.Entity<User_Access>().HasKey(uc => new { uc.UserId, uc.AccessId });
             modelBuilder.Entity<ApproveWorkflow>().HasKey(aw => new { aw.AccessId, aw.Order });
             modelBuilder.Entity<PartnerSign>().HasKey(ps => new { ps.PartnerId, ps.ContractId });
             modelBuilder.Entity<TemplateContent>().HasKey(tc => new { tc.ContractId, tc.TemplateFieldId });

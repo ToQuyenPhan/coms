@@ -15,6 +15,7 @@
   <ItemGroup>
     <PackageReference Include="Firebase.Auth" Version="1.0.0" />
     <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
+    <PackageReference Include="FreeSpire.Doc" Version="11.6.0" />
     <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="6.1.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.24" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.24" />

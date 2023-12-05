@@ -32,9 +32,9 @@ namespace Coms.Api.Controllers
 
         [HttpPut("approve")]
         [SwaggerOperation(Summary = "Approve a contract for partner in Coms")]
-        public IActionResult ApproveContract([FromQuery] int id)
+        public IActionResult ApproveContract([FromQuery] int contractId)
         {
-            ErrorOr<PartnerReviewResult> result = _partnerReviewService.ApprovePartnerReview(id).Result;
+            ErrorOr<PartnerReviewResult> result = _partnerReviewService.ApprovePartnerReview(contractId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

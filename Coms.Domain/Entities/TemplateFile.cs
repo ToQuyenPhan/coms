@@ -11,18 +11,18 @@ namespace Coms.Domain.Entities
 
         [Required]
         [MaxLength(100)]
-        public string FileName { get; set; }
+        public string? FileName { get; set; }
 
         [Required]
         [MaxLength(10)]
-        public string Extension { get; set; }
+        public string? Extension { get; set; }
 
         [Required]
         [MaxLength(200)]
-        public string ContentType { get; set; }
+        public string? ContentType { get; set; }
 
         [Required]
-        public byte[] FileData { get; set; }
+        public byte[]? FileData { get; set; }
 
         [Required]
         public int FileSize { get; set; }
