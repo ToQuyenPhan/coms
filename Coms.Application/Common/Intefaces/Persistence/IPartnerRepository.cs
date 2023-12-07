@@ -7,5 +7,8 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<Partner?> GetPartner(int id);
         Task<IList<Partner>?> GetActivePartners();
         Task<Partner?> GetPartnerByCode(string code);
+
+        //add partner
+        Task AddPartner(Partner partner);
     }
 }

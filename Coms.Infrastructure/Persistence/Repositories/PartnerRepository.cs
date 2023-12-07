@@ -34,5 +34,11 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             return await _genericRepository.FirstOrDefaultAsync(c => c.Code.Equals(code), null);
         }
+
+        //add partner
+        public async Task AddPartner(Partner partner)
+        {
+            await _genericRepository.CreateAsync(partner);
+        }
     }
 }

@@ -43,5 +43,18 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+        //add partner
+        //[HttpPost]
+        //[SwaggerOperation(Summary = "Add new partner to Coms")]
+        //[Authorize(Roles = "Sale Manager")]
+        //public IActionResult AddPartner([FromBody] AddPartnerResult command)
+        //{
+        //    ErrorOr<PartnerResult> result =
+        //        _partnerService.AddPartnerAsync(command);
+        //    return result.Match(
+        //                       result => Ok(result),
+        //                                      errors => Problem(errors)
+        //                                                 );
+        //}
     }
 }

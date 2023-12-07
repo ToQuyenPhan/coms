@@ -1,5 +1,8 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
+using Coms.Domain.Entities;
+using Coms.Domain.Enum;
 using ErrorOr;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Coms.Application.Services.Partners
 {
@@ -72,5 +75,42 @@ namespace Coms.Application.Services.Partners
                 return Error.NotFound("404", "Partner is not found!");
             }
         }
+
+        //add partner
+        //public async Task<ErrorOr<PartnerResult>> AddPartnerAsync(AddPartnerResult partner)
+        //{
+            
+        //    //foreach (var item in partner) for check all field is null if null return error.notfound
+        //    foreach (var item in partner.GetType().GetProperties())
+        //    {
+        //        if (item.GetValue(partner) is null || item.GetValue(partner).Equals("string"))
+        //        {
+        //            return Error.NotFound("404", "Value input is null");
+        //        }
+        //    }
+
+        //    var newPartner = new Partner
+        //    {
+        //        Address = partner.Address,
+        //        Code = partner.Code,
+        //        CompanyName = partner.CompanyName,
+        //        Email = partner.Email,
+        //        Image = partner.Image,
+        //        Phone = partner.Phone,
+        //        Representative = partner.Representative,
+        //        RepresentativePosition = partner.RepresentativePosition,
+        //        TaxCode = partner.TaxCode,
+        //        Status = (PartnerStatus)(int)PartnerStatus.Active
+        //    };
+        //    var result = _partnerRepository.AddPartner(newPartner);
+        //    if (result is not null)
+        //    {
+        //        return Error.NotFound("404", "Partner is not found!");
+        //    }
+        //    else
+        //    {
+        //        return Error.NotFound("404", "Partner is not found!");
+        //    }
+        //}
     }
 }
