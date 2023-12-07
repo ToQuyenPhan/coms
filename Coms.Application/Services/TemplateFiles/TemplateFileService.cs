@@ -17,6 +17,7 @@ namespace Coms.Application.Services.TemplateFiles
     {
         private readonly ITemplateFileRepository _templateFileRepository;
         private readonly ITemplateRepository _templateRepository;
+        private readonly ITemplateFieldRepository _templateFieldRepository;
         private string Bucket = "coms-64e4a.appspot.com";
         private string[] ValidFieldNames = { "Contract Title", "Contract Code", "Created Date",
             "Contract Duration", "Execution Time", "Company Name", "Company Address",
@@ -24,10 +25,12 @@ namespace Coms.Application.Services.TemplateFiles
             "Partner Name", "Partner Address", "Partner Tax Code", "Partner Email", "Partner Code",
             "Partner Signer Name", "Partner Signer Position"};
 
-        public TemplateFileService(ITemplateFileRepository templateFileRepository, ITemplateRepository templateRepository)
+        public TemplateFileService(ITemplateFileRepository templateFileRepository, 
+            ITemplateRepository templateRepository, ITemplateFieldRepository templateFieldRepository)
         {
             _templateFileRepository = templateFileRepository;
             _templateRepository = templateRepository;
+            _templateFieldRepository = templateFieldRepository;
         }
 
         public async Task<ErrorOr<TemplateFileResult>> Add(string name, string extension, string contenType, byte[] document,
@@ -49,35 +52,45 @@ namespace Coms.Application.Services.TemplateFiles
                     UploadedDate = DateTime.UtcNow,
                     TemplateId = templateId
                 };
-
-                //Write docx to computer
+                await _templateFileRepository.Add(templateFile);
                 MemoryStream stream = new MemoryStream();
                 stream.Write(document, 0, (int)document.Length);
                 string filePath =
                      Path.Combine(Environment.CurrentDirectory, "Data",
                         templateId + ".docx");
                 File.WriteAllBytes(filePath, stream.ToArray());
-
-                //Open docx file
-                //Microsoft.Office.Interop.Word.Application application = new Microsoft.Office.Interop.Word.Application();
-                //Document checkingDocument = application.Documents.Open(filePath);
-                //foreach(var field in checkingDocument.MailMerge.Mail)
-                //{
-                //    Console.WriteLine(field.Ma)
-                //}
                 Spire.Doc.Document checkingDocument = new Spire.Doc.Document();
                 checkingDocument.LoadFromFile(filePath);
                 bool isValid = true;
                 string[] mailMergeFieldNames = checkingDocument.MailMerge.GetMergeFieldNames();
-                for (int i = 0; i < mailMergeFieldNames.Length; i++)
+                IList<string> fieldNames = new List<string>();
+                foreach(var fieldName in mailMergeFieldNames)
                 {
-                    if (!IsValidFieldName(mailMergeFieldNames[i]))
+                    if (!fieldNames.Contains(fieldName))
                     {
-                        return Error.Validation("400", mailMergeFieldNames[i] + " field name is" +
-                            "   not valid!");
+                        fieldNames.Add(fieldName);
                     }
                 }
-                await _templateFileRepository.Add(templateFile);
+                if(fieldNames.Count() > 0)
+                {
+                    List<TemplateField> templateFields = new List<TemplateField>();
+                    foreach (var fieldName in fieldNames)
+                    {
+                        var templateField = new TemplateField
+                        {
+                            FieldName = fieldName,
+                            TemplateId = templateId
+                        };
+                        if (!templateFields.Contains(templateField))
+                        {
+                            templateFields.Add(templateField);
+                        }
+                    }
+                    if (templateFields.Count() > 0)
+                    {
+                        await _templateFieldRepository.AddRangeAsync(templateFields);
+                    }
+                }
                 return new TemplateFileResult()
                 {
                     Result = "OK"
@@ -179,20 +192,6 @@ namespace Coms.Application.Services.TemplateFiles
                 default:
                     throw new NotSupportedException("This file format is not supported!");
             }
-        }
-
-        private bool IsValidFieldName(string name)
-        {
-            var check = false;
-            foreach (var fieldName in ValidFieldNames)
-            {
-                if (fieldName.Equals(name))
-                {
-                    check = true;
-                    break;
-                }
-            }
-            return check;
         }
     }
 }

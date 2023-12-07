@@ -13,14 +13,14 @@ namespace Coms.Domain.Entities
         [Required]
         public string FieldName { get; set; } = string.Empty;
 
-        [Required]
-        public int PositionX { get; set; }
+        //[Required]
+        //public int PositionX { get; set; }
 
-        [Required]
-        public int PositionY { get; set; }
+        //[Required]
+        //public int PositionY { get; set; }
 
-        [Required] 
-        public FieldType FieldType { get; set; }
+        //[Required] 
+        //public FieldType FieldType { get; set; }
 
         public int? TemplateId { get; set; }
 
