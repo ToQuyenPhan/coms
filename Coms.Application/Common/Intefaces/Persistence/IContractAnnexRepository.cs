@@ -1,5 +1,4 @@
 ﻿using Coms.Domain.Entities;
-using Coms.Domain.Enum;
 
 namespace Coms.Application.Common.Intefaces.Persistence
 {
@@ -11,5 +10,8 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<IList<ContractAnnex>> GetContractAnnexesByContractId(int contractId);
         //get contractannexes by contractAnnexId
         Task<ContractAnnex> GetContractAnnexesById(int contractAnnexId);
+        //Update contractannexes by contractAnnexId
+        Task UpdateContractAnnexes(ContractAnnex contractAnnex);
+
     }
 }

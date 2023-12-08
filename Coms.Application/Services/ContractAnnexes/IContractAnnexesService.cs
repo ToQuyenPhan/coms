@@ -1,5 +1,4 @@
 ﻿using Coms.Application.Services.Common;
-using Coms.Domain.Entities;
 using ErrorOr;
 
 namespace Coms.Application.Services.ContractAnnexes
@@ -13,6 +12,6 @@ namespace Coms.Application.Services.ContractAnnexes
         //get contractannexes by contractAnnexId
         Task<ErrorOr<ContractAnnexesResult>> GetContractAnnexesById(int id);
         //delete contractannexes by contractAnnexId
-        Task<ErrorOr<ContractAnnexesResult>> Delete(int id);
+        Task<ErrorOr<ContractAnnexesResult>> DeleteContractAnnex(int id);
     }
 }

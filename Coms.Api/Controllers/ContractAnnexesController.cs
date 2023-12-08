@@ -105,11 +105,11 @@ namespace Coms.Api.Controllers
         [HttpDelete("id")]
         [SwaggerOperation(summary: "Delete contract annexes by contractAnnexId in Coms")]
         [Authorize(Roles = "Staff, Manager")]
-        public IActionResult Delete([FromQuery][Required] int id)
+        public IActionResult DeleteContractAnnex([FromQuery][Required] int id)
         {
             try
             {
-                ErrorOr<ContractAnnexesResult> result = _contractAnnexesService.Delete(id).Result;
+                ErrorOr<ContractAnnexesResult> result = _contractAnnexesService.DeleteContractAnnex(id).Result;
                 return result.Match(
                     result => Ok(result),
                     errors => Problem(errors)

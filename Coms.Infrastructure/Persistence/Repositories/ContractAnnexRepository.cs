@@ -1,9 +1,5 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
-using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
-using Coms.Domain.Enum;
-using LinqKit;
-using System.Linq.Expressions;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
@@ -17,16 +13,16 @@ namespace Coms.Infrastructure.Persistence.Repositories
         }
 
         //get all ContractAnnexes
-         public async Task<IList<ContractAnnex>> GetContractAnnexes()
+        public async Task<IList<ContractAnnex>?> GetContractAnnexes()
         {
-            var list = await _genericRepository.WhereAsync(c => c.Id > 0, null);
+            IList<ContractAnnex> list = await _genericRepository.WhereAsync(c => c.Id > 0, null);
             return (list.Count() > 0) ? list : null;
         }
 
         //get ContractAnnexes by contractId
-        public async Task<IList<ContractAnnex>> GetContractAnnexesByContractId(int contractId)
+        public async Task<IList<ContractAnnex>?> GetContractAnnexesByContractId(int contractId)
         {
-            var list = await _genericRepository.WhereAsync(c => c.ContractId.Equals(contractId), null);
+            IList<ContractAnnex> list = await _genericRepository.WhereAsync(c => c.ContractId.Equals(contractId), null);
             return (list.Count() > 0) ? list : null;
         }
 
@@ -36,7 +32,12 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(contractAnnexId), null);
         }
 
+        //Update contractannexes by ContractAnnex
+        public async Task UpdateContractAnnexes(ContractAnnex contractAnnex)
+        {
+            await _genericRepository.UpdateAsync(contractAnnex);
+        }
 
-        
+
     }
 }
