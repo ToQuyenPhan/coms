@@ -1,4 +1,8 @@
-﻿using Coms.Application.Services.Users;
+﻿using Coms.Application.Services.Templates;
+using Coms.Application.Services.UserAccesses;
+using Coms.Application.Services.Users;
+using Coms.Contracts.Templates;
+using Coms.Contracts.Users;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -77,5 +81,31 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpPost("add")]
+        [SwaggerOperation(Summary = "Add a user in Coms")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Add(UserFormRequest request)
+        {
+            ErrorOr<UserResult> result =
+                _userService.AddUser( request.FullName,request.Username,request.Email, request.Password,request.Dob,request.Image,request.RoleId,request.Status).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        /*[HttpPut]
+        [SwaggerOperation(Summary = "Edit a user in Coms")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Edit(UserFormRequest request, [FromQuery] int userId)
+        {
+            ErrorOr<UserResult> result =
+                _userService.UpdateUser(request.FullName, request.Username, request.Email, request.Password, request.Dob, request.Image, request.RoleId, request.Status).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }*/
     }
 }

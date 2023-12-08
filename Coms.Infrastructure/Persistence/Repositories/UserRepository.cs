@@ -24,6 +24,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
         }
 
+        public async Task AddUser(User user)
+        {
+            await _genericRepository.CreateAsync(user);
+        }
         //public async Task<IList<User>> GetUsers()
         //{
         //    var list = await _genericRepository.WhereAsync(a=>a.Status == (int)UserStatus.Active

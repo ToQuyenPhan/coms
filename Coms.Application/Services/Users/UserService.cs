@@ -1,9 +1,11 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Services;
 using Coms.Domain.Entities;
+using Coms.Domain.Enum;
 using ErrorOr;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -152,6 +154,81 @@ namespace Coms.Application.Services.Users
                     return Error.NotFound("404", "User not found!");
                 }
                 
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+        public async Task<ErrorOr<UserResult>> AddUser(string fullName, string username, string email, string password, DateTime dob, string image, int roleId, int status)
+        {
+            try
+            {
+                var user = new User
+                {
+                    FullName = fullName,
+                    Username = username,
+                    Email = email,
+                    Password = password,
+                    Image = image,
+                    RoleId = roleId,
+                    Dob = dob,
+                    Status = status,
+                };
+                await _userRepository.AddUser(user);
+                var userCreated = _userRepository.GetUser(user.Id).Result;
+                var result = new UserResult
+                {
+                    Id = userCreated.Id,
+                    FullName = userCreated.FullName,
+                    Username= userCreated.Username,
+                    Email = userCreated.Email,
+                    Password = userCreated.Password,
+                    Status = userCreated.Status,
+                    Dob= userCreated.Dob,
+                    Image = userCreated.Image,
+                    RoleId = userCreated.RoleId,
+                    Role = userCreated.Role.RoleName
+                };
+                return result;
+            }
+            catch (Exception ex) 
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<UserResult>> UpdateUser(string fullName, string username, string email, string password, DateTime dob, string image, int roleId, int status, int userId)
+        {
+            try
+            {
+                var user = new User
+                {
+                    FullName = fullName,
+                    Username = username,
+                    Email = email,
+                    Password = password,
+                    Image = image,
+                    RoleId = roleId,
+                    Dob = dob,
+                    Status = status,
+                };
+                await _userRepository.AddUser(user);
+                var userCreated = _userRepository.GetUser(user.Id).Result;
+                var result = new UserResult
+                {
+                    Id = userCreated.Id,
+                    FullName = userCreated.FullName,
+                    Username = userCreated.Username,
+                    Email = userCreated.Email,
+                    Password = userCreated.Password,
+                    Status = userCreated.Status,
+                    Dob = userCreated.Dob,
+                    Image = userCreated.Image,
+                    RoleId = userCreated.RoleId,
+                    Role = userCreated.Role.RoleName
+                };
+                return result;
             }
             catch (Exception ex)
             {
