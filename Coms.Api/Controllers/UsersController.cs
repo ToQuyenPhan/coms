@@ -95,17 +95,29 @@ namespace Coms.Api.Controllers
             );
         }
 
-        /*[HttpPut]
+        [HttpPut]
         [SwaggerOperation(Summary = "Edit a user in Coms")]
         [Authorize(Roles = "Admin")]
         public IActionResult Edit(UserFormRequest request, [FromQuery] int userId)
         {
             ErrorOr<UserResult> result =
-                _userService.UpdateUser(request.FullName, request.Username, request.Email, request.Password, request.Dob, request.Image, request.RoleId, request.Status).Result;
+                _userService.UpdateUser(request.FullName, request.Username, request.Email, request.Password, request.Dob, request.Image, request.RoleId, request.Status, userId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
             );
-        }*/
+        }
+
+        [HttpDelete]
+        [SwaggerOperation(Summary = "Delete a user in Coms")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Delete(int id)
+        {
+            ErrorOr<UserResult> result = _userService.DeleteUser(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

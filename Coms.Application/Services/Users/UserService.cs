@@ -1,8 +1,10 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Services;
+using Coms.Application.Services.Templates;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
+using Microsoft.Office.Interop.Word;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -202,33 +204,75 @@ namespace Coms.Application.Services.Users
         {
             try
             {
-                var user = new User
+                var user = await _userRepository.GetUser(userId);
+                if (user is not null)
                 {
-                    FullName = fullName,
-                    Username = username,
-                    Email = email,
-                    Password = password,
-                    Image = image,
-                    RoleId = roleId,
-                    Dob = dob,
-                    Status = status,
-                };
-                await _userRepository.AddUser(user);
-                var userCreated = _userRepository.GetUser(user.Id).Result;
-                var result = new UserResult
+                    user.FullName = fullName;
+                    user.Username = username;
+                    user.Email = email;
+                    user.Password = password;
+                    user.Image = image;
+                    user.RoleId = roleId;
+                    user.Dob = dob;
+                    user.Status = status;
+                    await _userRepository.UpdateUser(user);
+                    var result = new UserResult
+                    {
+                        Id = user.Id,
+                        FullName = user.FullName,
+                        Username = user.Username,
+                        Email = user.Email,
+                        Password = user.Password,
+                        Status = user.Status,
+                        Dob = user.Dob,
+                        Image = user.Image,
+                        RoleId = user.RoleId,
+                        Role = user.Role.RoleName
+                    };
+                    return result;
+                }
+            else
+            {
+                return Error.NotFound("404", "User is not found!");
+            } }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<UserResult>> DeleteUser(int userId)
+        {
+            try
+            {
+                if (_userRepository.GetUser(userId).Result is not null)
                 {
-                    Id = userCreated.Id,
-                    FullName = userCreated.FullName,
-                    Username = userCreated.Username,
-                    Email = userCreated.Email,
-                    Password = userCreated.Password,
-                    Status = userCreated.Status,
-                    Dob = userCreated.Dob,
-                    Image = userCreated.Image,
-                    RoleId = userCreated.RoleId,
-                    Role = userCreated.Role.RoleName
-                };
-                return result;
+                    var user = await _userRepository.GetUser(userId);
+                    if (user.Status == (int)UserStatus.Inactive)
+                    {
+                        return Error.Failure("400", "User is already inactive!");
+                    }
+                    user.Status = (int)UserStatus.Inactive;
+                    await _userRepository.UpdateUser(user);
+                    var result = new UserResult
+                    {
+                        Id = user.Id,
+                        FullName = user.FullName,
+                        Username = user.Username,
+                        Email = user.Email,
+                        Password = user.Password,
+                        Status = user.Status,
+                        Dob = user.Dob,
+                        Image = user.Image,
+                        RoleId = user.RoleId,
+                        Role = user.Role.RoleName
+                    };
+                    return result;
+                }
+                else
+                {
+                    return Error.NotFound("404", "User is not found!");
+                }
             }
             catch (Exception ex)
             {

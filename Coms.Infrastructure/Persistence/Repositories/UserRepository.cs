@@ -28,6 +28,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             await _genericRepository.CreateAsync(user);
         }
+        public async Task UpdateUser(User user)
+        {
+            await _genericRepository.UpdateAsync(user);
+        }
         //public async Task<IList<User>> GetUsers()
         //{
         //    var list = await _genericRepository.WhereAsync(a=>a.Status == (int)UserStatus.Active
