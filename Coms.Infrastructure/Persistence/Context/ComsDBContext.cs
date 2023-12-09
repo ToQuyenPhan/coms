@@ -49,6 +49,7 @@ namespace Coms.Infrastructure.Persistence.Context
         public DbSet<Flow> Flows { get; set; }
         public DbSet<FlowDetail> FlowDetails { get; set; }
         public DbSet<User_FlowDetail> UserFlowDetails { get; set; }
+        public DbSet<ContractField> ContractFields { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
