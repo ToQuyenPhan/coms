@@ -11,5 +11,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
                 int? templateTypeId, int? status, string email, int currentPage, int pageSize);
         Task<Template?> GetTemplate(int id);
         Task UpdateTemplate(Template template);
+        Task<IList<Template>?> GetActivatingTemplates();
     }
 }

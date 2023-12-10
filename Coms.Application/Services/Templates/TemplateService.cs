@@ -289,43 +289,60 @@ namespace Coms.Application.Services.Templates
             }
         }
 
-        //public async Task<ErrorOr<TemplateResult>> GetTemplateById(int id)
-        //{
-        //    try
-        //    {
-        //        if (_templateRepository.GetTemplate(id).Result is not null)
-        //        {
-        //            var template = await _templateRepository.GetTemplate(id);
-        //            var templateResult = new TemplateResult
-        //            {
-        //                Id = template.Id,
-        //                TemplateName = template.TemplateName,
-        //                Description = template.Description,
-        //                CreatedDate = template.CreatedDate,
-        //                CreatedDateString = template.CreatedDate.ToString(),
-        //                ContractCategoryId = template.ContractCategory.Id,
-        //                ContractCategoryName = template.ContractCategory.CategoryName,
-        //                TemplateTypeId = template.TemplateType.Id,
-        //                TemplateTypeName = template.TemplateType.Name,
-        //                TemplateLink = template.TemplateLink,
-        //                Status = (int)template.Status,
-        //                StatusString = template.Status.ToString(),
-        //                UserId = template.User.Id,
-        //                UserName = template.User.Username,
-        //                Email = template.User.Email
-        //            };
-        //            return templateResult;
-        //        }
-        //        else
-        //        {
-        //            return Error.NotFound();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Error.Failure("500", ex.Message);
-        //    }
-        //}
+        public async Task<ErrorOr<TemplateResult>> ActivateTemplate(int id)
+        {
+            try
+            {
+                var template = await _templateRepository.GetTemplate(id);
+                if (template is not null)
+                {
+                    var activatingTemplate = await _templateRepository.GetTemplates(string.Empty,
+                        template.ContractCategoryId, 0, (int)TemplateStatus.Activating, string.Empty, 0, 0);
+                    if (activatingTemplate is not null)
+                    {
+                        return Error.Conflict("409", "The contract category already has a activating " +
+                            " template!");
+                    }
+                    else
+                    {
+                        template.Status = TemplateStatus.Activating;
+                        await _templateRepository.UpdateTemplate(template);
+                        var templateResult = new TemplateResult
+                        {
+                            Id = template.Id,
+                            TemplateName = template.TemplateName,
+                            Description = template.Description,
+                            CreatedDate = template.CreatedDate,
+                            CreatedDateString = template.CreatedDate.ToString(),
+                            ContractCategoryId = template.ContractCategory.Id,
+                            ContractCategoryName = template.ContractCategory.CategoryName,
+                            TemplateTypeId = template.TemplateType.Id,
+                            TemplateTypeName = template.TemplateType.Name,
+                            TemplateLink = template.TemplateLink,
+                            Status = (int)template.Status,
+                            StatusString = template.Status.ToString(),
+                            UserId = template.User.Id,
+                            UserName = template.User.Username,
+                            Email = template.User.Email
+                        };
+                        if (template.UpdatedDate is not null)
+                        {
+                            templateResult.UpdatedDate = template.UpdatedDate;
+                            templateResult.UpdatedDateString = AsTimeAgo((DateTime)template.UpdatedDate);
+                        }
+                        return templateResult;
+                    }
+                }
+                else
+                {
+                    return Error.NotFound("404", "Template is not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
 
         private FormatType GetFormatType(string format)
         {

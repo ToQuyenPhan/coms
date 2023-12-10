@@ -47,6 +47,13 @@ namespace Coms.Infrastructure.Persistence.Repositories
             await _genericRepository.UpdateAsync(template);
         }
 
+        public async Task<IList<Template>?> GetActivatingTemplates()
+        {
+            var list = await _genericRepository.WhereAsync(t =>
+                t.Status.Equals(TemplateStatus.Activating), null);
+            return (list.Count() > 0) ? list.ToList() : null; 
+        }
+
         private Expression<Func<Template, bool>> BuildExpression(string templateName, 
                 int? contractCategoryId, int? templateTypeId, int? status, string email)
         {

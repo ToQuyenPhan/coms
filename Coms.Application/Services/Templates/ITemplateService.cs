@@ -5,7 +5,7 @@ namespace Coms.Application.Services.Templates
 {
     public interface ITemplateService
     {
-        Task<ErrorOr<TemplateResult>> AddTemplate(string name, string description, int category, int type, 
+        Task<ErrorOr<TemplateResult>> AddTemplate(string name, string description, int category, int type,
                 int status, int userId);
         Task<ErrorOr<PagingResult<TemplateResult>>> GetTemplates(string name, int? category,
                 int? type, int? status, string email, int currentPage, int pageSize);
@@ -14,6 +14,6 @@ namespace Coms.Application.Services.Templates
         Task<ErrorOr<TemplateResult>> UpdateTemplate(string name, string description, int category,
                 int type, int status, int templateId);
         Task<ErrorOr<TemplateResult>> GetTemplateInformation(int id);
-        //Task<ErrorOr<TemplateResult>> GetTemplateById(int id);
+        Task<ErrorOr<TemplateResult>> ActivateTemplate(int id);
     }
 }

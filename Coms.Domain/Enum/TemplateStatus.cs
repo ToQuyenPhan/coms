@@ -4,6 +4,7 @@
     {
         Deleted,
         Draft,
-        Done
+        Done,
+        Activating
     }
 }
