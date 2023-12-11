@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Coms.Domain\Coms.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="FlowDetails\" />
+  </ItemGroup>
+
 </Project>
