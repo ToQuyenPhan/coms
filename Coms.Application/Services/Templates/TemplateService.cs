@@ -24,16 +24,16 @@ namespace Coms.Application.Services.Templates
             _templateFileRepository = templateFileRepository;
         }
 
-        public async Task<ErrorOr<PagingResult<TemplateResult>>> GetTemplates(string name, int? category, 
+        public async Task<ErrorOr<PagingResult<TemplateResult>>> GetTemplates(string name, int? category,
                 int? type, int? status, string email, int currentPage, int pageSize)
         {
-            if(_templateRepository
+            if (_templateRepository
                     .GetTemplates(name, category, type, status, email, currentPage, pageSize).Result is not null)
             {
                 IList<TemplateResult> responses = new List<TemplateResult>();
                 var result = _templateRepository
                     .GetTemplates(name, category, type, status, email, currentPage, pageSize).Result;
-                foreach(var template in result.Items)
+                foreach (var template in result.Items)
                 {
                     var templateResult = new TemplateResult
                     {
@@ -55,8 +55,8 @@ namespace Coms.Application.Services.Templates
                     };
                     responses.Add(templateResult);
                 }
-                return new 
-                    PagingResult<TemplateResult>(responses, result.TotalCount, result.CurrentPage, 
+                return new
+                    PagingResult<TemplateResult>(responses, result.TotalCount, result.CurrentPage,
                     result.PageSize);
             }
             else
@@ -66,7 +66,7 @@ namespace Coms.Application.Services.Templates
             }
         }
 
-        public async Task<ErrorOr<TemplateResult>> AddTemplate(string name, string description, int category, 
+        public async Task<ErrorOr<TemplateResult>> AddTemplate(string name, string description, int category,
                 int type, int status, int userId)
         {
             try
@@ -79,7 +79,7 @@ namespace Coms.Application.Services.Templates
                     TemplateTypeId = type,
                     TemplateLink = "",
                     CreatedDate = DateTime.Now,
-                    Status = (TemplateStatus) status,
+                    Status = (TemplateStatus)status,
                     UserId = userId
                 };
                 await _templateRepository.AddTemplate(template);
@@ -91,7 +91,7 @@ namespace Coms.Application.Services.Templates
                     Description = createdTemplate.Description,
                     CreatedDate = createdTemplate.CreatedDate,
                     CreatedDateString = createdTemplate.CreatedDate.ToString(),
-                    ContractCategoryId= createdTemplate.ContractCategory.Id,
+                    ContractCategoryId = createdTemplate.ContractCategory.Id,
                     ContractCategoryName = createdTemplate.ContractCategory.CategoryName,
                     TemplateTypeId = createdTemplate.TemplateType.Id,
                     TemplateTypeName = createdTemplate.TemplateType.Name,
@@ -104,7 +104,7 @@ namespace Coms.Application.Services.Templates
                 };
                 return templateResult;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }
@@ -114,7 +114,7 @@ namespace Coms.Application.Services.Templates
         {
             try
             {
-                if(_templateRepository.GetTemplate(id).Result is not null)
+                if (_templateRepository.GetTemplate(id).Result is not null)
                 {
                     var template = await _templateRepository.GetTemplate(id);
                     template.Status = TemplateStatus.Deleted;
@@ -142,7 +142,7 @@ namespace Coms.Application.Services.Templates
                 else
                 {
                     return Error.NotFound();
-                } 
+                }
             }
             catch (Exception ex)
             {
@@ -195,16 +195,16 @@ namespace Coms.Application.Services.Templates
             try
             {
                 var template = await _templateRepository.GetTemplate(templateId);
-                if(template is not null)
+                if (template is not null)
                 {
                     var contractCategory = await _contractCategoryRepository
                             .GetActiveContractCategoryById(category);
-                    if(contractCategory is not null)
+                    if (contractCategory is not null)
                     {
                         template.ContractCategory = contractCategory;
                     }
                     var templateType = await _templateTypeRepository.GetTemplateTypeById(type);
-                    if(templateType is not null)
+                    if (templateType is not null)
                     {
                         template.TemplateType = templateType;
                     }
@@ -251,7 +251,7 @@ namespace Coms.Application.Services.Templates
             try
             {
                 var template = await _templateRepository.GetTemplate(id);
-                if(template is not null)
+                if (template is not null)
                 {
                     var templateResult = new TemplateResult
                     {
@@ -271,7 +271,7 @@ namespace Coms.Application.Services.Templates
                         UserName = template.User.Username,
                         Email = template.User.Email
                     };
-                    if(template.UpdatedDate is not null)
+                    if (template.UpdatedDate is not null)
                     {
                         templateResult.UpdatedDate = template.UpdatedDate;
                         templateResult.UpdatedDateString = AsTimeAgo((DateTime)template.UpdatedDate);
@@ -332,6 +332,51 @@ namespace Coms.Application.Services.Templates
                         }
                         return templateResult;
                     }
+                }
+                else
+                {
+                    return Error.NotFound("404", "Template is not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<TemplateResult>> DeactivateTemplate(int id)
+        {
+            try
+            {
+                var template = await _templateRepository.GetTemplate(id);
+                if (template is not null)
+                {
+                    template.Status = TemplateStatus.Done;
+                    await _templateRepository.UpdateTemplate(template);
+                    var templateResult = new TemplateResult
+                    {
+                        Id = template.Id,
+                        TemplateName = template.TemplateName,
+                        Description = template.Description,
+                        CreatedDate = template.CreatedDate,
+                        CreatedDateString = template.CreatedDate.ToString(),
+                        ContractCategoryId = template.ContractCategory.Id,
+                        ContractCategoryName = template.ContractCategory.CategoryName,
+                        TemplateTypeId = template.TemplateType.Id,
+                        TemplateTypeName = template.TemplateType.Name,
+                        TemplateLink = template.TemplateLink,
+                        Status = (int)template.Status,
+                        StatusString = template.Status.ToString(),
+                        UserId = template.User.Id,
+                        UserName = template.User.Username,
+                        Email = template.User.Email
+                    };
+                    if (template.UpdatedDate is not null)
+                    {
+                        templateResult.UpdatedDate = template.UpdatedDate;
+                        templateResult.UpdatedDateString = AsTimeAgo((DateTime)template.UpdatedDate);
+                    }
+                    return templateResult;
                 }
                 else
                 {

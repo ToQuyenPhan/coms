@@ -111,5 +111,17 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpPut("deactivate")]
+        [SwaggerOperation(Summary = "Deactivate a template in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public async Task<IActionResult> DeactivateTemplate([FromQuery] int id)
+        {
+            ErrorOr<TemplateResult> result = await _templateService.DeactivateTemplate(id);
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

@@ -15,5 +15,6 @@ namespace Coms.Application.Services.Templates
                 int type, int status, int templateId);
         Task<ErrorOr<TemplateResult>> GetTemplateInformation(int id);
         Task<ErrorOr<TemplateResult>> ActivateTemplate(int id);
+        Task<ErrorOr<TemplateResult>> DeactivateTemplate(int id);
     }
 }
