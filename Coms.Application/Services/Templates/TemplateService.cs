@@ -56,8 +56,8 @@ namespace Coms.Application.Services.Templates
                     responses.Add(templateResult);
                 }
                 return new
-                    PagingResult<TemplateResult>(responses, result.TotalCount, result.CurrentPage,
-                    result.PageSize);
+                    PagingResult<TemplateResult>(responses, result.TotalCount, currentPage,
+                    pageSize);
             }
             else
             {
