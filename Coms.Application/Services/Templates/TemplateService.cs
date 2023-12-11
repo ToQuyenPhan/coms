@@ -3,6 +3,7 @@ using Coms.Application.Services.Common;
 using Coms.Domain.Enum;
 using ErrorOr;
 using Syncfusion.EJ2.DocumentEditor;
+using System.Globalization;
 
 namespace Coms.Application.Services.Templates
 {
@@ -259,7 +260,8 @@ namespace Coms.Application.Services.Templates
                         TemplateName = template.TemplateName,
                         Description = template.Description,
                         CreatedDate = template.CreatedDate,
-                        CreatedDateString = template.CreatedDate.ToString(),
+                        CreatedDateString = template.CreatedDate.ToString("d MMMM yyyy", 
+                            CultureInfo.CreateSpecificCulture("en-US")),
                         ContractCategoryId = template.ContractCategory.Id,
                         ContractCategoryName = template.ContractCategory.CategoryName,
                         TemplateTypeId = template.TemplateType.Id,
@@ -269,7 +271,8 @@ namespace Coms.Application.Services.Templates
                         StatusString = template.Status.ToString(),
                         UserId = template.User.Id,
                         UserName = template.User.Username,
-                        Email = template.User.Email
+                        Email = template.User.Email,
+                        UserImage = template.User.Image
                     };
                     if (template.UpdatedDate is not null)
                     {
