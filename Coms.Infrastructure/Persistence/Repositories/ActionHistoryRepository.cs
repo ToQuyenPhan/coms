@@ -1,13 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
-using Coms.Application.Services.ActionHistories;
-using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
@@ -20,7 +13,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        public async Task<IList<ActionHistory>> GetCreateActionByUserId(int userId)
+        public async Task<IList<ActionHistory>?> GetCreateActionByUserId(int userId)
         {
             var list = await _genericRepository.WhereAsync(ah => ah.UserId.Equals(userId) &&
                 ah.ActionType.Equals(ActionType.Created), new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User,
@@ -44,12 +37,12 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return (list.Count() > 0) ? list : null;
         }
 
-        public async Task<IList<ActionHistory>> GetCreateActionByContractId(int contractId)
+        public async Task<ActionHistory?> GetCreateActionByContractId(int contractId)
         {
-            var list = await _genericRepository.WhereAsync(ah => ah.ContractId.Equals(contractId) &&
-                           ah.ActionType.Equals(ActionType.Created), new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User,
-                                                  ah => ah.Contract });
-            return (list.Count() > 0) ? list : null;
+           return await _genericRepository.FirstOrDefaultAsync(ah => ah.ContractId.Equals(contractId) &&
+                           ah.ActionType.Equals(ActionType.Created), 
+                           new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User,
+                           ah => ah.Contract });
         }
 
         public async Task<ActionHistory> GetActionHistoryById(int id)
