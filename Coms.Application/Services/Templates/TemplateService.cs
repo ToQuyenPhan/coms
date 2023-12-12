@@ -260,7 +260,7 @@ namespace Coms.Application.Services.Templates
                         TemplateName = template.TemplateName,
                         Description = template.Description,
                         CreatedDate = template.CreatedDate,
-                        CreatedDateString = template.CreatedDate.ToString("d MMMM yyyy", 
+                        CreatedDateString = template.CreatedDate.ToString("d MMMM yyyy",
                             CultureInfo.CreateSpecificCulture("en-US")),
                         ContractCategoryId = template.ContractCategory.Id,
                         ContractCategoryName = template.ContractCategory.CategoryName,

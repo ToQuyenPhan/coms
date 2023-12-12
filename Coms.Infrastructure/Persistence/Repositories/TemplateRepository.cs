@@ -58,6 +58,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
                 int? contractCategoryId, int? templateTypeId, int? status, string email)
         {
             var predicate = PredicateBuilder.New<Template>(true);
+            predicate = predicate.And(t => t.TemplateLink != "" && t.TemplateLink != null);
             if (!string.IsNullOrEmpty(templateName))
             {
                 predicate = predicate.And(t => t.TemplateName.Contains(templateName.Trim()));

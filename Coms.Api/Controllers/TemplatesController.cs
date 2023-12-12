@@ -123,5 +123,17 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpPut("restore")]
+        [SwaggerOperation(Summary = "Restore a template in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public async Task<IActionResult> RestoreTemplate([FromQuery] int id)
+        {
+            ErrorOr<TemplateResult> result = await _templateService.DeactivateTemplate(id);
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }
