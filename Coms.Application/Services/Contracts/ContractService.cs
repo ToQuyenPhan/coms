@@ -51,35 +51,34 @@ namespace Coms.Application.Services.Contracts
         {
             try
             {
-                //if (_contractRepository.GetContract(id).Result is not null)
-                //{
-                //    var contract = await _contractRepository.GetContract(id);
-                //    contract.Status = DocumentStatus.Deleted;
-                //    await _contractRepository.UpdateContract(contract);
-                //    var contractResult = new ContractResult
-                //    {
-                //        Id = contract.Id,
-                //        ContractName = contract.ContractName,
-                //        Version = contract.Version,
-                //        CreatedDate = contract.CreatedDate,
-                //        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
-                //        UpdatedDate = contract.UpdatedDate,
-                //        UpdatedDateString = contract.UpdatedDate.ToString(),
-                //        EffectiveDate = contract.EffectiveDate,
-                //        EffectiveDateString = contract.EffectiveDate.ToString(),
-                //        Status = (int)contract.Status,
-                //        StatusString = contract.Status.ToString(),
-                //        TemplateID = contract.TemplateId,
-                //        Code = contract.Code,
-                //        Link = contract.Link,
-                //    };
-                //    return contractResult;
-                //}
-                //else
-                //{
-                //    return Error.NotFound();
-                //}
-                return Error.NotFound();
+                var contract = await _contractRepository.GetContract(id);
+                if (contract is not null)
+                {
+                    contract.Status = DocumentStatus.Deleted;
+                    await _contractRepository.UpdateContract(contract);
+                    var contractResult = new ContractResult
+                    {
+                        Id = contract.Id,
+                        ContractName = contract.ContractName,
+                        Version = contract.Version,
+                        CreatedDate = contract.CreatedDate,
+                        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        UpdatedDate = contract.UpdatedDate,
+                        UpdatedDateString = contract.UpdatedDate.ToString(),
+                        EffectiveDate = contract.EffectiveDate,
+                        EffectiveDateString = contract.EffectiveDate.ToString(),
+                        Status = (int)contract.Status,
+                        StatusString = contract.Status.ToString(),
+                        TemplateID = contract.TemplateId,
+                        Code = contract.Code,
+                        Link = contract.Link,
+                    };
+                    return contractResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Contract is not found!");
+                }
             }
             catch (Exception ex)
             {
