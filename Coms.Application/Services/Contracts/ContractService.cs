@@ -98,7 +98,10 @@ namespace Coms.Application.Services.Contracts
                     var contract = await _contractRepository.GetContract(action.ContractId);
                     if (contract is not null)
                     {
-                        contracts.Add(contract);
+                        if (!string.IsNullOrEmpty(contract.Link))
+                        {
+                            contracts.Add(contract);
+                        }
                     }
                 }
             }
@@ -108,9 +111,13 @@ namespace Coms.Application.Services.Contracts
                 foreach (var yourFlowDetail in yourFlowDetails)
                 {
                     var contract = await _contractRepository.GetContract(yourFlowDetail.ContractId);
-                    if (!contracts.Contains(contract) && contract is not null)
+                    var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
+                    if (existedContract is null)
                     {
-                        contracts.Add(contract);
+                        if (!string.IsNullOrEmpty(contract.Link))
+                        {
+                            contracts.Add(contract);
+                        }
                     }
                 }
             }
