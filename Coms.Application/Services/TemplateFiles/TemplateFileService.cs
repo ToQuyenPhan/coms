@@ -127,7 +127,7 @@ namespace Coms.Application.Services.TemplateFiles
                 document.Close();
                 var stream = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
                 var task = new FirebaseStorage(Bucket)
-                    .Child("files")
+                    .Child("templates")
                     .Child(fileName)
                     .PutAsync(stream);
                 var template = await _templateRepository.GetTemplate(id);
