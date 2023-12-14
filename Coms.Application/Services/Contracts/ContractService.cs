@@ -140,7 +140,8 @@ namespace Coms.Application.Services.Contracts
                         predicate = predicate.And(c => c.Status.Equals((DocumentStatus)status));
                     }
                 }
-                IList<Contract> filteredList = contracts.Where(predicate).ToList();
+                IList<Contract> filteredList = contracts.Where(predicate).OrderByDescending(c => c.CreatedDate)
+                        .ToList();
                 var total = filteredList.Count();
                 if (currentPage > 0 && pageSize > 0)
                 {
