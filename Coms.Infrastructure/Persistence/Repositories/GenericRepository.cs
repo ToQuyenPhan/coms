@@ -77,7 +77,8 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return list;
         }
 
-        public async Task<IList<T>> WhereAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>>[]? includes)
+        public async Task<IList<T>> WhereAsync(Expression<Func<T, bool>> predicate, 
+            Expression<Func<T, object>>[]? includes)
         {
             return await AsQueryableWithIncludes(includes).Where(predicate).AsNoTracking().ToListAsync();
         }

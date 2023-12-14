@@ -16,18 +16,14 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        public async Task<PagingResult<Template>> GetTemplates(string templateName, int? contractCategoryId, 
-                int? templateTypeId, int? status, string email, int currentPage, int pageSize)
+        public async Task<IList<Template>?> GetTemplates(string templateName, int? contractCategoryId, 
+                int? templateTypeId, int? status, string email)
         {
-            var query = await _genericRepository.WhereAsync(BuildExpression(templateName,
-                    contractCategoryId, templateTypeId, status, email), null);
-            int totalCount = query.Count();
-            var list = await _genericRepository.WhereAsyncWithFilter(BuildExpression(templateName,
+            var list = await _genericRepository.WhereAsync(BuildExpression(templateName,
                     contractCategoryId, templateTypeId, status, email),
                     new System.Linq.Expressions.Expression<Func<Template, object>>[] { 
-                            t => t.ContractCategory, t => t.TemplateType, t => t.User }, 
-                    currentPage, pageSize);
-            return (list.Count() > 0) ? new PagingResult<Template>(list, totalCount, currentPage, pageSize) : null;
+                            t => t.ContractCategory, t => t.TemplateType, t => t.User });
+            return (list.Count() > 0) ? list : null;
         }
 
         public async Task<Template?> GetTemplate(int id)
