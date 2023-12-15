@@ -1,7 +1,9 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
+using Coms.Domain.Enum;
 using ErrorOr;
+using System.ComponentModel.Design;
 
 namespace Coms.Application.Services.Comments
 {
@@ -10,6 +12,7 @@ namespace Coms.Application.Services.Comments
         private readonly ICommentRepository _commentRepository;
         private readonly IActionHistoryRepository _actionHistoryRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IContractRepository _contractRepository;
         private readonly IAccessRepository _accessRepository;
         private readonly IUserAccessRepository _userAccessRepository;
 
@@ -17,26 +20,28 @@ namespace Coms.Application.Services.Comments
             IActionHistoryRepository actionHistoryRepository,
             IUserRepository userRepository,
             IAccessRepository accessRepository,
-            IUserAccessRepository userAccessRepository)
+            IUserAccessRepository userAccessRepository,
+            IContractRepository contractRepository)
         {
             _commentRepository = commentRepository;
             _actionHistoryRepository = actionHistoryRepository;
             _userRepository = userRepository;
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
+            _contractRepository = contractRepository;
         }
 
         public async Task<ErrorOr<PagingResult<CommentResult>>> GetAllComments(int userId, int currentPage,
                 int pageSize)
         {
-            if (_actionHistoryRepository.GetCreateActionByUserId(userId).Result is not null)
+            var createActions = await _actionHistoryRepository.GetCreateActionByUserId(userId);
+            if (createActions is not null)
             {
-                var createHistories = await _actionHistoryRepository.GetCreateActionByUserId(userId);
                 IList<ActionHistory> commentHistories = new List<ActionHistory>();
-                foreach (var history in createHistories)
+                foreach (var action in createActions)
                 {
                     var commentHistoryList = await _actionHistoryRepository
-                            .GetCommentActionByContractId(history.ContractId, userId);
+                            .GetCommentActionByContractId(action.ContractId, userId);
                     if (commentHistoryList is not null)
                     {
                         foreach (var commentHistory in commentHistoryList)
@@ -48,35 +53,43 @@ namespace Coms.Application.Services.Comments
                         }
                     }
                 }
-                IList<CommentResult> comments = new List<CommentResult>();
-                foreach (var commentHistory in commentHistories)
+                if(commentHistories.Count() > 0)
                 {
-                    var comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);
-                    if(comment is not null)
+                    IList<CommentResult> comments = new List<CommentResult>();
+                    foreach (var commentHistory in commentHistories)
                     {
-                        var commentResult = new CommentResult()
+                        var comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);
+                        if (comment is not null)
                         {
-                            Id = comment.Id,
-                            Content = comment.Content,
-                            ActionHistoryId = comment.ActionHistoryId,
-                            ReplyId = comment.ReplyId,
-                            Status = (int)comment.Status,
-                            StatusString = comment.Status.ToString()
-                        };
-                        commentResult.Long = AsTimeAgo(comment.ActionHistory.CreatedAt);
-                        commentResult.CreatedAt = comment.ActionHistory.CreatedAt.ToString();
-                        var user = await _userRepository.GetUser((int)comment.ActionHistory.UserId);
-                        commentResult.UserId = user.Id;
-                        commentResult.FullName = user.FullName;
-                        comments.Add(commentResult);
+                            var commentResult = new CommentResult()
+                            {
+                                Id = comment.Id,
+                                Content = comment.Content,
+                                ActionHistoryId = comment.ActionHistoryId,
+                                ReplyId = comment.ReplyId,
+                                Status = (int)comment.Status,
+                                StatusString = comment.Status.ToString()
+                            };
+                            commentResult.Long = AsTimeAgo(comment.ActionHistory.CreatedAt);
+                            commentResult.CreatedAt = comment.ActionHistory.CreatedAt.ToString();
+                            var user = await _userRepository.GetUser((int)comment.ActionHistory.UserId);
+                            commentResult.UserId = user.Id;
+                            commentResult.FullName = user.FullName;
+                            comments.Add(commentResult);
+                        }
                     }
+                    int total = comments.Count();
+                    if (currentPage > 0 && pageSize > 0)
+                    {
+                        comments = comments.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+                    }
+                    return new PagingResult<CommentResult>(comments, total, currentPage, pageSize);
                 }
-                int total = comments.Count();
-                if (currentPage > 0 && pageSize > 0)
+                else
                 {
-                    comments = comments.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+                    return new PagingResult<CommentResult>(new List<CommentResult>(), 0, currentPage,
+                    pageSize);
                 }
-                return new PagingResult<CommentResult>(comments, total, currentPage, pageSize);
             }
             else
             {
@@ -88,9 +101,9 @@ namespace Coms.Application.Services.Comments
         public async Task<ErrorOr<CommentResult>> DismissComment(int id) {
             try
             {
-                if(_commentRepository.GetComment(id).Result is not null)
+                var comment = await _commentRepository.GetComment(id);
+                if (comment is not null)
                 {
-                    var comment = await _commentRepository.GetComment(id);
                     comment.Status = Domain.Enum.CommentStatus.Dismissed;
                     await _commentRepository.UpdateComment(comment);
                     var commentResult = new CommentResult()
@@ -106,7 +119,7 @@ namespace Coms.Application.Services.Comments
                 }
                 else
                 {
-                    return Error.NotFound();
+                    return Error.NotFound("404", "Comment is not found!");
                 }
             }catch(Exception ex)
             {
@@ -171,7 +184,41 @@ namespace Coms.Application.Services.Comments
             }
         }
         
-        
+        public async Task<ErrorOr<CommentDetailResult>> GetCommentDetail(int id)
+        {
+            var comment = await _commentRepository.GetComment(id);
+            if (comment is not null)
+            {
+                if (comment.Status.Equals(CommentStatus.Inactive))
+                {
+                    return Error.Conflict("409", "Comment is inactive!");
+                }
+                var contract = await _contractRepository.GetContract(comment.ActionHistory.ContractId);
+                if(contract is not null)
+                {
+                    if (contract.Status.Equals(DocumentStatus.Deleted))
+                    {
+                        return Error.Conflict("409", "Contract no longer exists!");
+                    }
+                    else
+                    {
+                        CommentDetailResult result = new CommentDetailResult()
+                        {
+                            ContractId = contract.Id
+                        };
+                        return result;
+                    }
+                }
+                else
+                {
+                    return Error.NotFound("404", "Contract is not found!");
+                }
+            }
+            else
+            {
+                return Error.NotFound("404", "Comment is not found!");
+            }
+        }
 
         private string AsTimeAgo(DateTime dateTime)
         {

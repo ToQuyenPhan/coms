@@ -13,12 +13,12 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        //public async Task<Contract> GetContract(int id)
-        //{
-        //    return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id),
-        //        new System.Linq.Expressions.Expression<Func<Contract, object>>[]
-        //            { a => a.Accesses,a=> a.ContractCosts, a=>a.ContractAnnexes, a=> a.ActionHistories, a => a.Template});
-        //}
+        public async Task<Contract?> GetContract(int id)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id),
+                new System.Linq.Expressions.Expression<Func<Contract, object>>[]
+                    { c => c.ContractCosts, c => c.ContractAnnexes, c => c.ActionHistories, c => c.Template});
+        }
 
         public async Task UpdateContract(Contract contract)
         {

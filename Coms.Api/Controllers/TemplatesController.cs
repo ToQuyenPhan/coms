@@ -100,16 +100,40 @@ namespace Coms.Api.Controllers
             );
         }
 
-        //add get template by id
-        //[HttpGet("{id}")]
-        //[SwaggerOperation(Summary = "Get template by id in Coms")]
-        //public IActionResult GetTemplateById(int id)
-        //{
-        //    ErrorOr<TemplateResult> result = _templateService.GetTemplateById(id).Result;
-        //    return result.Match(
-        //                                      result => Ok(result),
-        //                                                                                   errors => Problem(errors)
-        //                                                                                                                                           );
-        //}
+        [HttpPut("activate")]
+        [SwaggerOperation(Summary = "Activate a template in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public async Task<IActionResult> ActivateTemplate([FromQuery] int id)
+        {
+            ErrorOr<TemplateResult> result = await _templateService.ActivateTemplate(id);
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpPut("deactivate")]
+        [SwaggerOperation(Summary = "Deactivate a template in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public async Task<IActionResult> DeactivateTemplate([FromQuery] int id)
+        {
+            ErrorOr<TemplateResult> result = await _templateService.DeactivateTemplate(id);
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpPut("restore")]
+        [SwaggerOperation(Summary = "Restore a template in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public async Task<IActionResult> RestoreTemplate([FromQuery] int id)
+        {
+            ErrorOr<TemplateResult> result = await _templateService.DeactivateTemplate(id);
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

@@ -11,5 +11,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
         //Task<IList<User>> GetUsers();
         //Task<IList<User>> GetManagers();
         //Task<IList<User>> GetStaffs();
+        Task<IList<User>> GetUsers();
+
     }
 }

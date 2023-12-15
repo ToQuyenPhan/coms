@@ -4,12 +4,6 @@ using Coms.Application.Services.Accesses;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Coms.Application.Services.ActionHistories
 {
@@ -117,28 +111,28 @@ namespace Coms.Application.Services.ActionHistories
             try
             {
                 IList<ActionHistory> actionHistories = new List<ActionHistory>();
-                actionHistories = _actionHistoryRepository.GetCreateActionByContractId(contractId).Result;
+                //actionHistories = _actionHistoryRepository.GetCreateActionByContractId(contractId).Result;
                 var results = new List<ActionHistoryResult>();
-                if (actionHistories != null)
-                {
-                    foreach (var actionHistory in actionHistories)
-                    {
-                        var result = new ActionHistoryResult()
-                        {
-                            Id = actionHistory.Id,
-                            ActionType = (int)actionHistory.ActionType,
-                            ActionTypeString = actionHistory.ActionType.ToString(),
-                            CreatedAt = actionHistory.CreatedAt,
-                            CreatedAtString = actionHistory.CreatedAt.ToString("dd/MM/yyyy"),
-                            UserId = actionHistory.UserId,
-                            FullName = actionHistory.User.FullName,
-                            UserImage = actionHistory.User.Image,
-                            ContractId = actionHistory.ContractId,
-                            ContractName = actionHistory.Contract.ContractName
-                        };
-                        results.Add(result);
-                    }
-                }
+                //if (actionHistories != null)
+                //{
+                //    foreach (var actionHistory in actionHistories)
+                //    {
+                //        var result = new ActionHistoryResult()
+                //        {
+                //            Id = actionHistory.Id,
+                //            ActionType = (int)actionHistory.ActionType,
+                //            ActionTypeString = actionHistory.ActionType.ToString(),
+                //            CreatedAt = actionHistory.CreatedAt,
+                //            CreatedAtString = actionHistory.CreatedAt.ToString("dd/MM/yyyy"),
+                //            UserId = actionHistory.UserId,
+                //            FullName = actionHistory.User.FullName,
+                //            UserImage = actionHistory.User.Image,
+                //            ContractId = actionHistory.ContractId,
+                //            ContractName = actionHistory.Contract.ContractName
+                //        };
+                //        results.Add(result);
+                //    }
+                //}
                 return results;
             }
             catch (Exception ex)

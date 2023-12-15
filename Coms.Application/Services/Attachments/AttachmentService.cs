@@ -1,9 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
-using Coms.Domain.Entities;
-using Coms.Domain.Enum;
 using ErrorOr;
-using LinqKit;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -14,23 +11,38 @@ namespace Coms.Application.Services.Contracts
         {
             _attachmentRepository = attachmentRepository;
         }
-        //add get all attachments by contract id
-        public async Task<ErrorOr<IList<AttachmentResult>>> GetAttachmentsByContractId(int contractId)
+
+        public async Task<ErrorOr<PagingResult<AttachmentResult>>> GetAttachmentsByContractId(int contractId, int currentPage,
+                int pageSize)
         {
             var attachments = await _attachmentRepository.GetAttachmentsByContractId(contractId);
-            var attachmentResults = attachments.Select(a => new AttachmentResult
+            if (attachments is not null)
             {
-                Id = a.Id,
-                FileName = a.FileName,
-                FileLink = a.FileLink,
-                UploadDate = a.UploadDate,
-                Description = a.Description,
-                Status = a.Status,
-                ContractId = a.ContractId,
-            }).ToList();
-            return attachmentResults;
+                int total = attachments.Count;
+                var attachmentResults = attachments.Select(a => new AttachmentResult
+                {
+                    Id = a.Id,
+                    FileName = a.FileName,
+                    FileLink = a.FileLink,
+                    UploadDate = a.UploadDate,
+                    Description = a.Description,
+                    Status = a.Status,
+                    ContractId = a.ContractId,
+                }).OrderByDescending(a => a.UploadDate).ToList();
+                if(currentPage > 0 &&  pageSize > 0)
+                {
+                    attachmentResults = attachmentResults.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                            .ToList();
+                }
+                return new
+                    PagingResult<AttachmentResult>(attachmentResults, total, currentPage,
+                    pageSize); ;
+            }
+            else
+            {
+                return new PagingResult<AttachmentResult>(new List<AttachmentResult>(), 0, currentPage,
+                    pageSize);
+            }
         }
-
-
     }
 }

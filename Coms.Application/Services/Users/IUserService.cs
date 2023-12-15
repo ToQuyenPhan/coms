@@ -1,4 +1,5 @@
-﻿using ErrorOr;
+﻿using Coms.Application.Services.Common;
+using ErrorOr;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +17,6 @@ namespace Coms.Application.Services.Users
         Task<ErrorOr<UserResult>> AddUser(string fullName, string username, string email, string password, DateTime dob, string image, int roleId, int status);
         Task<ErrorOr<UserResult>> UpdateUser(string fullName, string username, string email, string password, DateTime dob, string image, int roleId, int status, int userId);
         Task<ErrorOr<UserResult>> DeleteUser(int userId);
+        Task<ErrorOr<PagingResult<UserResult>>> GetUsersByFilter(string? userName, string? email, int? role, int? status, int currentPage, int pageSize);
     }
 }

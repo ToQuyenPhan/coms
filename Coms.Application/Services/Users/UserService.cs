@@ -1,9 +1,12 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
+using Coms.Application.Services.Common;
+using Coms.Application.Services.Contracts;
 using Coms.Application.Services.Services;
 using Coms.Application.Services.Templates;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
+using LinqKit;
 using Microsoft.Office.Interop.Word;
 using System;
 using System.Collections.Generic;
@@ -11,6 +14,8 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using static SkiaSharp.HarfBuzz.SKShaper;
 
 namespace Coms.Application.Services.Users
 {
@@ -277,6 +282,64 @@ namespace Coms.Application.Services.Users
             catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<PagingResult<UserResult>>> GetUsersByFilter(string? userName, string? email, int? role, int? status, int currentPage, int pageSize)
+        {
+            IList<User> users = new List<User>();
+            users = _userRepository.GetUsers().Result;
+            if (users.Count() > 0)
+            {
+                var predicate = PredicateBuilder.New<User>(true);
+                if (!string.IsNullOrEmpty(userName))
+                {
+                    predicate = predicate.And(c => c.Username.ToUpper().Contains(userName.Trim().ToUpper()));
+                }
+                if (!string.IsNullOrEmpty(email))
+                {
+                    predicate = predicate.And(c => c.Email.ToUpper().Contains(email.Trim().ToUpper()));
+                }
+                if (role is not null)
+                {
+                    predicate = predicate.And(c => c.RoleId == role);
+                }
+                if (status is not null)
+                {
+                    predicate = predicate.And(c => c.Status == status);
+                }
+                IList<User> filteredList = users.Where(predicate).ToList();
+                var total = filteredList.Count();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    filteredList = filteredList.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                            .ToList();
+                }
+                IList<UserResult> results = new List<UserResult>();
+                foreach (var user in filteredList)
+                {
+                    var result = new UserResult()
+                    {
+                        Id = user.Id,
+                        FullName = user.FullName,
+                        Username = user.Username,
+                        Dob = user.Dob,
+                        Email = user.Email,
+                        Image = user.Image,
+                        Password = user.Password,
+                        Status = user.Status,
+                        RoleId = user.RoleId,
+                        Role = user.Role.RoleName
+                    };
+                    results.Add(result);
+                }
+                return new
+                    PagingResult<UserResult>(results, total, currentPage, pageSize);
+            }
+            else
+            {
+                return new PagingResult<UserResult>(new List<UserResult>(), 0, currentPage,
+                    pageSize);
             }
         }
     }

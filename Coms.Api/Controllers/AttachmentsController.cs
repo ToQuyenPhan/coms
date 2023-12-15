@@ -1,11 +1,10 @@
 ﻿using Coms.Application.Services.Common;
 using Coms.Application.Services.Contracts;
-using Coms.Contracts.Contracts;
+using Coms.Contracts.Attachments;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Security.Claims;
 
 namespace Coms.Api.Controllers
 {
@@ -20,12 +19,13 @@ namespace Coms.Api.Controllers
             _attachmentService = attachmentService;
         }
 
-        //add get all attachments by "contract id"
-        [HttpGet("{contractId}")]
+        [HttpGet("all")]
         [SwaggerOperation(Summary = "Get all attachments of a contract in Coms")]
-        public IActionResult GetAttachmentsByContractId(int contractId)
+        public IActionResult GetAttachmentsByContractId([FromQuery] AttachmentRequest request)
         {
-            ErrorOr<IList<AttachmentResult>> result = _attachmentService.GetAttachmentsByContractId(contractId).Result;
+            ErrorOr<PagingResult<AttachmentResult>> result = 
+                    _attachmentService.GetAttachmentsByContractId(request.ContractId, request.CurrentPage, 
+                    request.PageSize).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

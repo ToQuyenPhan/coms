@@ -5,7 +5,6 @@ namespace Coms.Application.Services.Contracts
 {
     public interface IAttachmentService
     {
-        //add get all attachments by contract id
-        Task<ErrorOr<IList<AttachmentResult>>> GetAttachmentsByContractId(int contractId);
+        Task<ErrorOr<PagingResult<AttachmentResult>>> GetAttachmentsByContractId(int contractId, int currentPage, int pageSize);
     }
 }

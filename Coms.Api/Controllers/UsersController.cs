@@ -1,4 +1,5 @@
-﻿using Coms.Application.Services.Templates;
+﻿using Coms.Application.Services.Common;
+using Coms.Application.Services.Templates;
 using Coms.Application.Services.UserAccesses;
 using Coms.Application.Services.Users;
 using Coms.Contracts.Templates;
@@ -114,6 +115,18 @@ namespace Coms.Api.Controllers
         public IActionResult Delete(int id)
         {
             ErrorOr<UserResult> result = _userService.DeleteUser(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet("filter")]
+        [SwaggerOperation(Summary = "Get all users by filter in Coms")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult GetUsersByFilter([FromQuery] UserFilterRequest request)
+        {
+            ErrorOr<PagingResult<UserResult>> result = _userService.GetUsersByFilter(request.UserName,request.Email, request.Role,request.Status, request.CurrentPage, request.PageSize).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
