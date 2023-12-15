@@ -21,12 +21,23 @@ namespace Coms.Api.Controllers
         }
 
         [HttpGet("all")]
-        [SwaggerOperation(Summary = "Get all comment of your contracts in Coms")]
+        [SwaggerOperation(Summary = "Get all comments of your contracts in Coms")]
         public IActionResult GetYourContracts([FromQuery] PagingRequest request)
         {
             ErrorOr<PagingResult<CommentResult>> result =
                 _commentService.GetAllComments(int.Parse(this.User.Claims.First(i => i.Type ==
                 ClaimTypes.NameIdentifier).Value), request.CurrentPage, request.PageSize).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet]
+        [SwaggerOperation(Summary = "Get details of a comment in Coms")]
+        public IActionResult GetCommentDetails([FromQuery] int id)
+        {
+            ErrorOr<CommentDetailResult> result = _commentService.GetCommentDetail(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

@@ -27,7 +27,8 @@ namespace Coms.Infrastructure.Persistence.Repositories
 
         public async Task<Comment?> GetComment(int id)
         {
-            return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id), null);
+            return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id), 
+                    new System.Linq.Expressions.Expression<Func<Comment, object>>[] { c => c.ActionHistory });
         }
     }
 }

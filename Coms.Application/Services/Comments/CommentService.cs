@@ -1,7 +1,9 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
+using Coms.Domain.Enum;
 using ErrorOr;
+using System.ComponentModel.Design;
 
 namespace Coms.Application.Services.Comments
 {
@@ -10,6 +12,7 @@ namespace Coms.Application.Services.Comments
         private readonly ICommentRepository _commentRepository;
         private readonly IActionHistoryRepository _actionHistoryRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IContractRepository _contractRepository;
         private readonly IAccessRepository _accessRepository;
         private readonly IUserAccessRepository _userAccessRepository;
 
@@ -17,13 +20,15 @@ namespace Coms.Application.Services.Comments
             IActionHistoryRepository actionHistoryRepository,
             IUserRepository userRepository,
             IAccessRepository accessRepository,
-            IUserAccessRepository userAccessRepository)
+            IUserAccessRepository userAccessRepository,
+            IContractRepository contractRepository)
         {
             _commentRepository = commentRepository;
             _actionHistoryRepository = actionHistoryRepository;
             _userRepository = userRepository;
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
+            _contractRepository = contractRepository;
         }
 
         public async Task<ErrorOr<PagingResult<CommentResult>>> GetAllComments(int userId, int currentPage,
@@ -96,9 +101,9 @@ namespace Coms.Application.Services.Comments
         public async Task<ErrorOr<CommentResult>> DismissComment(int id) {
             try
             {
-                if(_commentRepository.GetComment(id).Result is not null)
+                var comment = await _commentRepository.GetComment(id);
+                if (comment is not null)
                 {
-                    var comment = await _commentRepository.GetComment(id);
                     comment.Status = Domain.Enum.CommentStatus.Dismissed;
                     await _commentRepository.UpdateComment(comment);
                     var commentResult = new CommentResult()
@@ -114,7 +119,7 @@ namespace Coms.Application.Services.Comments
                 }
                 else
                 {
-                    return Error.NotFound();
+                    return Error.NotFound("404", "Comment is not found!");
                 }
             }catch(Exception ex)
             {
@@ -179,7 +184,41 @@ namespace Coms.Application.Services.Comments
             }
         }
         
-        
+        public async Task<ErrorOr<CommentDetailResult>> GetCommentDetail(int id)
+        {
+            var comment = await _commentRepository.GetComment(id);
+            if (comment is not null)
+            {
+                if (comment.Status.Equals(CommentStatus.Inactive))
+                {
+                    return Error.Conflict("409", "Comment is inactive!");
+                }
+                var contract = await _contractRepository.GetContract(comment.ActionHistory.ContractId);
+                if(contract is not null)
+                {
+                    if (contract.Status.Equals(DocumentStatus.Deleted))
+                    {
+                        return Error.Conflict("409", "Contract no longer exists!");
+                    }
+                    else
+                    {
+                        CommentDetailResult result = new CommentDetailResult()
+                        {
+                            ContractId = contract.Id
+                        };
+                        return result;
+                    }
+                }
+                else
+                {
+                    return Error.NotFound("404", "Contract is not found!");
+                }
+            }
+            else
+            {
+                return Error.NotFound("404", "Comment is not found!");
+            }
+        }
 
         private string AsTimeAgo(DateTime dateTime)
         {
