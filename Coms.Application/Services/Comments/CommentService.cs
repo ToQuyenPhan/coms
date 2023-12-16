@@ -3,7 +3,6 @@ using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
-using System.ComponentModel.Design;
 
 namespace Coms.Application.Services.Comments
 {
@@ -13,22 +12,22 @@ namespace Coms.Application.Services.Comments
         private readonly IActionHistoryRepository _actionHistoryRepository;
         private readonly IUserRepository _userRepository;
         private readonly IContractRepository _contractRepository;
-        private readonly IAccessRepository _accessRepository;
-        private readonly IUserAccessRepository _userAccessRepository;
+        private readonly IUserFlowDetailsRepository _userFlowDetailsRepository;
+        private readonly IFlowDetailRepository _flowDetailRepository;
 
         public CommentService(ICommentRepository commentRepository,
             IActionHistoryRepository actionHistoryRepository,
             IUserRepository userRepository,
-            IAccessRepository accessRepository,
-            IUserAccessRepository userAccessRepository,
-            IContractRepository contractRepository)
+            IContractRepository contractRepository,
+            IUserFlowDetailsRepository userFlowDetailsRepository,
+            IFlowDetailRepository flowDetailRepository)
         {
             _commentRepository = commentRepository;
             _actionHistoryRepository = actionHistoryRepository;
             _userRepository = userRepository;
-            _accessRepository = accessRepository;
-            _userAccessRepository = userAccessRepository;
             _contractRepository = contractRepository;
+            _userFlowDetailsRepository = userFlowDetailsRepository;
+            _flowDetailRepository = flowDetailRepository;
         }
 
         public async Task<ErrorOr<PagingResult<CommentResult>>> GetAllComments(int userId, int currentPage,
@@ -127,47 +126,63 @@ namespace Coms.Application.Services.Comments
             }
         }
 
-        //add get all comment of a contract
         public async Task<ErrorOr<PagingResult<CommentResult>>> GetContractComments(int contractId, int currentPage,
                            int pageSize)
         {
-            if (_actionHistoryRepository.GetCommentActionByContractId(contractId).Result is not null)
+            var histories = await _actionHistoryRepository.GetCommentActionByContractId(contractId);
+            if (histories is not null)
             {
-                var histories = await _actionHistoryRepository.GetCommentActionByContractId(contractId);
                 IList<CommentResult> comments = new List<CommentResult>();
-                //var accesses = await _accessRepository.GetAccessByContractId(contractId);
-                IList<User_Access> userAccesses = new List<User_Access>();
-                //foreach(var access in accesses)
-                //{
-                    //var userAccess = await _userAccessRepository.GetByAccessId(access.Id);
-                    //if(userAccess is not null)
-                    //{
-                    //    userAccesses.Add(userAccess);
-                    //}
-                //}
                 foreach (var commentHistory in histories)
                 {
                     var comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);
-                    //var userRole = userAccesses.Where(ua => ua.UserId.Equals(commentHistory.UserId)).FirstOrDefault();
-                    //string accessRole = userRole.Access.AccessRole.ToString();
                     if (comment is not null)
                     {
-                        //var commentResult = new CommentResult()
-                        //{
-                        //    Id = comment.Id,
-                        //    Content = comment.Content,
-                        //    ActionHistoryId = comment.ActionHistoryId,
-                        //    ReplyId = comment.ReplyId,
-                        //    Status = (int)comment.Status,
-                        //    StatusString = comment.Status.ToString(),
-                        //    AccessRole = accessRole,
-                        //};
-                        //commentResult.Long = AsTimeAgo(comment.ActionHistory.CreatedAt);
-                        //commentResult.CreatedAt = comment.ActionHistory.CreatedAt.ToString();
-                        //var user = await _userRepository.GetUser((int)comment.ActionHistory.UserId);
-                        //commentResult.UserId = user.Id;
-                        //commentResult.FullName = user.FullName;
-                        //comments.Add(commentResult);
+                        var commentResult = new CommentResult()
+                        {
+                            Id = comment.Id,
+                            Content = comment.Content,
+                            ActionHistoryId = comment.ActionHistoryId,
+                            ReplyId = comment.ReplyId,
+                            Status = (int)comment.Status,
+                            StatusString = comment.Status.ToString()
+                        };
+                        commentResult.Long = AsTimeAgo(commentHistory.CreatedAt);
+                        commentResult.CreatedAt = commentHistory.CreatedAt.ToString();
+                        commentResult.UserId = commentHistory.User.Id;
+                        commentResult.FullName = commentHistory.User.FullName;
+                        if (commentHistory.User.Image is not null)
+                        {
+                            commentResult.UserImage = commentHistory.User.Image;
+                        }
+                        var userFlowDetails = 
+                            await _userFlowDetailsRepository
+                            .GetUserFlowDetailsByUserIdAndContractId(commentHistory.User.Id, commentHistory.ContractId);
+                        if(userFlowDetails is not null)
+                        {
+                            int numberOfRole = 0;
+                            foreach (var userFlowDetail in userFlowDetails)
+                            {
+                                var flowDetail = await _flowDetailRepository.GetFlowDetail(userFlowDetail.FlowDetailId);
+                                if(flowDetail is not null)
+                                {
+                                    numberOfRole++;
+                                    if(numberOfRole > 1)
+                                    {
+                                        commentResult.AccessRole += ", " + flowDetail.FlowRole.ToString();
+                                    }
+                                    else
+                                    {
+                                        commentResult.AccessRole = flowDetail.FlowRole.ToString(); 
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            commentResult.AccessRole = "Author";
+                        }
+                        comments.Add(commentResult);
                     }
                 }
                 int total = comments.Count();

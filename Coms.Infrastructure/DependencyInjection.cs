@@ -44,6 +44,7 @@ namespace Coms.Infrastructure
             services.AddScoped<IAproveWorkflowRepository, AproveWorkflowRepository>();
             services.AddScoped<ITemplateFieldRepository, TemplateFieldRepository>();
             services.AddScoped<IUserFlowDetailsRepository, UserFlowDetailsRepository>();
+            services.AddScoped<IFlowDetailRepository, FlowDetailRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             //add attachment repository
             services.AddScoped<IAttachmentRepository, AttachmentRepository>();

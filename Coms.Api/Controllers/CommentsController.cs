@@ -44,18 +44,6 @@ namespace Coms.Api.Controllers
             );
         }
 
-        [HttpPut("dismiss")]
-        [SwaggerOperation(Summary = "Dismiss a comment in Coms")]
-        public IActionResult DismissComment([FromQuery] int id)
-        {
-            ErrorOr<CommentResult> result = _commentService.DismissComment(id).Result;
-            return result.Match(
-                result => Ok(result),
-                errors => Problem(errors)
-            );
-        }
-
-        //get all comment of a contract
         [HttpGet("contract")]
         [SwaggerOperation(Summary = "Get all comment of a contract in Coms")]
         public IActionResult GetContractComments([FromQuery] int contractId, [FromQuery] PagingRequest request)
@@ -66,6 +54,17 @@ namespace Coms.Api.Controllers
                                result => Ok(result),
                                               errors => Problem(errors)
                                                          );
+        }
+
+        [HttpPut("dismiss")]
+        [SwaggerOperation(Summary = "Dismiss a comment in Coms")]
+        public IActionResult DismissComment([FromQuery] int id)
+        {
+            ErrorOr<CommentResult> result = _commentService.DismissComment(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
         }
     }
 }
