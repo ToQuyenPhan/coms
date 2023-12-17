@@ -30,5 +30,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id), 
                     new System.Linq.Expressions.Expression<Func<Comment, object>>[] { c => c.ActionHistory });
         }
+
+        public async Task AddComment(Comment comment)
+        {
+            await _genericRepository.CreateAsync(comment);
+        }
     }
 }

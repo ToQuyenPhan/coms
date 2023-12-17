@@ -7,5 +7,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<Comment?> GetByActionHistoryId(int actionHistoryId);
         Task UpdateComment(Comment comment);
         Task<Comment?> GetComment(int id);
+        Task AddComment(Comment comment);
     }
 }

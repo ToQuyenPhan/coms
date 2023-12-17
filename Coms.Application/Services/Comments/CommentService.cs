@@ -186,6 +186,7 @@ namespace Coms.Application.Services.Comments
                     }
                 }
                 int total = comments.Count();
+                comments = comments.OrderByDescending(c => c.CreatedAt).ToList();
                 if (currentPage > 0 && pageSize > 0)
                 {
                     comments = comments.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
@@ -232,6 +233,54 @@ namespace Coms.Application.Services.Comments
             else
             {
                 return Error.NotFound("404", "Comment is not found!");
+            }
+        }
+
+        public async Task<ErrorOr<CommentResult>> LeaveComment(int userId, int contractId, string content, 
+                int? replyId)
+        {
+            try
+            {
+                var contract = await _contractRepository.GetContract(contractId);
+                if(contract is not null)
+                {
+                    var actionHistory = new ActionHistory()
+                    {
+                        ActionType = ActionType.Commented,
+                        CreatedAt = DateTime.Now,
+                        UserId = userId,
+                        ContractId = contractId
+                    };
+                    await _actionHistoryRepository.AddActionHistory(actionHistory);
+                    var comment = new Comment()
+                    {
+                        Content = content,
+                        Status = CommentStatus.Active,
+                        ActionHistoryId = actionHistory.Id
+                    };
+                    if(replyId is not null && replyId > 0)
+                    {
+                        comment.ReplyId = replyId;
+                    }
+                    await _commentRepository.AddComment(comment);
+                    var commentResult = new CommentResult()
+                    {
+                        Id = comment.Id,
+                        Content = comment.Content,
+                        ActionHistoryId = comment.ActionHistoryId,
+                        ReplyId = comment.ReplyId,
+                        Status = (int)comment.Status,
+                        StatusString = comment.Status.ToString()
+                    };
+                    return commentResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Contract is not found!");
+                }
+            }catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
             }
         }
 

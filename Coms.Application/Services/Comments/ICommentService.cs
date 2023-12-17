@@ -9,5 +9,6 @@ namespace Coms.Application.Services.Comments
         Task<ErrorOr<CommentResult>> DismissComment(int id);
         Task<ErrorOr<PagingResult<CommentResult>>> GetContractComments(int contractId, int currentPage, int pageSize);
         Task<ErrorOr<CommentDetailResult>> GetCommentDetail(int id);
+        Task<ErrorOr<CommentResult>> LeaveComment(int userId, int contractId, string content, int? replyId);
     }
 }

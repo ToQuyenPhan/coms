@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Services.Comments;
 using Coms.Application.Services.Common;
+using Coms.Contracts.Comments;
 using Coms.Contracts.Common.Paging;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
@@ -54,6 +55,19 @@ namespace Coms.Api.Controllers
                                result => Ok(result),
                                               errors => Problem(errors)
                                                          );
+        }
+
+        [HttpPost]
+        [SwaggerOperation(Summary = "Leave a comment in Coms")]
+        public IActionResult LeaveComment([FromBody] CommentFormRequest request)
+        {
+            ErrorOr<CommentResult> result = _commentService.LeaveComment(
+                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.ContractId, 
+                    request.Content, request.ReplyId).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
         }
 
         [HttpPut("dismiss")]
