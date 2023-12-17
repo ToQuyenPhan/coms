@@ -4,7 +4,6 @@ using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
 using LinqKit;
-using System.Linq;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -403,6 +402,7 @@ namespace Coms.Application.Services.Contracts
                 return Error.Failure("500", ex.Message);
             }
         }
+
         public async Task<ErrorOr<ContractResult>> AddContract(string contractName, string code, int partnerId, int authorId, int signerId, int templateId, DateTime effectiveDate,
                 int[] contractCosts, int status)
         {
@@ -753,6 +753,34 @@ namespace Coms.Application.Services.Contracts
             catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<AuthorResult>> IsAuthor(int userId, int contractId)
+        {
+            var contract = await _contractRepository.GetContract(contractId);
+            if(contract is not null)
+            {
+                if (contract.Status.Equals(DocumentStatus.Deleted))
+                {
+                    return Error.Conflict("409", "Contract no longer exist!");
+                }
+                else
+                {
+                    var actionHistory = await _actionHistoryRepository.GetCreateActionByContractId(contractId);
+                    if (actionHistory.UserId.Equals(userId))
+                    {
+                        return new AuthorResult() { IsAuthor = true };
+                    }
+                    else
+                    {
+                        return new AuthorResult() { IsAuthor = false };
+                    }
+                }
+            }
+            else
+            {
+                return Error.NotFound("404", "Contract is not found!");
             }
         }
     }

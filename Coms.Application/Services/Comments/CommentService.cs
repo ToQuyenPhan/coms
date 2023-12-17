@@ -244,6 +244,10 @@ namespace Coms.Application.Services.Comments
                 var contract = await _contractRepository.GetContract(contractId);
                 if(contract is not null)
                 {
+                    if (contract.Status.Equals(DocumentStatus.Deleted))
+                    {
+                        return Error.Conflict("409", "Contract no longer exist!");
+                    }
                     var actionHistory = new ActionHistory()
                     {
                         ActionType = ActionType.Commented,
