@@ -17,6 +17,7 @@ using Coms.Application.Services.ContractFiles;
 using Coms.Application.Services.Partners;
 using Coms.Application.Services.Users;
 using Coms.Application.Services.UserAccesses;
+using Coms.Application.Services.UserFlowDetails;
 
 namespace Coms.Application
 {
@@ -42,6 +43,7 @@ namespace Coms.Application
             services.AddScoped<IPartnerService, PartnerService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserAccessService, UserAccessService>();
+            services.AddScoped<IUserFlowDetailService, UserFlowDetailService>();
             return services;
         }
     }

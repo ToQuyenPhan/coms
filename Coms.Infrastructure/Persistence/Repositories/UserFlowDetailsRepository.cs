@@ -20,6 +20,14 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return (list.Count() > 0) ? list : null;
         }
 
+        public async Task<IList<User_FlowDetail>?> GetUserFlowDetailsByContractId(int contractId)
+        {
+            var list = await _genericRepository.WhereAsync(ufd => ufd.ContractId.Equals(contractId),
+                new System.Linq.Expressions.Expression<Func<User_FlowDetail, object>>[] { ufd => ufd.User,
+                        ufd => ufd.Contract, ufd => ufd.FlowDetail });
+            return (list.Count() > 0) ? list : null;
+        }
+
         public async Task<IList<User_FlowDetail>?> GetUserFlowDetailsByUserIdAndContractId(int userId, int contractId)
         {
             var list = await _genericRepository.WhereAsync(ufd => ufd.UserId.Equals(userId) 
