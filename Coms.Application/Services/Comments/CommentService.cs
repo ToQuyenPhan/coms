@@ -288,6 +288,37 @@ namespace Coms.Application.Services.Comments
             }
         }
 
+        public async Task<ErrorOr<CommentResult>> DeleteComment(int id)
+        {
+            try
+            {
+                var comment = await _commentRepository.GetComment(id);
+                if (comment is not null)
+                {
+                    comment.Status = CommentStatus.Inactive;
+                    await _commentRepository.UpdateComment(comment);
+                    var commentResult = new CommentResult()
+                    {
+                        Id = comment.Id,
+                        Content = comment.Content,
+                        ActionHistoryId = comment.ActionHistoryId,
+                        ReplyId = comment.ReplyId,
+                        Status = (int)comment.Status,
+                        StatusString = comment.Status.ToString()
+                    };
+                    return commentResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Comment is not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
         private string AsTimeAgo(DateTime dateTime)
         {
             TimeSpan timeSpan = DateTime.Now.Subtract(dateTime);

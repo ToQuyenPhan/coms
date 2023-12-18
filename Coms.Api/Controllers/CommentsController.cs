@@ -80,5 +80,16 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpDelete]
+        [SwaggerOperation(Summary = "Delete a comment in Coms")]
+        public IActionResult DeleteComment([FromQuery] int id)
+        {
+            ErrorOr<CommentResult> result = _commentService.DeleteComment(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }
