@@ -9,7 +9,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
-    [Authorize(Roles = "Staff")]
+    [Authorize(Roles = "Staff, Manager")]
     public class AttachmentsController : ApiController
     {
         private readonly IAttachmentService _attachmentService;
@@ -31,7 +31,16 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
                  );
         }
-        
 
+        [HttpDelete]
+        [SwaggerOperation(Summary = "Delete an attachment of a contract in Coms")]
+        public IActionResult DeleteAttachment([FromQuery] int id)
+        {
+            ErrorOr<AttachmentResult> result = _attachmentService.DeleteAttachment(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+                 );
+        }
     }
 }

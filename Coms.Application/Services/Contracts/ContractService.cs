@@ -380,8 +380,6 @@ namespace Coms.Application.Services.Contracts
                         Version = contract.Version,
                         CreatedDate = contract.CreatedDate,
                         CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
-                        UpdatedDate = contract.UpdatedDate,
-                        UpdatedDateString = contract.UpdatedDate.ToString(),
                         EffectiveDate = contract.EffectiveDate,
                         EffectiveDateString = contract.EffectiveDate.ToString(),
                         Status = (int)contract.Status,
@@ -390,6 +388,13 @@ namespace Coms.Application.Services.Contracts
                         Code = contract.Code,
                         Link = contract.Link
                     };
+                    if(contract.UpdatedDate is not null)
+                    {
+                        contractResult.UpdatedDate = contract.UpdatedDate;
+                        contractResult.UpdatedDateString = contract.UpdatedDate.ToString();
+                    }
+                    var template = await _templateRepository.GetTemplate(contract.TemplateId);
+                    contractResult.ContractCategory = template.ContractCategory.CategoryName;
                     return contractResult;
                 }
                 else

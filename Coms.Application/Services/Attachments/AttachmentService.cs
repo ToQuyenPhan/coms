@@ -44,5 +44,36 @@ namespace Coms.Application.Services.Contracts
                     pageSize);
             }
         }
+
+        public async Task<ErrorOr<AttachmentResult>> DeleteAttachment(int id)
+        {
+            try
+            {
+                var attachment = await _attachmentRepository.GetAttachment(id);
+                if (attachment is not null)
+                {
+                    attachment.Status = Domain.Enum.AttachmentStatus.Inactive;
+                    await _attachmentRepository.UpdateAttachment(attachment);
+                    var attachmentResult = new AttachmentResult()
+                    {
+                        Id = attachment.Id,
+                        FileName = attachment.FileName,
+                        FileLink = attachment.FileLink,
+                        UploadDate = attachment.UploadDate,
+                        Description = attachment.Description,
+                        Status = attachment.Status,
+                        ContractId = attachment.ContractId,
+                    };
+                    return attachmentResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Attachment is not found!");
+                }
+            }catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
     }
 }

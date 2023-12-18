@@ -18,6 +18,15 @@ namespace Coms.Infrastructure.Persistence.Repositories
                 a.Status != Domain.Enum.AttachmentStatus.Inactive, null);
             return (list.Count() > 0) ? list : null;
         }
+
+        public async Task UpdateAttachment(Attachment attachment)
+        {
+            await _genericRepository.UpdateAsync(attachment);
+        }
+
+        public async Task<Attachment?> GetAttachment(int id)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(a => a.Id.Equals(id));
+        }
     }
-    
 }
