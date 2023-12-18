@@ -11,5 +11,6 @@ namespace Coms.Application.Services.Comments
         Task<ErrorOr<CommentDetailResult>> GetCommentDetail(int id);
         Task<ErrorOr<CommentResult>> LeaveComment(int userId, int contractId, string content, int? replyId);
         Task<ErrorOr<CommentResult>> DeleteComment(int id);
+        Task<ErrorOr<CommentResult>> EditComment(int id, string content);
     }
 }

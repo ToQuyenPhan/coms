@@ -11,5 +11,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<ActionHistory> GetActionHistoryById(int id);
         Task AddActionHistory(ActionHistory actionHistory);
         Task<IList<ActionHistory>?> GetCommentActionByContractId(int contractId);
+        Task UpdateActionHistory(ActionHistory actionHistory);
     }
 }

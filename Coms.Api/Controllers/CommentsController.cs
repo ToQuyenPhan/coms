@@ -81,6 +81,17 @@ namespace Coms.Api.Controllers
             );
         }
 
+        [HttpPut]
+        [SwaggerOperation(Summary = "Edit a comment in Coms")]
+        public IActionResult EditComment([FromBody] CommentFormUpdateRequest request)
+        {
+            ErrorOr<CommentResult> result = _commentService.EditComment(request.Id, request.Content).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
         [HttpDelete]
         [SwaggerOperation(Summary = "Delete a comment in Coms")]
         public IActionResult DeleteComment([FromQuery] int id)

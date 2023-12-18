@@ -3,6 +3,7 @@ using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
+using System.Diagnostics.Contracts;
 
 namespace Coms.Application.Services.Comments
 {
@@ -296,6 +297,40 @@ namespace Coms.Application.Services.Comments
                 if (comment is not null)
                 {
                     comment.Status = CommentStatus.Inactive;
+                    await _commentRepository.UpdateComment(comment);
+                    var commentResult = new CommentResult()
+                    {
+                        Id = comment.Id,
+                        Content = comment.Content,
+                        ActionHistoryId = comment.ActionHistoryId,
+                        ReplyId = comment.ReplyId,
+                        Status = (int)comment.Status,
+                        StatusString = comment.Status.ToString()
+                    };
+                    return commentResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Comment is not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<CommentResult>> EditComment(int id, string content)
+        {
+            try
+            {
+                var comment = await _commentRepository.GetComment(id);
+                if (comment is not null)
+                {
+                    //var actionHistory = await _actionHistoryRepository.GetActionHistoryById((int)comment.ActionHistoryId); 
+                    //actionHistory.CreatedAt = DateTime.Now;
+                    //await _actionHistoryRepository.UpdateActionHistory(actionHistory);
+                    comment.Content = content;
                     await _commentRepository.UpdateComment(comment);
                     var commentResult = new CommentResult()
                     {

@@ -64,6 +64,11 @@ namespace Coms.Infrastructure.Persistence.Repositories
                                                   ah => ah.Contract, ah => ah.User});
             return (list.Count() > 0) ? list : null;
         }
+
+        public async Task UpdateActionHistory(ActionHistory actionHistory)
+        {
+            await _genericRepository.UpdateAsync(actionHistory);
+        }
     }
 
 }
