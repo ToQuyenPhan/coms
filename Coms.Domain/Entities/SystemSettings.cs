@@ -35,5 +35,17 @@ namespace Coms.Domain.Entities
         [MaxLength(50)]
         [EmailAddress]
         public string Email { get; set; }
+
+        [Required]
+        [MaxLength(150)]
+        public string BankAccount { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string BankAccountNumber { get; set; }
+
+        [Required]
+        [MaxLength(250)]
+        public string BankName { get; set; }
     }
 }

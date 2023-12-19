@@ -51,7 +51,8 @@ namespace Coms.Application.Services.TemplateFields
                                 templateField.FieldName.Contains("Signer") || 
                                 templateField.FieldName.Contains("Created Date") ||
                                 templateField.FieldName.Contains("Contract Code") ||
-                                templateField.FieldName.Contains("Contract Service"))
+                                templateField.FieldName.Contains("Contract Service") ||
+                                templateField.FieldName.Equals("Payment"))
                         {
                             isReadOnly = true;
                             if (templateField.FieldName.Contains("Partner"))
@@ -90,7 +91,8 @@ namespace Coms.Application.Services.TemplateFields
                                     return Error.NotFound("404", "Partner is not found!");
                                 }
                             }
-                            if (templateField.FieldName.Contains("Company"))
+                            if (templateField.FieldName.Contains("Company") || 
+                                    templateField.FieldName.Contains("Payment"))
                             {
                                 var systemSettings = await _systemSettingsRepository.GetSystemSettings();
                                 if (systemSettings is not null)
@@ -114,6 +116,9 @@ namespace Coms.Application.Services.TemplateFields
                                             break;
                                         case "Company Email":
                                             content = systemSettings.Email;
+                                            break;
+                                        case "Payment":
+                                            content = systemSettings.BankName;
                                             break;
                                         default: break;
                                     }
@@ -190,6 +195,13 @@ namespace Coms.Application.Services.TemplateFields
                             IsReadOnly = isReadOnly,
                             Content = content,
                         };
+                        templateFieldResult.Type = "text";
+                        if (templateFieldResult.Name.Contains("Duration"))
+                        {
+                            templateFieldResult.Name += " (month)";
+                            templateFieldResult.Type = "number";
+                            templateFieldResult.MinValue = 0;
+                        }
                         results.Add(templateFieldResult);
                     }
                     return results.ToList();
