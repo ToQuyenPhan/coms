@@ -17,10 +17,10 @@ namespace Coms.Api.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetTemplateFields([FromQuery] int contractCategoryId, int partnerId)
+        public IActionResult GetTemplateFields([FromQuery] int contractCategoryId, int partnerId, int serviceId)
         {
             ErrorOr<IList<TemplateFieldResult>> result = _templateFieldService.GetTemplateFields(contractCategoryId, 
-                    partnerId).Result;
+                    partnerId, serviceId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

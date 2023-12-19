@@ -1,16 +1,7 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
-using Coms.Application.Services.Common;
-using Coms.Application.Services.ContractCosts;
-using Coms.Application.Services.Contracts;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
-using LinqKit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Coms.Application.Services.Services
 {
@@ -60,9 +51,9 @@ namespace Coms.Application.Services.Services
         {
             try
             {
-                if (_serviceRepository.GetServiceById(serviceId).Result is not null)
+                if (_serviceRepository.GetService(serviceId).Result is not null)
                 {
-                    var service = await _serviceRepository.GetServiceById(serviceId);
+                    var service = await _serviceRepository.GetService(serviceId);
                     var result = new ServiceResult
                     {
                         Id = service.Id,
@@ -97,7 +88,7 @@ namespace Coms.Application.Services.Services
                     Status =ServiceStatus.Active
                 };
                 await _serviceRepository.AddService(service);
-                var created = _serviceRepository.GetServiceById(service.Id).Result;
+                var created = _serviceRepository.GetService(service.Id).Result;
                 var result = new ServiceResult
                 {
                     Id = service.Id,
@@ -120,9 +111,9 @@ namespace Coms.Application.Services.Services
         {
             try
             {
-                if (_serviceRepository.GetServiceById(serviceId).Result is not null)
+                if (_serviceRepository.GetService(serviceId).Result is not null)
                 {
-                    var service = await _serviceRepository.GetServiceById(serviceId);
+                    var service = await _serviceRepository.GetService(serviceId);
                     service.ServiceName = serviceName;
                     service.Description = description;
                     service.Price = price;
@@ -153,9 +144,9 @@ namespace Coms.Application.Services.Services
         {
             try
             {
-                if (_serviceRepository.GetServiceById(serviceId).Result is not null)
+                if (_serviceRepository.GetService(serviceId).Result is not null)
                 {
-                    var service = await _serviceRepository.GetServiceById(serviceId);
+                    var service = await _serviceRepository.GetService(serviceId);
                     service.Status = ServiceStatus.Inactive;
                     await _serviceRepository.UpdateService(service);    
                     var result = new ServiceResult
@@ -172,6 +163,40 @@ namespace Coms.Application.Services.Services
                 else
                 {
                     return Error.NotFound("Service not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<IList<ServiceResult>>> GetActiveServices()
+        {
+            try
+            {
+                var services = await _serviceRepository.GetServices();
+                if (services is not null)
+                {
+                    IList<ServiceResult> results = new List<ServiceResult>();
+                    foreach(var service in services)
+                    {
+                        var result = new ServiceResult
+                        {
+                            Id = service.Id,
+                            ServiceName = service.ServiceName,
+                            Description = service.Description,
+                            Price = service.Price,
+                            Status = (int)service.Status,
+                            StatusString = service.Status.ToString()
+                        };
+                        results.Add(result);
+                    }
+                    return results.ToList();
+                }
+                else
+                {
+                    return Error.NotFound("404", "Service not found!");
                 }
             }
             catch (Exception ex)

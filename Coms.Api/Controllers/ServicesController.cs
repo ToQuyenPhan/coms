@@ -21,6 +21,18 @@ namespace Coms.Api.Controllers
             _serviceService = serviceService;
         }
 
+        [HttpGet("active")]
+        [SwaggerOperation(Summary = "Get active services in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult GetActiveServices()
+        {
+            ErrorOr<IList<ServiceResult>> result = _serviceService.GetActiveServices().Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
         [HttpGet("gets")]
         [SwaggerOperation(Summary = "Get services by serviceName in Coms")]
         [Authorize(Roles = "Staff, Manager")]
