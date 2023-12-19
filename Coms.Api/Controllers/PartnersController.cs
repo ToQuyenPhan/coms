@@ -1,6 +1,4 @@
-﻿using Coms.Application.Services.ContractCategories;
-using Coms.Application.Services.PartnerReviews;
-using Coms.Application.Services.Partners;
+﻿using Coms.Application.Services.Partners;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +18,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet("active")]
         [SwaggerOperation(Summary = "Get all active partners of Coms")]
-        [Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Staff, Manager")]
         public IActionResult GetActiveContractCategories()
         {
             ErrorOr<IList<PartnerResult>> result =
@@ -38,6 +36,18 @@ namespace Coms.Api.Controllers
             ErrorOr<PartnerResult> result =
                 _partnerService.GetPartner(int.Parse(this.User.Claims.First(i =>
                 i.Type == ClaimTypes.NameIdentifier).Value)).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet]
+        [SwaggerOperation(Summary = "Get a partner by id in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult GetPartner([FromQuery] int id)
+        {
+            ErrorOr<PartnerResult> result = _partnerService.GetPartner(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
