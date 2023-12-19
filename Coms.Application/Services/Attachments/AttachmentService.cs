@@ -1,8 +1,10 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
+using Coms.Application.Services.Contracts;
+using Coms.Domain.Entities;
 using ErrorOr;
 
-namespace Coms.Application.Services.Contracts
+namespace Coms.Application.Services.Attachments
 {
     public class AttachmentService : IAttachmentService
     {
@@ -15,11 +17,11 @@ namespace Coms.Application.Services.Contracts
         public async Task<ErrorOr<PagingResult<AttachmentResult>>> GetAttachmentsByContractId(int contractId, int currentPage,
                 int pageSize)
         {
-            var attachments = await _attachmentRepository.GetAttachmentsByContractId(contractId);
+            IList<Attachment>? attachments = await _attachmentRepository.GetAttachmentsByContractId(contractId);
             if (attachments is not null)
             {
                 int total = attachments.Count;
-                var attachmentResults = attachments.Select(a => new AttachmentResult
+                List<AttachmentResult> attachmentResults = attachments.Select(a => new AttachmentResult
                 {
                     Id = a.Id,
                     FileName = a.FileName,
@@ -29,7 +31,7 @@ namespace Coms.Application.Services.Contracts
                     Status = a.Status,
                     ContractId = a.ContractId,
                 }).OrderByDescending(a => a.UploadDate).ToList();
-                if(currentPage > 0 &&  pageSize > 0)
+                if (currentPage > 0 && pageSize > 0)
                 {
                     attachmentResults = attachmentResults.Skip((currentPage - 1) * pageSize).Take(pageSize)
                             .ToList();
@@ -49,12 +51,12 @@ namespace Coms.Application.Services.Contracts
         {
             try
             {
-                var attachment = await _attachmentRepository.GetAttachment(id);
+                Attachment? attachment = await _attachmentRepository.GetAttachment(id);
                 if (attachment is not null)
                 {
                     attachment.Status = Domain.Enum.AttachmentStatus.Inactive;
                     await _attachmentRepository.UpdateAttachment(attachment);
-                    var attachmentResult = new AttachmentResult()
+                    AttachmentResult attachmentResult = new()
                     {
                         Id = attachment.Id,
                         FileName = attachment.FileName,
@@ -70,7 +72,41 @@ namespace Coms.Application.Services.Contracts
                 {
                     return Error.NotFound("404", "Attachment is not found!");
                 }
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        //add new attachment
+        public async Task<ErrorOr<AttachmentResult>> AddAttachment(string fileName, string fileLink, DateTime uploadDate, string description, int contractId)
+        {
+            try
+            {
+                Attachment attachment = new()
+                {
+                    FileName = fileName,
+                    FileLink = fileLink,
+                    UploadDate = uploadDate,
+                    Description = description,
+                    Status = Domain.Enum.AttachmentStatus.Active,
+                    ContractId = contractId,
+                };
+                await _attachmentRepository.AddAttachment(attachment);
+                AttachmentResult attachmentResult = new()
+                {
+                    Id = attachment.Id,
+                    FileName = attachment.FileName,
+                    FileLink = attachment.FileLink,
+                    UploadDate = attachment.UploadDate,
+                    Description = attachment.Description,
+                    Status = attachment.Status,
+                    ContractId = attachment.ContractId,
+                };
+                return attachmentResult;
+            }
+            catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }
