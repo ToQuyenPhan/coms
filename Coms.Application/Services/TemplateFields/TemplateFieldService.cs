@@ -8,14 +8,26 @@ namespace Coms.Application.Services.TemplateFields
         private readonly ITemplateFieldRepository _templateFieldRepository;
         private readonly ITemplateRepository _templateRepository;
         private readonly IPartnerRepository _partnerRepository;
+        private readonly ISystemSettingsRepository _systemSettingsRepository;
+        private readonly IFlowRepository _flowRepository;
+        private readonly IFlowDetailRepository _flowDetailRepository;
+        private readonly IUserFlowDetailsRepository _userFlowDetailsRepository;
 
         public TemplateFieldService(ITemplateFieldRepository templateFieldRepository,
                 ITemplateRepository templateRepository,
-                IPartnerRepository partnerRepository)
+                IPartnerRepository partnerRepository,
+                ISystemSettingsRepository systemSettingsRepository,
+                IFlowRepository flowRepository,
+                IFlowDetailRepository flowDetailRepository,
+                IUserFlowDetailsRepository userFlowDetailsRepository)
         {
             _templateFieldRepository = templateFieldRepository;
             _templateRepository = templateRepository;
             _partnerRepository = partnerRepository;
+            _systemSettingsRepository = systemSettingsRepository;
+            _flowRepository = flowRepository;
+            _flowDetailRepository = flowDetailRepository;
+            _userFlowDetailsRepository = userFlowDetailsRepository;
         }
 
         public async Task<ErrorOr<IList<TemplateFieldResult>>> GetTemplateFields(int contractCategoryId, int partnerId)
@@ -31,14 +43,17 @@ namespace Coms.Application.Services.TemplateFields
                     {
                         string? content = null;
                         bool isReadOnly = false;
-                        if(templateField.FieldName.Contains("Company") || templateField.FieldName.Contains("Partner") ||
-                                templateField.FieldName.Contains("Signer"))
+                        if (templateField.FieldName.Contains("Company") || templateField.FieldName.Contains("Partner") ||
+                                templateField.FieldName.Contains("Signer") || 
+                                templateField.FieldName.Contains("Created Date") ||
+                                templateField.FieldName.Contains("Contract Code"))
                         {
                             isReadOnly = true;
                             if (templateField.FieldName.Contains("Partner"))
                             {
                                 var partner = await _partnerRepository.GetPartner(partnerId);
-                                if (partner is not null) {
+                                if (partner is not null)
+                                {
                                     switch (templateField.FieldName)
                                     {
                                         case "Partner Name":
@@ -69,6 +84,78 @@ namespace Coms.Application.Services.TemplateFields
                                 {
                                     return Error.NotFound("404", "Partner is not found!");
                                 }
+                            }
+                            if (templateField.FieldName.Contains("Company"))
+                            {
+                                var systemSettings = await _systemSettingsRepository.GetSystemSettings();
+                                if (systemSettings is not null)
+                                {
+                                    switch (templateField.FieldName)
+                                    {
+                                        case "Company Name":
+                                            content = systemSettings.CompanyName;
+                                            break;
+                                        case "Company Address":
+                                            content = systemSettings.Address;
+                                            break;
+                                        case "Company Phone":
+                                            content = systemSettings.Phone;
+                                            break;
+                                        case "Company Tax Code":
+                                            content = systemSettings.TaxCode;
+                                            break;
+                                        case "Company Hotline":
+                                            content = systemSettings.Hotline;
+                                            break;
+                                        case "Company Email":
+                                            content = systemSettings.Email;
+                                            break;
+                                        default: break;
+                                    }
+                                }
+                                else
+                                {
+                                    return Error.NotFound("404", "The system is not have any settings!");
+                                }
+                            }
+                            if (templateField.FieldName.Contains("Signer Name") ||
+                                    templateField.FieldName.Contains("Signer Position"))
+                            {
+                                var flow = await _flowRepository.GetByContractCategoryId(contractCategoryId);
+                                if (flow is not null)
+                                {
+                                    var flowDetail = await _flowDetailRepository.GetSignerByFlowId(flow.Id);
+                                    var userFlowDetail = await _userFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);
+                                    switch (templateField.FieldName)
+                                    {
+                                        case "Signer Name":
+                                            content = userFlowDetail.User.FullName;
+                                            break;
+                                        case "Signer Position":
+                                            content = userFlowDetail.User.Position;
+                                            break;
+                                        default: break;
+                                    }
+                                }
+                                else
+                                {
+                                    return Error.NotFound("404", "The system is not have any flows for this contract category!");
+                                }
+                            }
+                            if (templateField.FieldName.Contains("Created Date"))
+                            {
+                                content = DateTime.Now.ToString("dd/MM/yyyy");
+                            }
+                            if (templateField.FieldName.Contains("Contract Code"))
+                            {
+                                var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                                var stringChars = new char[8];
+                                var random = new Random();
+                                for (int i = 0; i < stringChars.Length; i++)
+                                {
+                                    stringChars[i] = chars[random.Next(chars.Length)];
+                                }
+                                content = new String(stringChars);
                             }
                         }
                         if (templateField.FieldName.Contains("Signature"))

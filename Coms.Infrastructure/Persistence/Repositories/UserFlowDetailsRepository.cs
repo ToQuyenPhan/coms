@@ -36,5 +36,12 @@ namespace Coms.Infrastructure.Persistence.Repositories
                         ufd => ufd.Contract, ufd => ufd.FlowDetail });
             return (list.Count() > 0) ? list : null;
         }
+
+        public async Task<User_FlowDetail?> GetByFlowDetailId(int flowDetailId)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(ufd =>
+                ufd.FlowDetailId.Equals(flowDetailId), new System.Linq.Expressions.Expression<Func<User_FlowDetail, object>>[] { ufd => ufd.User,
+                        ufd => ufd.Contract, ufd => ufd.FlowDetail });
+        }
     }
 }

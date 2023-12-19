@@ -1,9 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Coms.Domain.Entities
 {
     public class SystemSettings
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
         [Required]
         public string CompanyName { get; set; }
 
@@ -25,5 +30,10 @@ namespace Coms.Domain.Entities
         [Required]
         [MaxLength(50)]
         public string TaxCode { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        [EmailAddress]
+        public string Email { get; set; }
     }
 }
