@@ -9,8 +9,8 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<ContractResult>> DeleteContract(int id);
         Task<ErrorOr<PagingResult<ContractResult>>> GetYourContracts(int userId,
                 string name, string creatorName, int? status, int currentPage, int pageSize);
-        Task<ErrorOr<ContractResult>> AddContract(string contractName, string code, int partnerId,
-            int auhtorId,int signerId, int templateId, DateTime effectiveDate,int[] service,int status);
+        Task<ErrorOr<ContractResult>> AddContract(string[] names, string[] values, int contractCategoryId,
+                int serviceId, DateTime effectiveDate, int status);
         Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport(int userId);
         Task<ErrorOr<ContractResult>> GetContract(int id);
         Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContracts(int userId,

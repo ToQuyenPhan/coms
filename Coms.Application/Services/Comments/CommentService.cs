@@ -157,8 +157,7 @@ namespace Coms.Application.Services.Comments
                             commentResult.UserImage = commentHistory.User.Image;
                         }
                         var userFlowDetails = 
-                            await _userFlowDetailsRepository
-                            .GetUserFlowDetailsByUserIdAndContractId(commentHistory.User.Id, commentHistory.ContractId);
+                            await _userFlowDetailsRepository.GetByContractId(commentHistory.ContractId);
                         if(userFlowDetails is not null)
                         {
                             int numberOfRole = 0;

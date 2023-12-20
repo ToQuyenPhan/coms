@@ -7,16 +7,19 @@ namespace Coms.Application.Services.UserFlowDetails
     public class UserFlowDetailService : IUserFlowDetailService
     {
         private readonly IUserFlowDetailsRepository _userFlowDetailsRepository;
+        private readonly IFlowDetailRepository _flowDetailRepository;
 
-        public UserFlowDetailService(IUserFlowDetailsRepository userFlowDetailsRepository)
+        public UserFlowDetailService(IUserFlowDetailsRepository userFlowDetailsRepository, 
+                IFlowDetailRepository flowDetailRepository)
         {
             _userFlowDetailsRepository = userFlowDetailsRepository;
+            _flowDetailRepository = flowDetailRepository;
         }
 
         public async Task<ErrorOr<PagingResult<UserFlowDetailResult>>> GetContractFlowDetails(int contractId, 
                 int currentPage, int pageSize)
         {
-            var contractFlowDetails = await _userFlowDetailsRepository.GetUserFlowDetailsByContractId(contractId);
+            var contractFlowDetails = await _userFlowDetailsRepository.GetByContractId(contractId);
             if(contractFlowDetails is not null )
             {
                 IList<UserFlowDetailResult> results = new List<UserFlowDetailResult>();
@@ -27,15 +30,16 @@ namespace Coms.Application.Services.UserFlowDetails
                         Id = contractFlowDetail.Id,
                         Status = (int) contractFlowDetail.Status,
                         StatusString = contractFlowDetail.Status.ToString(),
-                        UserId = contractFlowDetail.UserId,
-                        FullName = contractFlowDetail.User.FullName,
                         ContractId = contractFlowDetail.ContractId,
+                        UserId = (int)contractFlowDetail.FlowDetail.UserId,
                         FlowDetailId = contractFlowDetail.FlowDetailId,
                         FlowRole = contractFlowDetail.FlowDetail.FlowRole.ToString(),
                     };
-                    if(contractFlowDetail.User.Image is not null)
+                    var flowDetail = await _flowDetailRepository.GetFlowDetail(contractFlowDetail.FlowDetailId);
+                    flowDetailResult.FullName = flowDetail.User.FullName;
+                    if (flowDetail.User.Image is not null)
                     {
-                        flowDetailResult.UserImage = contractFlowDetail.User.Image;
+                        flowDetailResult.UserImage = flowDetail.User.Image;
                     }
                     results.Add(flowDetailResult);
                 }

@@ -38,7 +38,7 @@ namespace Coms.Domain.Entities
         public virtual Template? Template { get; set; }
 
         //public virtual ICollection<Access> Accesses { get; set; }
-        public virtual ICollection<User_FlowDetail>? UserFlowDetails { get; set; }
+        public virtual ICollection<Contract_FlowDetail>? UserFlowDetails { get; set; }
         public virtual ICollection<ActionHistory>? ActionHistories { get; set; }
         public virtual ICollection<Attachment>? Attachments { get; set; }
         public virtual ICollection<ContractAnnex>? ContractAnnexes { get; set; }

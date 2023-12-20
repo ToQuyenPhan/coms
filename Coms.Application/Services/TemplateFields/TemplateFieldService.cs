@@ -135,14 +135,13 @@ namespace Coms.Application.Services.TemplateFields
                                 if (flow is not null)
                                 {
                                     var flowDetail = await _flowDetailRepository.GetSignerByFlowId(flow.Id);
-                                    var userFlowDetail = await _userFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);
                                     switch (templateField.FieldName)
                                     {
                                         case "Signer Name":
-                                            content = userFlowDetail.User.FullName;
+                                            content = flowDetail.User.FullName;
                                             break;
                                         case "Signer Position":
-                                            content = userFlowDetail.User.Position;
+                                            content = flowDetail.User.Position;
                                             break;
                                         default: break;
                                     }

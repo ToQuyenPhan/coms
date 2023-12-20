@@ -48,7 +48,7 @@ namespace Coms.Infrastructure.Persistence.Context
         public DbSet<LiquidationRecordFile> LiquidationRecordFiles { get; set; }
         public DbSet<Flow> Flows { get; set; }
         public DbSet<FlowDetail> FlowDetails { get; set; }
-        public DbSet<User_FlowDetail> UserFlowDetails { get; set; }
+        public DbSet<Contract_FlowDetail> UserFlowDetails { get; set; }
         public DbSet<ContractField> ContractFields { get; set; }
         public DbSet<SystemSettings> SystemSettings { get; set; }
 

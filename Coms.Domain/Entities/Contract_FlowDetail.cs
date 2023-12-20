@@ -4,7 +4,7 @@ using Coms.Domain.Enum;
 
 namespace Coms.Domain.Entities
 {
-    public class User_FlowDetail
+    public class Contract_FlowDetail
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -12,9 +12,6 @@ namespace Coms.Domain.Entities
 
         [Required]
         public FlowDetailStatus Status { get; set; }
-
-        public int UserId { get; set; }
-        public virtual User? User { get; set; }
         
         public int ContractId { get; set; }
         public virtual Contract? Contract { get; set; }

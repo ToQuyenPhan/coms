@@ -13,9 +13,13 @@ namespace Coms.Domain.Entities
         [Required]
         public FlowRole FlowRole { get; set; }
 
+        public int? UserId { get; set; }
+        public virtual User? User { get; set; }
+
         public int? Order { get; set; }
 
         public int FlowID { get; set; }
         public virtual Flow? Flow { get; set; }
+        public virtual ICollection<Contract_FlowDetail>? ContractFlowDetails { get; set; }
     }
 }

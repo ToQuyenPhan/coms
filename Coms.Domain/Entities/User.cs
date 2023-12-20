@@ -44,7 +44,7 @@ namespace Coms.Domain.Entities
         public virtual Role? Role { get; set; }
         public virtual ICollection<ActionHistory>? ActionHistories { get; set; }
         //public virtual ICollection<User_Access>? UserAccesses { get; set; }
-        public virtual ICollection<User_FlowDetail>? UserFlowDetails { get; set; }
+        public virtual ICollection<FlowDetail>? FlowDetails { get; set; }
         public virtual ICollection<PartnerReview>? PartnerReviews { get; set; }
         public virtual ICollection<Template> Templates { get; set; }
     }

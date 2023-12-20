@@ -20,6 +20,7 @@ namespace Coms.Application.Services.Contracts
         private readonly IContractCostRepository _contractCostRepository;
         private readonly IAproveWorkflowRepository _aproveWorkflowRepository;
         private readonly IUserFlowDetailsRepository _userFlowDetailsRepository;
+        private readonly IFlowDetailRepository _flowDetailRepository;
 
         public ContractService(IAccessRepository accessRepository,
                 IUserAccessRepository userAccessRepository,
@@ -31,7 +32,8 @@ namespace Coms.Application.Services.Contracts
                 IPartnerRepository partnerRepository,
                 IContractCostRepository contractCostRepository,
                 IAproveWorkflowRepository aproveWorkflowRepository,
-                IUserFlowDetailsRepository userFlowDetailsRepository)
+                IUserFlowDetailsRepository userFlowDetailsRepository,
+                IFlowDetailRepository flowDetailRepository)
         {
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
@@ -44,6 +46,7 @@ namespace Coms.Application.Services.Contracts
             _contractRepository = contractRepository;
             _aproveWorkflowRepository = aproveWorkflowRepository;
             _userFlowDetailsRepository = userFlowDetailsRepository;
+            _flowDetailRepository = flowDetailRepository;
         }
 
         public async Task<ErrorOr<ContractResult>> DeleteContract(int id)
@@ -104,18 +107,28 @@ namespace Coms.Application.Services.Contracts
                     }
                 }
             }
-            var yourFlowDetails = await _userFlowDetailsRepository.GetUserFlowDetailsByUserId(userId);
-            if (yourFlowDetails is not null)
+            var flowDetails = await _flowDetailRepository.GetUserFlowDetailsByUserId(userId);
+            if (flowDetails is not null)
             {
-                foreach (var yourFlowDetail in yourFlowDetails)
+                foreach (var flowDetail in flowDetails)
                 {
-                    var contract = await _contractRepository.GetContract(yourFlowDetail.ContractId);
-                    var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
-                    if (existedContract is null)
+                    var contractFlowDetails = await _userFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);
+                    if (contractFlowDetails is not null)
                     {
-                        if (!string.IsNullOrEmpty(contract.Link))
+                        foreach(var contractFlowDetail in contractFlowDetails)
                         {
-                            contracts.Add(contract);
+                            var contract = await _contractRepository.GetContract(contractFlowDetail.ContractId);
+                            if (!contract.Status.Equals(DocumentStatus.Deleted))
+                            {
+                                var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
+                                if (existedContract is null)
+                                {
+                                    if (!string.IsNullOrEmpty(contract.Link))
+                                    {
+                                        contracts.Add(contract);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -388,7 +401,7 @@ namespace Coms.Application.Services.Contracts
                         Code = contract.Code,
                         Link = contract.Link
                     };
-                    if(contract.UpdatedDate is not null)
+                    if (contract.UpdatedDate is not null)
                     {
                         contractResult.UpdatedDate = contract.UpdatedDate;
                         contractResult.UpdatedDateString = contract.UpdatedDate.ToString();
@@ -408,92 +421,135 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
-        public async Task<ErrorOr<ContractResult>> AddContract(string contractName, string code, int partnerId, int authorId, int signerId, int templateId, DateTime effectiveDate,
-                int[] contractCosts, int status)
+        public async Task<ErrorOr<ContractResult>> AddContract(string[] names, string[] values, int contractCategoryId,
+                int serviceId, DateTime effectiveDate, int status)
         {
             try
             {
-                var contract = new Contract
+                var namesAndValues = names.Zip(values, (n, v) => new { Name = n, Value = v });
+                var template = await _templateRepository.GetTemplateByContractCategoryId(contractCategoryId);
+                if (template is not null)
                 {
-                    ContractName = contractName,
-                    Code = code,
-                    TemplateId = templateId,
-                    Link = " ",
-                    CreatedDate = DateTime.Now,
-                    UpdatedDate = DateTime.Now,
-                    EffectiveDate = effectiveDate,
-                    Version = 1,
-                    Status = (DocumentStatus)status
-
-                };
-                await _contractRepository.AddContract(contract);
-                //var access = new Access
-                //{
-                //    ContractId = contract.Id,
-                //    AccessRole = AccessRole.Author
-                //};
-                //await _accessRepository.AddAccess(access);
-
-                //var userAccess = new User_Access
-                //{
-                //    UserId = authorId,
-                //    AccessId = access.Id,
-                //};
-                //await _userAccessRepository.AddUserAccess(userAccess);
-                var partnerReview = new PartnerReview
+                    var contract = new Contract
+                    {
+                        TemplateId = template.Id,
+                        Link = "",
+                        CreatedDate = DateTime.Now,
+                        EffectiveDate = effectiveDate,
+                        Version = 1,
+                        Status = (DocumentStatus)status
+                    };
+                    foreach (var nav in namesAndValues)
+                    {
+                        if (nav.Name.Equals("Contract Title"))
+                        {
+                            contract.ContractName = nav.Value;
+                        }
+                        if (nav.Name.Equals("ContractCode"))
+                        {
+                            contract.Code = nav.Value;
+                        }
+                    }
+                    await _contractRepository.AddContract(contract);
+                    return new ContractResult();
+                }
+                else
                 {
-                    ContractId = contract.Id,
-                    PartnerId = partnerId,
-                    UserId = signerId,
-                    IsApproved = false,
-                    SendDate = DateTime.Now,
-                    ReviewAt = DateTime.Now,
-                    Status = PartnerReviewStatus.Active
-                };
-                await _partnerReviewRepository.AddPartnerReview(partnerReview);
-                var actionHistory = new ActionHistory
-                {
-                    ActionType = ActionType.Created,
-                    UserId = authorId,
-                    CreatedAt = DateTime.Now,
-                    ContractId = contract.Id,
-                };
-                await _actionHistoryRepository.AddActionHistory(actionHistory);
-                await _contractCostRepository.AddContractCostsToContract(contractCosts, contract.Id);
-                var partner = _partnerRepository.GetPartner(partnerId).Result;
-                var template = _templateRepository.GetTemplate(templateId).Result;
-                //var user = _userRepository.GetUser(userAccess.UserId ?? throw new InvalidOperationException("Value cannot be null")).Result;
-                //var contractResult = new ContractResult
-                //{
-                //    Id = contract.Id,
-                //    Code = contract.Code,
-                //    ContractName = contract.ContractName,
-                //    CreatedDate = contract.CreatedDate,
-                //    CreatedDateString = contract.CreatedDate.ToString(),
-                //    UpdatedDate = contract.UpdatedDate,
-                //    UpdatedDateString = contract.UpdatedDate.ToString(),
-                //    EffectiveDate = contract.EffectiveDate,
-                //    EffectiveDateString = contract.EffectiveDate.ToString(),
-                //    Link = contract.Link,
-                //    Status = (int)contract.Status,
-                //    StatusString = contract.Status.ToString(),
-                //    CreatorId = userAccess.UserId,
-                //    CreatorName = user.FullName,
-                //    CreatorEmail = user.Email,
-                //    CreatorImage = user.Image,
-                //    TemplateID = contract.TemplateId,
-                //    Version = 1,
-                //    PartnerId = partnerReview.PartnerId,
-                //    PartnerName = partner.CompanyName
-                //};
-                //return contractResult;
-                return Error.NotFound();
+                    return Error.Failure("500", "No template is activating in this category!");
+                }
             }
             catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }
         }
+
+        //public async Task<ErrorOr<ContractResult>> AddContract(string contractName, string code, int partnerId, int authorId, int signerId, int templateId, DateTime effectiveDate,
+        //        int[] contractCosts, int status)
+        //{
+        //    try
+        //    {
+        //        var contract = new Contract
+        //        {
+        //            ContractName = contractName,
+        //            Code = code,
+        //            TemplateId = templateId,
+        //            Link = " ",
+        //            CreatedDate = DateTime.Now,
+        //            UpdatedDate = DateTime.Now,
+        //            EffectiveDate = effectiveDate,
+        //            Version = 1,
+        //            Status = (DocumentStatus)status
+
+        //        };
+        //        await _contractRepository.AddContract(contract);
+        //        var access = new Access
+        //        {
+        //            ContractId = contract.Id,
+        //            AccessRole = AccessRole.Author
+        //        };
+        //        await _accessRepository.AddAccess(access);
+
+        //        var userAccess = new User_Access
+        //        {
+        //            UserId = authorId,
+        //            AccessId = access.Id,
+        //        };
+        //        await _userAccessRepository.AddUserAccess(userAccess);
+        //        var partnerReview = new PartnerReview
+        //        {
+        //            ContractId = contract.Id,
+        //            PartnerId = partnerId,
+        //            UserId = signerId,
+        //            IsApproved = false,
+        //            SendDate = DateTime.Now,
+        //            ReviewAt = DateTime.Now,
+        //            Status = PartnerReviewStatus.Active
+        //        };
+        //        await _partnerReviewRepository.AddPartnerReview(partnerReview);
+        //        var actionHistory = new ActionHistory
+        //        {
+        //            ActionType = ActionType.Created,
+        //            UserId = authorId,
+        //            CreatedAt = DateTime.Now,
+        //            ContractId = contract.Id,
+        //        };
+        //        await _actionHistoryRepository.AddActionHistory(actionHistory);
+        //        await _contractCostRepository.AddContractCostsToContract(contractCosts, contract.Id);
+        //        var partner = _partnerRepository.GetPartner(partnerId).Result;
+        //        var template = _templateRepository.GetTemplate(templateId).Result;
+        //        var user = _userRepository.GetUser(userAccess.UserId ?? throw new InvalidOperationException("Value cannot be null")).Result;
+        //        var contractResult = new ContractResult
+        //        {
+        //            Id = contract.Id,
+        //            Code = contract.Code,
+        //            ContractName = contract.ContractName,
+        //            CreatedDate = contract.CreatedDate,
+        //            CreatedDateString = contract.CreatedDate.ToString(),
+        //            UpdatedDate = contract.UpdatedDate,
+        //            UpdatedDateString = contract.UpdatedDate.ToString(),
+        //            EffectiveDate = contract.EffectiveDate,
+        //            EffectiveDateString = contract.EffectiveDate.ToString(),
+        //            Link = contract.Link,
+        //            Status = (int)contract.Status,
+        //            StatusString = contract.Status.ToString(),
+        //            CreatorId = userAccess.UserId,
+        //            CreatorName = user.FullName,
+        //            CreatorEmail = user.Email,
+        //            CreatorImage = user.Image,
+        //            TemplateID = contract.TemplateId,
+        //            Version = 1,
+        //            PartnerId = partnerReview.PartnerId,
+        //            PartnerName = partner.CompanyName
+        //        };
+        //        return contractResult;
+        //        return Error.NotFound();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Error.Failure("500", ex.Message);
+        //    }
+        //}
 
         public async Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContracts(int userId,
                 string name, string creatorName, int? status, int currentPage, int pageSize)
@@ -764,7 +820,7 @@ namespace Coms.Application.Services.Contracts
         public async Task<ErrorOr<AuthorResult>> IsAuthor(int userId, int contractId)
         {
             var contract = await _contractRepository.GetContract(contractId);
-            if(contract is not null)
+            if (contract is not null)
             {
                 if (contract.Status.Equals(DocumentStatus.Deleted))
                 {

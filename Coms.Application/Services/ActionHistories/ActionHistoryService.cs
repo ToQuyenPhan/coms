@@ -56,6 +56,7 @@ namespace Coms.Application.Services.ActionHistories
                     };
                     actionHistoryResults.Add(actionHistoryResult);
                 }
+                actionHistoryResults = actionHistoryResults.OrderByDescending(ah => ah.CreatedAt).ToList();
                 if(currentPage > 0 && pageSize > 0)
                 {
                     actionHistoryResults = actionHistoryResults.Skip((currentPage - 1) * pageSize).Take(pageSize)
