@@ -12,21 +12,25 @@ namespace Coms.Api.Controllers
     public class TemplateFilesController : ApiController
     {
         private readonly ITemplateFileService _templateFileService;
+        private Microsoft.AspNetCore.Hosting.IHostingEnvironment hostEnvironment;
 
-        public TemplateFilesController(ITemplateFileService templateFileService)
+        public TemplateFilesController(ITemplateFileService templateFileService, 
+                Microsoft.AspNetCore.Hosting.IHostingEnvironment hostEnvironment)
         {
             _templateFileService = templateFileService;
+            this.hostEnvironment = hostEnvironment;
         }
 
         [HttpPost]
         public IActionResult Add([FromQuery] int templateId, string? templateName, [FromForm]FormUploadRequest file)
         {
+            string path = this.hostEnvironment.WebRootPath + "\\Files\\";
             var ms = new MemoryStream();
             file.File.CopyTo(ms);
             var fileContent = ms.ToArray();
             ErrorOr<TemplateFileResult> result = _templateFileService.Add(templateName, "docx", 
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
-                fileContent, (int)file.File.Length, templateId).Result;
+                fileContent, (int)file.File.Length, templateId, path).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
@@ -36,7 +40,8 @@ namespace Coms.Api.Controllers
         [HttpPost("pdf")]
         public async Task<IActionResult> Pdf([FromQuery] int id, [FromBody] PdfDataRequest request)
         {
-            ErrorOr<TemplateFileResult> result = await _templateFileService.ExportPDf(request.Content, id);
+            string path = this.hostEnvironment.WebRootPath + "\\Files\\";
+            ErrorOr<TemplateFileResult> result = await _templateFileService.ExportPDf(request.Content, id, path);
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

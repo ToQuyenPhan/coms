@@ -10,6 +10,7 @@ using System.Collections;
 using System.Xml.Linq;
 using Spire.Doc.Reporting;
 using Spire.Doc;
+using System.Net.Http;
 
 namespace Coms.Application.Services.TemplateFiles
 {
@@ -34,7 +35,7 @@ namespace Coms.Application.Services.TemplateFiles
         }
 
         public async Task<ErrorOr<TemplateFileResult>> Add(string name, string extension, string contenType, byte[] document,
-                int size, int templateId)
+                int size, int templateId, string serverPath)
         {
             try
             {
@@ -55,9 +56,7 @@ namespace Coms.Application.Services.TemplateFiles
                 await _templateFileRepository.Add(templateFile);
                 MemoryStream stream = new MemoryStream();
                 stream.Write(document, 0, (int)document.Length);
-                string filePath =
-                     Path.Combine(Environment.CurrentDirectory, "Data",
-                        templateId + ".docx");
+                string filePath = Path.Combine(serverPath, templateId + ".docx");
                 File.WriteAllBytes(filePath, stream.ToArray());
                 Spire.Doc.Document checkingDocument = new Spire.Doc.Document();
                 checkingDocument.LoadFromFile(filePath);
@@ -102,7 +101,7 @@ namespace Coms.Application.Services.TemplateFiles
             }
         }
 
-        public async Task<ErrorOr<TemplateFileResult>> ExportPDf(string content, int id)
+        public async Task<ErrorOr<TemplateFileResult>> ExportPDf(string content, int id, string serverPath)
         {
             try
             {
