@@ -3,11 +3,11 @@ using Coms.Domain.Entities;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
-    public class UserFlowDetailsRepository : IUserFlowDetailsRepository
+    public class ContractFlowDetailsRepository : IContractFlowDetailsRepository
     {
         private readonly IGenericRepository<Contract_FlowDetail> _genericRepository;
 
-        public UserFlowDetailsRepository(IGenericRepository<Contract_FlowDetail> genericRepository)
+        public ContractFlowDetailsRepository(IGenericRepository<Contract_FlowDetail> genericRepository)
         {
             _genericRepository = genericRepository;
         }

@@ -6,10 +6,10 @@ namespace Coms.Application.Services.UserFlowDetails
 {
     public class UserFlowDetailService : IUserFlowDetailService
     {
-        private readonly IUserFlowDetailsRepository _userFlowDetailsRepository;
+        private readonly IContractFlowDetailsRepository _userFlowDetailsRepository;
         private readonly IFlowDetailRepository _flowDetailRepository;
 
-        public UserFlowDetailService(IUserFlowDetailsRepository userFlowDetailsRepository, 
+        public UserFlowDetailService(IContractFlowDetailsRepository userFlowDetailsRepository, 
                 IFlowDetailRepository flowDetailRepository)
         {
             _userFlowDetailsRepository = userFlowDetailsRepository;

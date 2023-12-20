@@ -13,14 +13,14 @@ namespace Coms.Application.Services.Comments
         private readonly IActionHistoryRepository _actionHistoryRepository;
         private readonly IUserRepository _userRepository;
         private readonly IContractRepository _contractRepository;
-        private readonly IUserFlowDetailsRepository _userFlowDetailsRepository;
+        private readonly IContractFlowDetailsRepository _userFlowDetailsRepository;
         private readonly IFlowDetailRepository _flowDetailRepository;
 
         public CommentService(ICommentRepository commentRepository,
             IActionHistoryRepository actionHistoryRepository,
             IUserRepository userRepository,
             IContractRepository contractRepository,
-            IUserFlowDetailsRepository userFlowDetailsRepository,
+            IContractFlowDetailsRepository userFlowDetailsRepository,
             IFlowDetailRepository flowDetailRepository)
         {
             _commentRepository = commentRepository;

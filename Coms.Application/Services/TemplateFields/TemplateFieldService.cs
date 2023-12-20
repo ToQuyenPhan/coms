@@ -11,7 +11,7 @@ namespace Coms.Application.Services.TemplateFields
         private readonly ISystemSettingsRepository _systemSettingsRepository;
         private readonly IFlowRepository _flowRepository;
         private readonly IFlowDetailRepository _flowDetailRepository;
-        private readonly IUserFlowDetailsRepository _userFlowDetailsRepository;
+        private readonly IContractFlowDetailsRepository _userFlowDetailsRepository;
         private readonly IServiceRepository _serviceRepository;
 
         public TemplateFieldService(ITemplateFieldRepository templateFieldRepository,
@@ -20,7 +20,7 @@ namespace Coms.Application.Services.TemplateFields
                 ISystemSettingsRepository systemSettingsRepository,
                 IFlowRepository flowRepository,
                 IFlowDetailRepository flowDetailRepository,
-                IUserFlowDetailsRepository userFlowDetailsRepository,
+                IContractFlowDetailsRepository userFlowDetailsRepository,
                 IServiceRepository serviceRepository)
         {
             _templateFieldRepository = templateFieldRepository;

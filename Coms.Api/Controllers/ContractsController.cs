@@ -88,7 +88,8 @@ namespace Coms.Api.Controllers
         [Authorize(Roles = "Staff, Manager")]
         public IActionResult Add([FromBody] ContractFormRequest request)
         {
-            ErrorOr<string> result = request.Name[0];
+            ErrorOr<ContractResult> result = _contractService.AddContract(request.Name, request.Value, request.ContractCategoryId, 
+                        request.ServiceId, request.EffectiveDate, request.Status).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

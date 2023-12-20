@@ -2,7 +2,7 @@
 
 namespace Coms.Application.Common.Intefaces.Persistence
 {
-    public interface IUserFlowDetailsRepository
+    public interface IContractFlowDetailsRepository
     {
         Task<Contract_FlowDetail?> GetByContractIdAndFlowDetailId(int contractId, int flowDetailId);
         Task<IList<Contract_FlowDetail>?> GetByFlowDetailId(int flowDetailId);

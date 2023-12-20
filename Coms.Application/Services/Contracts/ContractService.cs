@@ -19,7 +19,7 @@ namespace Coms.Application.Services.Contracts
         private readonly IPartnerRepository _partnerRepository;
         private readonly IContractCostRepository _contractCostRepository;
         private readonly IAproveWorkflowRepository _aproveWorkflowRepository;
-        private readonly IUserFlowDetailsRepository _userFlowDetailsRepository;
+        private readonly IContractFlowDetailsRepository _contractFlowDetailsRepository;
         private readonly IFlowDetailRepository _flowDetailRepository;
 
         public ContractService(IAccessRepository accessRepository,
@@ -32,7 +32,7 @@ namespace Coms.Application.Services.Contracts
                 IPartnerRepository partnerRepository,
                 IContractCostRepository contractCostRepository,
                 IAproveWorkflowRepository aproveWorkflowRepository,
-                IUserFlowDetailsRepository userFlowDetailsRepository,
+                IContractFlowDetailsRepository contractFlowDetailsRepository,
                 IFlowDetailRepository flowDetailRepository)
         {
             _accessRepository = accessRepository;
@@ -45,7 +45,7 @@ namespace Coms.Application.Services.Contracts
             _actionHistoryRepository = actionHistoryRepository;
             _contractRepository = contractRepository;
             _aproveWorkflowRepository = aproveWorkflowRepository;
-            _userFlowDetailsRepository = userFlowDetailsRepository;
+            _contractFlowDetailsRepository = contractFlowDetailsRepository;
             _flowDetailRepository = flowDetailRepository;
         }
 
@@ -112,7 +112,7 @@ namespace Coms.Application.Services.Contracts
             {
                 foreach (var flowDetail in flowDetails)
                 {
-                    var contractFlowDetails = await _userFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);
+                    var contractFlowDetails = await _contractFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);
                     if (contractFlowDetails is not null)
                     {
                         foreach(var contractFlowDetail in contractFlowDetails)
@@ -430,27 +430,40 @@ namespace Coms.Application.Services.Contracts
                 var template = await _templateRepository.GetTemplateByContractCategoryId(contractCategoryId);
                 if (template is not null)
                 {
-                    var contract = new Contract
-                    {
-                        TemplateId = template.Id,
-                        Link = "",
-                        CreatedDate = DateTime.Now,
-                        EffectiveDate = effectiveDate,
-                        Version = 1,
-                        Status = (DocumentStatus)status
-                    };
-                    foreach (var nav in namesAndValues)
-                    {
-                        if (nav.Name.Equals("Contract Title"))
-                        {
-                            contract.ContractName = nav.Value;
-                        }
-                        if (nav.Name.Equals("ContractCode"))
-                        {
-                            contract.Code = nav.Value;
-                        }
-                    }
-                    await _contractRepository.AddContract(contract);
+                    
+                    string contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts");
+                    bool folderExists = Directory.Exists(contractFilePath);
+                    if (!folderExists)
+                        Directory.CreateDirectory(contractFilePath);
+                    contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", "test.docx");
+                    string templateFilePath = Path.Combine(Environment.CurrentDirectory, "Templates", template.Id + ".docx");
+                    Spire.Doc.Document document = new Spire.Doc.Document();
+                    document.LoadFromFile(templateFilePath, Spire.Doc.FileFormat.Docx);
+                    document.MailMerge.Execute(names, values);
+                    document.SaveToFile(contractFilePath);
+                    document.Close();
+                    //var contract = new Contract
+                    //{
+                    //    TemplateId = template.Id,
+                    //    Link = "",
+                    //    CreatedDate = DateTime.Now,
+                    //    EffectiveDate = effectiveDate,
+                    //    Version = 1,
+                    //    Status = (DocumentStatus)status
+                    //};
+                    //foreach (var nav in namesAndValues)
+                    //{
+                    //    if (nav.Name.Equals("Contract Title"))
+                    //    {
+                    //        contract.ContractName = nav.Value;
+                    //    }
+                    //    if (nav.Name.Equals("ContractCode"))
+                    //    {
+                    //        contract.Code = nav.Value;
+                    //    }
+                    //}
+                    //await _contractRepository.AddContract(contract);
+
                     return new ContractResult();
                 }
                 else

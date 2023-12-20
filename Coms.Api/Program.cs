@@ -58,7 +58,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NHaF5cXmVCf1FpRGVGfV5yd0VCal9YTnRdUiweQnxTdEZiWH1ZcHdVQGFfUkB0Wg==");
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NAaF5cWWJCf0x3THxbf1x0ZFFMZVRbQHRPMyBoS35RdURhW39edHFdQmNVUUJ+");
 
 //Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

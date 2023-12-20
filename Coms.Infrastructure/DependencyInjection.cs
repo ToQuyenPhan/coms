@@ -43,7 +43,7 @@ namespace Coms.Infrastructure
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IAproveWorkflowRepository, AproveWorkflowRepository>();
             services.AddScoped<ITemplateFieldRepository, TemplateFieldRepository>();
-            services.AddScoped<IUserFlowDetailsRepository, UserFlowDetailsRepository>();
+            services.AddScoped<IContractFlowDetailsRepository, ContractFlowDetailsRepository>();
             services.AddScoped<IFlowDetailRepository, FlowDetailRepository>();
             services.AddScoped<IContractFieldRepository, ContractFieldRepository>();
             services.AddScoped<ISystemSettingsRepository, SystemSettingRepository>();
