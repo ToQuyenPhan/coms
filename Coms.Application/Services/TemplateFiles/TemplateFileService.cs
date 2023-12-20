@@ -113,9 +113,7 @@ namespace Coms.Application.Services.TemplateFiles
                 //Converts Word document into PDF document
                 PdfDocument pdfDocument = render.ConvertToPDF(doc);
                 string fileName = id + ".pdf";
-                string filePath =
-                      Path.Combine(Environment.CurrentDirectory, "Data",
-                        fileName);
+                string filePath = Path.Combine(serverPath, fileName);
                 // Saves the document to server machine file system, you can customize here to save into databases or file servers based on requirement.
                 FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
 
