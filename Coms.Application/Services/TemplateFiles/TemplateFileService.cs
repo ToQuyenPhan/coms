@@ -32,7 +32,7 @@ namespace Coms.Application.Services.TemplateFiles
         }
 
         public async Task<ErrorOr<TemplateFileResult>> Add(string name, string extension, string contenType, byte[] document,
-                int size, int templateId, string serverPath)
+                int size, int templateId)
         {
             try
             {
@@ -102,7 +102,7 @@ namespace Coms.Application.Services.TemplateFiles
             }
         }
 
-        public async Task<ErrorOr<TemplateFileResult>> ExportPDf(string content, int id, string serverPath)
+        public async Task<ErrorOr<TemplateFileResult>> ExportPDf(string content, int id)
         {
             try
             {

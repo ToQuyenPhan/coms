@@ -23,15 +23,12 @@ namespace Coms.Api.Controllers
         [HttpPost]
         public IActionResult Add([FromQuery] int templateId, string? templateName, [FromForm]FormUploadRequest file)
         {
-            string webRootPath = _webHostEnvironment.WebRootPath;
-            string contentRootPath = _webHostEnvironment.ContentRootPath;
-            string path = Path.Combine(webRootPath, "Files");
             var ms = new MemoryStream();
             file.File.CopyTo(ms);
             var fileContent = ms.ToArray();
             ErrorOr<TemplateFileResult> result = _templateFileService.Add(templateName, "docx", 
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document", 
-                fileContent, (int)file.File.Length, templateId, path).Result;
+                fileContent, (int)file.File.Length, templateId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
@@ -41,10 +38,7 @@ namespace Coms.Api.Controllers
         [HttpPost("pdf")]
         public async Task<IActionResult> Pdf([FromQuery] int id, [FromBody] PdfDataRequest request)
         {
-            string webRootPath = _webHostEnvironment.WebRootPath;
-            string contentRootPath = _webHostEnvironment.ContentRootPath;
-            string path = Path.Combine(webRootPath, "Files");
-            ErrorOr<TemplateFileResult> result = await _templateFileService.ExportPDf(request.Content, id, path);
+            ErrorOr<TemplateFileResult> result = await _templateFileService.ExportPDf(request.Content, id);
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
