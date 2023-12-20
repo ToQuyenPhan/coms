@@ -7,10 +7,7 @@ using Syncfusion.DocIORenderer;
 using Syncfusion.EJ2.DocumentEditor;
 using Syncfusion.Pdf;
 using System.Collections;
-using System.Xml.Linq;
-using Spire.Doc.Reporting;
-using Spire.Doc;
-using System.Net.Http;
+using System.IO;
 
 namespace Coms.Application.Services.TemplateFiles
 {
@@ -39,6 +36,10 @@ namespace Coms.Application.Services.TemplateFiles
         {
             try
             {
+                string filePath = Path.Combine(Environment.CurrentDirectory, "Templates");
+                bool folderExists = Directory.Exists(filePath);
+                if (!folderExists)
+                    Directory.CreateDirectory(filePath);
                 if (name == null)
                 {
                     name = "Untitled";
@@ -56,7 +57,7 @@ namespace Coms.Application.Services.TemplateFiles
                 await _templateFileRepository.Add(templateFile);
                 MemoryStream stream = new MemoryStream();
                 stream.Write(document, 0, (int)document.Length);
-                string filePath = Path.Combine(serverPath, templateId + ".docx");
+                filePath = Path.Combine(Environment.CurrentDirectory, "Templates", templateId + ".docx");
                 File.WriteAllBytes(filePath, stream.ToArray());
                 Spire.Doc.Document checkingDocument = new Spire.Doc.Document();
                 checkingDocument.LoadFromFile(filePath);
@@ -113,7 +114,7 @@ namespace Coms.Application.Services.TemplateFiles
                 //Converts Word document into PDF document
                 PdfDocument pdfDocument = render.ConvertToPDF(doc);
                 string fileName = id + ".pdf";
-                string filePath = Path.Combine(serverPath, fileName);
+                string filePath = Path.Combine(Environment.CurrentDirectory, "Templates", id + ".docx");
                 // Saves the document to server machine file system, you can customize here to save into databases or file servers based on requirement.
                 FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
 

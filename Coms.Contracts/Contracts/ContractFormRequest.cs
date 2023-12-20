@@ -24,6 +24,7 @@ namespace Coms.Contracts.Contracts
         //public int Status { get; set; }
         public string[] Name {  get; set; }
         public string[] Value {  get; set; }
+        public int ContractCategoryId { get; set; }
 
         [DataType(DataType.Date)]
         public DateTime EffectiveDate { get; set; }

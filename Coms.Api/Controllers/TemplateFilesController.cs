@@ -12,19 +12,20 @@ namespace Coms.Api.Controllers
     public class TemplateFilesController : ApiController
     {
         private readonly ITemplateFileService _templateFileService;
-        private Microsoft.AspNetCore.Hosting.IHostingEnvironment hostEnvironment;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public TemplateFilesController(ITemplateFileService templateFileService, 
-                Microsoft.AspNetCore.Hosting.IHostingEnvironment hostEnvironment)
+        public TemplateFilesController(ITemplateFileService templateFileService, IWebHostEnvironment webHostEnvironment)
         {
             _templateFileService = templateFileService;
-            this.hostEnvironment = hostEnvironment;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpPost]
         public IActionResult Add([FromQuery] int templateId, string? templateName, [FromForm]FormUploadRequest file)
         {
-            string path = this.hostEnvironment.WebRootPath + "\\Files\\";
+            string webRootPath = _webHostEnvironment.WebRootPath;
+            string contentRootPath = _webHostEnvironment.ContentRootPath;
+            string path = Path.Combine(webRootPath, "Files");
             var ms = new MemoryStream();
             file.File.CopyTo(ms);
             var fileContent = ms.ToArray();
@@ -40,7 +41,9 @@ namespace Coms.Api.Controllers
         [HttpPost("pdf")]
         public async Task<IActionResult> Pdf([FromQuery] int id, [FromBody] PdfDataRequest request)
         {
-            string path = this.hostEnvironment.WebRootPath + "\\Files\\";
+            string webRootPath = _webHostEnvironment.WebRootPath;
+            string contentRootPath = _webHostEnvironment.ContentRootPath;
+            string path = Path.Combine(webRootPath, "Files");
             ErrorOr<TemplateFileResult> result = await _templateFileService.ExportPDf(request.Content, id, path);
             return result.Match(
                 result => Ok(result),
