@@ -17,5 +17,6 @@ namespace Coms.Application.Services.Comments
         public int UserId { get; set; }
         public string FullName { get; set; }
         public string AccessRole { get; set; }
+        public string UserImage {  get; set; }
     }
 }

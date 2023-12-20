@@ -1,10 +1,5 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
@@ -17,12 +12,21 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        //add get all attachments by contract id
         public async Task<IList<Attachment>> GetAttachmentsByContractId(int contractId)
         {
-            var list = await _genericRepository.WhereAsync(a => a.ContractId.Equals(contractId), null);
+            var list = await _genericRepository.WhereAsync(a => a.ContractId.Equals(contractId) && 
+                a.Status != Domain.Enum.AttachmentStatus.Inactive, null);
             return (list.Count() > 0) ? list : null;
         }
+
+        public async Task UpdateAttachment(Attachment attachment)
+        {
+            await _genericRepository.UpdateAsync(attachment);
+        }
+
+        public async Task<Attachment?> GetAttachment(int id)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(a => a.Id.Equals(id));
+        }
     }
-    
 }

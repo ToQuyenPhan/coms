@@ -1,7 +1,5 @@
 ﻿using Coms.Application.Services.ActionHistories;
-using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Accesses;
-using Coms.Application.Services.ActionHistories;
 using Coms.Application.Services.Authentication;
 using Coms.Application.Services.Comments;
 using Coms.Application.Services.ContractCategories;
@@ -17,6 +15,8 @@ using Coms.Application.Services.ContractFiles;
 using Coms.Application.Services.Partners;
 using Coms.Application.Services.Users;
 using Coms.Application.Services.UserAccesses;
+using Coms.Application.Services.UserFlowDetails;
+using Coms.Application.Services.TemplateFields;
 using Coms.Application.Services.LiquidationRecords;
 
 namespace Coms.Application
@@ -43,7 +43,6 @@ namespace Coms.Application
             services.AddScoped<IPartnerService, PartnerService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserAccessService, UserAccessService>();
-            services.AddScoped<ILiquidationRecordsService, LiquidationRecordsService>();
             return services;
         }
     }

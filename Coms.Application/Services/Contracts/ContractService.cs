@@ -4,7 +4,6 @@ using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
 using LinqKit;
-using System.Linq;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -51,35 +50,34 @@ namespace Coms.Application.Services.Contracts
         {
             try
             {
-                //if (_contractRepository.GetContract(id).Result is not null)
-                //{
-                //    var contract = await _contractRepository.GetContract(id);
-                //    contract.Status = DocumentStatus.Deleted;
-                //    await _contractRepository.UpdateContract(contract);
-                //    var contractResult = new ContractResult
-                //    {
-                //        Id = contract.Id,
-                //        ContractName = contract.ContractName,
-                //        Version = contract.Version,
-                //        CreatedDate = contract.CreatedDate,
-                //        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
-                //        UpdatedDate = contract.UpdatedDate,
-                //        UpdatedDateString = contract.UpdatedDate.ToString(),
-                //        EffectiveDate = contract.EffectiveDate,
-                //        EffectiveDateString = contract.EffectiveDate.ToString(),
-                //        Status = (int)contract.Status,
-                //        StatusString = contract.Status.ToString(),
-                //        TemplateID = contract.TemplateId,
-                //        Code = contract.Code,
-                //        Link = contract.Link,
-                //    };
-                //    return contractResult;
-                //}
-                //else
-                //{
-                //    return Error.NotFound();
-                //}
-                return Error.NotFound();
+                var contract = await _contractRepository.GetContract(id);
+                if (contract is not null)
+                {
+                    contract.Status = DocumentStatus.Deleted;
+                    await _contractRepository.UpdateContract(contract);
+                    var contractResult = new ContractResult
+                    {
+                        Id = contract.Id,
+                        ContractName = contract.ContractName,
+                        Version = contract.Version,
+                        CreatedDate = contract.CreatedDate,
+                        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        UpdatedDate = contract.UpdatedDate,
+                        UpdatedDateString = contract.UpdatedDate.ToString(),
+                        EffectiveDate = contract.EffectiveDate,
+                        EffectiveDateString = contract.EffectiveDate.ToString(),
+                        Status = (int)contract.Status,
+                        StatusString = contract.Status.ToString(),
+                        TemplateID = contract.TemplateId,
+                        Code = contract.Code,
+                        Link = contract.Link,
+                    };
+                    return contractResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Contract is not found!");
+                }
             }
             catch (Exception ex)
             {
@@ -99,7 +97,10 @@ namespace Coms.Application.Services.Contracts
                     var contract = await _contractRepository.GetContract(action.ContractId);
                     if (contract is not null)
                     {
-                        contracts.Add(contract);
+                        if (!string.IsNullOrEmpty(contract.Link))
+                        {
+                            contracts.Add(contract);
+                        }
                     }
                 }
             }
@@ -109,9 +110,13 @@ namespace Coms.Application.Services.Contracts
                 foreach (var yourFlowDetail in yourFlowDetails)
                 {
                     var contract = await _contractRepository.GetContract(yourFlowDetail.ContractId);
-                    if (!contracts.Contains(contract) && contract is not null)
+                    var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
+                    if (existedContract is null)
                     {
-                        contracts.Add(contract);
+                        if (!string.IsNullOrEmpty(contract.Link))
+                        {
+                            contracts.Add(contract);
+                        }
                     }
                 }
             }
@@ -134,7 +139,8 @@ namespace Coms.Application.Services.Contracts
                         predicate = predicate.And(c => c.Status.Equals((DocumentStatus)status));
                     }
                 }
-                IList<Contract> filteredList = contracts.Where(predicate).ToList();
+                IList<Contract> filteredList = contracts.Where(predicate).OrderByDescending(c => c.CreatedDate)
+                        .ToList();
                 var total = filteredList.Count();
                 if (currentPage > 0 && pageSize > 0)
                 {
@@ -364,39 +370,44 @@ namespace Coms.Application.Services.Contracts
         {
             try
             {
-                //if (_contractRepository.GetContract(id).Result is not null)
-                //{
-                //    var contract = await _contractRepository.GetContract(id);
-                //    var contractResult = new ContractResult
-                //    {
-                //        Id = contract.Id,
-                //        ContractName = contract.ContractName,
-                //        Version = contract.Version,
-                //        CreatedDate = contract.CreatedDate,
-                //        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
-                //        UpdatedDate = contract.UpdatedDate,
-                //        UpdatedDateString = contract.UpdatedDate.ToString(),
-                //        EffectiveDate = contract.EffectiveDate,
-                //        EffectiveDateString = contract.EffectiveDate.ToString(),
-                //        Status = (int)contract.Status,
-                //        StatusString = contract.Status.ToString(),
-                //        TemplateID = contract.TemplateId,
-                //        Code = contract.Code,
-                //        Link = contract.Link
-                //    };
-                //    return contractResult;
-                //}
-                //else
-                //{
-                //    return Error.NotFound("404", "Contract is not found!");
-                //}
-                return Error.NotFound();
+                var contract = await _contractRepository.GetContract(id);
+                if (contract is not null)
+                {
+                    var contractResult = new ContractResult
+                    {
+                        Id = contract.Id,
+                        ContractName = contract.ContractName,
+                        Version = contract.Version,
+                        CreatedDate = contract.CreatedDate,
+                        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        EffectiveDate = contract.EffectiveDate,
+                        EffectiveDateString = contract.EffectiveDate.ToString(),
+                        Status = (int)contract.Status,
+                        StatusString = contract.Status.ToString(),
+                        TemplateID = contract.TemplateId,
+                        Code = contract.Code,
+                        Link = contract.Link
+                    };
+                    if(contract.UpdatedDate is not null)
+                    {
+                        contractResult.UpdatedDate = contract.UpdatedDate;
+                        contractResult.UpdatedDateString = contract.UpdatedDate.ToString();
+                    }
+                    var template = await _templateRepository.GetTemplate(contract.TemplateId);
+                    contractResult.ContractCategory = template.ContractCategory.CategoryName;
+                    return contractResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Contract is not found!");
+                }
             }
             catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }
         }
+
         public async Task<ErrorOr<ContractResult>> AddContract(string contractName, string code, int partnerId, int authorId, int signerId, int templateId, DateTime effectiveDate,
                 int[] contractCosts, int status)
         {
@@ -747,6 +758,34 @@ namespace Coms.Application.Services.Contracts
             catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<AuthorResult>> IsAuthor(int userId, int contractId)
+        {
+            var contract = await _contractRepository.GetContract(contractId);
+            if(contract is not null)
+            {
+                if (contract.Status.Equals(DocumentStatus.Deleted))
+                {
+                    return Error.Conflict("409", "Contract no longer exist!");
+                }
+                else
+                {
+                    var actionHistory = await _actionHistoryRepository.GetCreateActionByContractId(contractId);
+                    if (actionHistory.UserId.Equals(userId))
+                    {
+                        return new AuthorResult() { IsAuthor = true };
+                    }
+                    else
+                    {
+                        return new AuthorResult() { IsAuthor = false };
+                    }
+                }
+            }
+            else
+            {
+                return Error.NotFound("404", "Contract is not found!");
             }
         }
     }

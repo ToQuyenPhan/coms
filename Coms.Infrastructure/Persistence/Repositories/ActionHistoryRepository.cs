@@ -21,7 +21,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return (list.Count() > 0) ? list : null;
         }
 
-        public async Task<IList<ActionHistory>> GetCommentActionByContractId(int contractId, int userId)
+        public async Task<IList<ActionHistory>?> GetCommentActionByContractId(int contractId, int userId)
         {
             var list = await _genericRepository.WhereAsync(ah => ah.ContractId.Equals(contractId) &&
                 ah.ActionType.Equals(ActionType.Commented) && !ah.UserId.Equals(userId), null);
@@ -57,13 +57,17 @@ namespace Coms.Infrastructure.Persistence.Repositories
             await _genericRepository.CreateAsync(actionHistory);
         }
 
-        //add get comment action by contract id
-        public async Task<IList<ActionHistory>> GetCommentActionByContractId(int contractId)
+        public async Task<IList<ActionHistory>?> GetCommentActionByContractId(int contractId)
         {
             var list = await _genericRepository.WhereAsync(ah => ah.ContractId.Equals(contractId) &&
                            ah.ActionType.Equals(ActionType.Commented), new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User,
-                                                  ah => ah.Contract });
+                                                  ah => ah.Contract, ah => ah.User});
             return (list.Count() > 0) ? list : null;
+        }
+
+        public async Task UpdateActionHistory(ActionHistory actionHistory)
+        {
+            await _genericRepository.UpdateAsync(actionHistory);
         }
     }
 

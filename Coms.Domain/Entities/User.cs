@@ -26,6 +26,10 @@ namespace Coms.Domain.Entities
         [MaxLength(20)]
         public string Password { get; set; } = null!;
 
+        [Required]
+        [MaxLength(50)]
+        public string Position { get; set; } = null!;
+
         public string? Image { get; set; }
 
         [Required]

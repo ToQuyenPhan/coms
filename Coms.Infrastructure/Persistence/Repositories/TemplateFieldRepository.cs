@@ -16,5 +16,11 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             await _genericRepository.CreateRangeAsync(templateFields);
         }
+
+        public async Task<IList<TemplateField>?> GetTemplateFieldsByTemplateId(int templateId)
+        {
+            var list = await _genericRepository.WhereAsync(tf => tf.TemplateId.Equals(templateId), null);
+            return (list.Count() > 0) ? list : null;
+        }
     }
 }

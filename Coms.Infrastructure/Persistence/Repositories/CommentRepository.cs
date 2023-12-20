@@ -13,7 +13,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        public async Task<Comment> GetByActionHistoryId(int actionHistoryId)
+        public async Task<Comment?> GetByActionHistoryId(int actionHistoryId)
         {
             return await _genericRepository.FirstOrDefaultAsync(c => c.ActionHistoryId.Equals(actionHistoryId) && 
                 c.Status.Equals(CommentStatus.Active), 
@@ -27,7 +27,13 @@ namespace Coms.Infrastructure.Persistence.Repositories
 
         public async Task<Comment?> GetComment(int id)
         {
-            return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id), null);
+            return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id), 
+                    new System.Linq.Expressions.Expression<Func<Comment, object>>[] { c => c.ActionHistory });
+        }
+
+        public async Task AddComment(Comment comment)
+        {
+            await _genericRepository.CreateAsync(comment);
         }
     }
 }

@@ -3,6 +3,7 @@ using Coms.Application.Services.Common;
 using Coms.Domain.Enum;
 using ErrorOr;
 using Syncfusion.EJ2.DocumentEditor;
+using System;
 using System.Globalization;
 
 namespace Coms.Application.Services.Templates
@@ -28,13 +29,13 @@ namespace Coms.Application.Services.Templates
         public async Task<ErrorOr<PagingResult<TemplateResult>>> GetTemplates(string name, int? category,
                 int? type, int? status, string email, int currentPage, int pageSize)
         {
-            if (_templateRepository
-                    .GetTemplates(name, category, type, status, email, currentPage, pageSize).Result is not null)
+
+            List<TemplateResult> responses = new List<TemplateResult>();
+            var result = _templateRepository
+                .GetTemplates(name, category, type, status, email).Result;
+            if (result is not null)
             {
-                IList<TemplateResult> responses = new List<TemplateResult>();
-                var result = _templateRepository
-                    .GetTemplates(name, category, type, status, email, currentPage, pageSize).Result;
-                foreach (var template in result.Items)
+                foreach (var template in result)
                 {
                     var templateResult = new TemplateResult
                     {
@@ -56,8 +57,15 @@ namespace Coms.Application.Services.Templates
                     };
                     responses.Add(templateResult);
                 }
+                var total = result.Count();
+                responses = responses.OrderByDescending(t => t.CreatedDate).ToList();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    responses = responses.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                            .ToList();
+                }
                 return new
-                    PagingResult<TemplateResult>(responses, result.TotalCount, currentPage,
+                    PagingResult<TemplateResult>(responses, total, currentPage,
                     pageSize);
             }
             else
@@ -300,7 +308,7 @@ namespace Coms.Application.Services.Templates
                 if (template is not null)
                 {
                     var activatingTemplate = await _templateRepository.GetTemplates(string.Empty,
-                        template.ContractCategoryId, 0, (int)TemplateStatus.Activating, string.Empty, 0, 0);
+                        template.ContractCategoryId, 0, (int)TemplateStatus.Activating, string.Empty);
                     if (activatingTemplate is not null)
                     {
                         return Error.Conflict("409", "The contract category already has a activating " +

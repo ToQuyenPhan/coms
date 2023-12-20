@@ -34,6 +34,19 @@ namespace Coms.Api.Controllers
             );
         }
 
+        [HttpGet("author")]
+        [SwaggerOperation(Summary = "Check contract author in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult IsAuthor([FromQuery] int contractId)
+        {
+            ErrorOr<AuthorResult> result = _contractService.IsAuthor(
+                int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), contractId).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
         [HttpDelete]
         [SwaggerOperation(Summary = "Get your contracts in Coms")]
         [Authorize(Roles = "Staff, Manager")]
