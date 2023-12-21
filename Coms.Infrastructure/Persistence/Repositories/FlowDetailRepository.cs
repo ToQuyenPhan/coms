@@ -22,7 +22,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public async Task<FlowDetail?> GetSignerByFlowId(int flowId)
         {
             return await _genericRepository.FirstOrDefaultAsync(fd => fd.FlowID == flowId && 
-                fd.FlowRole.Equals(FlowRole.Signer));
+                fd.FlowRole.Equals(FlowRole.Signer), new System.Linq.Expressions.Expression<Func<FlowDetail, object>>[] { fd => fd.User, fd => fd.Flow });
         }
 
         public async Task<IList<FlowDetail>?> GetUserFlowDetailsByUserId(int userId)

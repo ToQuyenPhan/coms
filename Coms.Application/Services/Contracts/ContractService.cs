@@ -3,12 +3,19 @@ using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
+using Firebase.Storage;
 using LinqKit;
+using Microsoft.Office.Interop.Word;
+using Spire.Doc;
+using Spire.Doc.Documents;
+using Spire.Doc.Fields;
+using System.Reflection.PortableExecutable;
 
 namespace Coms.Application.Services.Contracts
 {
     public class ContractService : IContractService
     {
+        private string Bucket = "coms-64e4a.appspot.com";
         private readonly IAccessRepository _accessRepository;
         private readonly IUserAccessRepository _userAccessRepository;
         private readonly IPartnerReviewRepository _partnerReviewRepository;
@@ -21,6 +28,7 @@ namespace Coms.Application.Services.Contracts
         private readonly IAproveWorkflowRepository _aproveWorkflowRepository;
         private readonly IContractFlowDetailsRepository _contractFlowDetailsRepository;
         private readonly IFlowDetailRepository _flowDetailRepository;
+        private readonly IServiceRepository _serviceRepository;
 
         public ContractService(IAccessRepository accessRepository,
                 IUserAccessRepository userAccessRepository,
@@ -33,7 +41,8 @@ namespace Coms.Application.Services.Contracts
                 IContractCostRepository contractCostRepository,
                 IAproveWorkflowRepository aproveWorkflowRepository,
                 IContractFlowDetailsRepository contractFlowDetailsRepository,
-                IFlowDetailRepository flowDetailRepository)
+                IFlowDetailRepository flowDetailRepository,
+                IServiceRepository serviceRepository)
         {
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
@@ -47,6 +56,7 @@ namespace Coms.Application.Services.Contracts
             _aproveWorkflowRepository = aproveWorkflowRepository;
             _contractFlowDetailsRepository = contractFlowDetailsRepository;
             _flowDetailRepository = flowDetailRepository;
+            _serviceRepository = serviceRepository;
         }
 
         public async Task<ErrorOr<ContractResult>> DeleteContract(int id)
@@ -429,19 +439,28 @@ namespace Coms.Application.Services.Contracts
                 var namesAndValues = names.Zip(values, (n, v) => new { Name = n, Value = v });
                 var template = await _templateRepository.GetTemplateByContractCategoryId(contractCategoryId);
                 if (template is not null)
-                {
-                    
+                {      
                     string contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts");
                     bool folderExists = Directory.Exists(contractFilePath);
                     if (!folderExists)
                         Directory.CreateDirectory(contractFilePath);
-                    contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", "test.docx");
+                    var service = await _serviceRepository.GetService(serviceId);
+                    contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", "test1.docx");
                     string templateFilePath = Path.Combine(Environment.CurrentDirectory, "Templates", template.Id + ".docx");
                     Spire.Doc.Document document = new Spire.Doc.Document();
-                    document.LoadFromFile(templateFilePath, Spire.Doc.FileFormat.Docx);
+                    document.LoadFromFile(templateFilePath, FileFormat.Docx);
                     document.MailMerge.Execute(names, values);
                     document.SaveToFile(contractFilePath);
+                    //string contractFilePdfPath = Path.Combine(Environment.CurrentDirectory, "Contracts", "test1.pdf");
+                    //document.SaveToFile(contractFilePath, Spire.Doc.FileFormat.PDF);
                     document.Close();
+                    //var stream = File.Open(contractFilePdfPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                    //var task = new FirebaseStorage(Bucket)
+                    //    .Child("contracts")
+                    //    .Child("test1.pdf")
+                    //    .PutAsync(stream);
+                    //string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/templates%2F" + id
+                    //    + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
                     //var contract = new Contract
                     //{
                     //    TemplateId = template.Id,

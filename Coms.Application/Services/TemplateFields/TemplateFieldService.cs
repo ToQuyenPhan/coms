@@ -50,9 +50,7 @@ namespace Coms.Application.Services.TemplateFields
                         if (templateField.FieldName.Contains("Company") || templateField.FieldName.Contains("Partner") ||
                                 templateField.FieldName.Contains("Signer") || 
                                 templateField.FieldName.Contains("Created Date") ||
-                                templateField.FieldName.Contains("Contract Code") ||
-                                templateField.FieldName.Contains("Contract Service") ||
-                                templateField.FieldName.Equals("Payment"))
+                                templateField.FieldName.Contains("Contract Code"))
                         {
                             isReadOnly = true;
                             if (templateField.FieldName.Contains("Partner"))
@@ -83,6 +81,9 @@ namespace Coms.Application.Services.TemplateFields
                                         case "Partner Email":
                                             content = partner.Email;
                                             break;
+                                        case "Partner Signature":
+                                            content = "[" + templateField.FieldName + "]";
+                                            break;
                                         default: break;
                                     }
                                 }
@@ -91,8 +92,7 @@ namespace Coms.Application.Services.TemplateFields
                                     return Error.NotFound("404", "Partner is not found!");
                                 }
                             }
-                            if (templateField.FieldName.Contains("Company") || 
-                                    templateField.FieldName.Contains("Payment"))
+                            if (templateField.FieldName.Contains("Company"))
                             {
                                 var systemSettings = await _systemSettingsRepository.GetSystemSettings();
                                 if (systemSettings is not null)
@@ -117,8 +117,8 @@ namespace Coms.Application.Services.TemplateFields
                                         case "Company Email":
                                             content = systemSettings.Email;
                                             break;
-                                        case "Payment":
-                                            content = systemSettings.BankName;
+                                        case "Company Signature":
+                                            content = "[" + templateField.FieldName + "]";
                                             break;
                                         default: break;
                                     }
@@ -166,22 +166,6 @@ namespace Coms.Application.Services.TemplateFields
                                 }
                                 content = new String(stringChars);
                             }
-                            if (templateField.FieldName.Contains("Contract Service"))
-                            {
-                                var service = await _serviceRepository.GetService(serviceId);
-                                if(service is not null)
-                                {
-                                    content = service.ServiceName;
-                                }
-                                else
-                                {
-                                    return Error.NotFound("404", "Service is not found!");
-                                }
-                            }
-                        }
-                        if (templateField.FieldName.Contains("Signature"))
-                        {
-                            continue;
                         }
                         if (templateField.FieldName.Contains("Contract Title"))
                         {
