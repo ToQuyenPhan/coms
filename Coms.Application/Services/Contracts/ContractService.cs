@@ -2,6 +2,7 @@
 using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
+using ConvertApiDotNet;
 using ErrorOr;
 using Firebase.Storage;
 using LinqKit;
@@ -9,6 +10,11 @@ using Microsoft.Office.Interop.Word;
 using Spire.Doc;
 using Spire.Doc.Documents;
 using Spire.Doc.Fields;
+using Syncfusion.DocIO;
+using Syncfusion.DocIO.DLS;
+using Syncfusion.DocIORenderer;
+using Syncfusion.OfficeChart;
+using Syncfusion.Pdf;
 using System.Reflection.PortableExecutable;
 
 namespace Coms.Application.Services.Contracts
@@ -434,7 +440,7 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
-        public async Task<ErrorOr<ContractResult>> AddContract(string[] names, string[] values, int contractCategoryId,
+        public async Task<ErrorOr<int>> AddContract(string[] names, string[] values, int contractCategoryId,
                 int serviceId, DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate, 
                 int partnerId)
         {
@@ -475,7 +481,7 @@ namespace Coms.Application.Services.Contracts
                     await _contractRepository.AddContract(contract);
                     contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", contract.Id + ".docx");
                     document.SaveToFile(contractFilePath);
-                    document.Close();
+                    document.Dispose();
                     List<ContractField> contractFields = new List<ContractField>();
                     foreach(var nav in namesAndValues)
                     {
@@ -526,17 +532,7 @@ namespace Coms.Application.Services.Contracts
                         ContractId = contract.Id
                     };
                     await _actionHistoryRepository.AddActionHistory(actionHistory);
-                    //string contractFilePdfPath = Path.Combine(Environment.CurrentDirectory, "Contracts", "test1.pdf");
-                    //document.SaveToFile(contractFilePath, Spire.Doc.FileFormat.PDF);
-
-                    //var stream = File.Open(contractFilePdfPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
-                    //var task = new FirebaseStorage(Bucket)
-                    //    .Child("contracts")
-                    //    .Child("test1.pdf")
-                    //    .PutAsync(stream);
-                    //string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/templates%2F" + id
-                    //    + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
-                    return new ContractResult();
+                    return contract.Id;
                 }
                 else
                 {
@@ -544,6 +540,50 @@ namespace Coms.Application.Services.Contracts
                 }
             }
             catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<string>> UploadContract(int contractId)
+        {
+            try
+            {
+                string contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", contractId + ".docx");
+                //Open the file as Stream
+                FileStream docStream = new FileStream(contractFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+                //Loads file stream into Word document
+                WordDocument wordDocument = new WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
+                //Instantiation of DocIORenderer for Word to PDF conversion
+                DocIORenderer render = new DocIORenderer();
+                //Sets Chart rendering Options.
+                render.Settings.ChartRenderingOptions.ImageFormat = Syncfusion.OfficeChart.ExportImageFormat.Jpeg;
+                //Converts Word document into PDF document
+                PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
+                string filePath = Path.Combine(Environment.CurrentDirectory, "Contracts", contractId + ".pdf");
+                // Saves the document to server machine file system, you can customize here to save into databases or file servers based on requirement.
+                FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                //Releases all resources used by the Word document and DocIO Renderer objects
+                render.Dispose();
+                wordDocument.Dispose();
+                pdfDocument.Save(fileStream);
+                //Closes the instance of PDF document object
+                pdfDocument.Close();
+                fileStream.Close();
+                wordDocument.Close();
+                var stream = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                var task = new FirebaseStorage(Bucket)
+                    .Child("contracts")
+                    .Child(contractId + ".pdf")
+                    .PutAsync(stream);
+                string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/contracts%2F" + contractId
+                    + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
+                var contract = await _contractRepository.GetContract(contractId);
+                contract.Link = link;
+                await _contractRepository.UpdateContract(contract);
+                var downloadUrl = await task;
+                return link;
+            }catch(Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }

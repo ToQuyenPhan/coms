@@ -1,5 +1,4 @@
 ﻿using Coms.Application.Services.Common;
-using Coms.Domain.Entities;
 using ErrorOr;
 
 namespace Coms.Application.Services.Contracts
@@ -9,7 +8,7 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<ContractResult>> DeleteContract(int id);
         Task<ErrorOr<PagingResult<ContractResult>>> GetYourContracts(int userId,
                 string name, string creatorName, int? status, int currentPage, int pageSize);
-        Task<ErrorOr<ContractResult>> AddContract(string[] names, string[] values, int contractCategoryId,
+        Task<ErrorOr<int>> AddContract(string[] names, string[] values, int contractCategoryId,
                 int serviceId, DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate,
                 int partnerId);
         Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport(int userId);
@@ -20,5 +19,6 @@ namespace Coms.Application.Services.Contracts
                 string name, string code, bool isApproved, int currentPage, int pageSize);
         Task<ErrorOr<ContractResult>> ApproveContract(int contractId, int userId, bool isApproved);
         Task<ErrorOr<AuthorResult>> IsAuthor(int userId, int contractId);
+        Task<ErrorOr<string>> UploadContract(int contractId);
     }
 }

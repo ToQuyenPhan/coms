@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ConvertApi" Version="3.0.14" />
     <PackageReference Include="Firebase.Auth" Version="1.0.0" />
     <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
     <PackageReference Include="FreeSpire.Doc" Version="11.6.0" />
@@ -20,7 +21,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.24" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.24" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Office.Interop.Word" Version="15.0.4797.1004" />
+    <PackageReference Include="Microsoft.Office.Interop.Word" Version="12.0.0" />
     <PackageReference Include="Syncfusion.DocIORenderer.Net.Core" Version="24.1.41" />
     <PackageReference Include="Syncfusion.EJ2.WordEditor.AspNet.Core" Version="24.1.41" />
   </ItemGroup>

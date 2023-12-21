@@ -86,12 +86,24 @@ namespace Coms.Api.Controllers
         [HttpPost]
         [SwaggerOperation(Summary = "Add a contract in Coms")]
         [Authorize(Roles = "Staff, Manager")]
-        public IActionResult Add([FromBody] ContractFormRequest request)
+        public IActionResult AddContract([FromBody] ContractFormRequest request)
         {
-            ErrorOr<ContractResult> result = _contractService.AddContract(request.Name, request.Value, request.ContractCategoryId, 
+            ErrorOr<int> result = _contractService.AddContract(request.Name, request.Value, request.ContractCategoryId, 
                         request.ServiceId, request.EffectiveDate, request.Status, 
                         int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.SendDate,
                         request.ReviewDate, request.PartnerId).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpPost("upload")]
+        [SwaggerOperation(Summary = "Upload a contract in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult UploadContract([FromQuery] int id)
+        {
+            ErrorOr<string> result = _contractService.UploadContract(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
