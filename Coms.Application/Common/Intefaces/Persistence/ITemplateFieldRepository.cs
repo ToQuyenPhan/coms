@@ -6,5 +6,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
     {
         Task AddRangeAsync(List<TemplateField> templateFields);
         Task<IList<TemplateField>?> GetTemplateFieldsByTemplateId(int templateId);
+        Task UpdateRangeAsync(List<TemplateField> templateFields);
+        Task DeleteRangeAsync(List<TemplateField> templateFields);
     }
 }

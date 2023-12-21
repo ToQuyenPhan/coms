@@ -12,11 +12,6 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        public async Task AddContractField(ContractField contractField)
-        {
-            await _genericRepository.CreateAsync(contractField);
-        }
-
         public async Task AddRangeContractField(List<ContractField> contractFields)
         {
             await _genericRepository.CreateRangeAsync(contractFields);

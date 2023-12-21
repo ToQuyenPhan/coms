@@ -32,5 +32,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
                 ufd.ContractId.Equals(contractId), new System.Linq.Expressions.Expression<Func<Contract_FlowDetail, object>>[] { ufd => ufd.Contract, ufd => ufd.FlowDetail });
             return (list.Count() > 0) ? list : null;
         }
+
+        public async Task AddRangeContractFlowDetails(List<Contract_FlowDetail> contractFlowDetails)
+        {
+            await _genericRepository.CreateRangeAsync(contractFlowDetails);
+        }
     }
 }

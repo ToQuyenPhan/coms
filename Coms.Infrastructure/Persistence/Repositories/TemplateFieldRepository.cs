@@ -22,5 +22,15 @@ namespace Coms.Infrastructure.Persistence.Repositories
             var list = await _genericRepository.WhereAsync(tf => tf.TemplateId.Equals(templateId), null);
             return (list.Count() > 0) ? list : null;
         }
+
+        public async Task UpdateRangeAsync(List<TemplateField> templateFields)
+        {
+            await _genericRepository.UpdateRangeAsync(templateFields);
+        }
+
+        public async Task DeleteRangeAsync(List<TemplateField> templateFields)
+        {
+            await _genericRepository.DeleteRangeAsync(templateFields);
+        }
     }
 }

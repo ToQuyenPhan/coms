@@ -168,7 +168,7 @@ namespace Coms.Application.Services.Templates
                 if (templateFile is not null)
                 {
                     string filePath =
-                        Path.Combine(Environment.CurrentDirectory, "Data",
+                        Path.Combine(Environment.CurrentDirectory, "Templates",
                         templateFile.FileName + ".docx");
                     var stream = File.Create(filePath);
                     stream.Write(templateFile.FileData, 0, templateFile.FileData.Length);

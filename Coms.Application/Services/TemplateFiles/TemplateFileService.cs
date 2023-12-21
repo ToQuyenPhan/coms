@@ -3,6 +3,7 @@ using Coms.Domain.Entities;
 using ErrorOr;
 using Firebase.Storage;
 using Microsoft.Office.Interop.Word;
+using SkiaSharp;
 using Syncfusion.DocIORenderer;
 using Syncfusion.EJ2.DocumentEditor;
 using Syncfusion.Pdf;
@@ -149,6 +150,42 @@ namespace Coms.Application.Services.TemplateFiles
                 var templateFile = await _templateFileRepository.GetTemplateFileByTemplateId(templateId);
                 if (templateFile is not null)
                 {
+                    string filePath = Path.Combine(Environment.CurrentDirectory, "Templates", templateId + ".docx");
+                    Spire.Doc.Document checkingDocument = new Spire.Doc.Document();
+                    checkingDocument.LoadFromFile(filePath);
+                    string[] mailMergeFieldNames = checkingDocument.MailMerge.GetMergeFieldNames();
+                    IList<string> fieldNames = new List<string>();
+                    foreach (var fieldName in mailMergeFieldNames)
+                    {
+                        if (!fieldNames.Contains(fieldName))
+                        {
+                            fieldNames.Add(fieldName);
+                        }
+                    }
+                    if (fieldNames.Count() > 0)
+                    {
+                        var templateFields = await _templateFieldRepository.GetTemplateFieldsByTemplateId(templateId);
+                        if(templateFields is not null) {
+                            await _templateFieldRepository.DeleteRangeAsync(new List<TemplateField>(templateFields));
+                            List<TemplateField> newFields = new List<TemplateField>();
+                            foreach (var fieldName in fieldNames)
+                            {
+                                var newField = new TemplateField
+                                {
+                                    FieldName = fieldName,
+                                    TemplateId = templateId
+                                };
+                                if (!templateFields.Contains(newField))
+                                {
+                                    newFields.Add(newField);
+                                }
+                            }
+                            if (templateFields.Count() > 0)
+                            {
+                                await _templateFieldRepository.AddRangeAsync(newFields);
+                            }
+                        }
+                    }
                     templateFile.FileName = templateName;
                     templateFile.FileData = document;
                     templateFile.UpdatedDate = DateTime.Now;

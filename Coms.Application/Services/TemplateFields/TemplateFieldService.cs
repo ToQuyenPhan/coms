@@ -42,6 +42,10 @@ namespace Coms.Application.Services.TemplateFields
                 var templateFields = await _templateFieldRepository.GetTemplateFieldsByTemplateId(template.Id);
                 if (templateFields is not null)
                 {
+                    var systemSettings = await _systemSettingsRepository.GetSystemSettings();
+                    var partner = await _partnerRepository.GetPartner(partnerId);
+                    var flow = await _flowRepository.GetByContractCategoryId(contractCategoryId);
+                    var service = await _serviceRepository.GetService(serviceId);
                     IList<TemplateFieldResult> results = new List<TemplateFieldResult>();
                     foreach (var templateField in templateFields)
                     {
@@ -50,12 +54,13 @@ namespace Coms.Application.Services.TemplateFields
                         if (templateField.FieldName.Contains("Company") || templateField.FieldName.Contains("Partner") ||
                                 templateField.FieldName.Contains("Signer") || 
                                 templateField.FieldName.Contains("Created Date") ||
-                                templateField.FieldName.Contains("Contract Code"))
+                                templateField.FieldName.Contains("Contract Code") || 
+                                templateField.FieldName.Contains("Bank") || templateField.FieldName.Contains("Account") ||
+                                templateField.FieldName.Contains("Service"))
                         {
                             isReadOnly = true;
                             if (templateField.FieldName.Contains("Partner"))
                             {
-                                var partner = await _partnerRepository.GetPartner(partnerId);
                                 if (partner is not null)
                                 {
                                     switch (templateField.FieldName)
@@ -92,9 +97,9 @@ namespace Coms.Application.Services.TemplateFields
                                     return Error.NotFound("404", "Partner is not found!");
                                 }
                             }
-                            if (templateField.FieldName.Contains("Company"))
+                            if (templateField.FieldName.Contains("Company") ||
+                                templateField.FieldName.Contains("Bank") || templateField.FieldName.Contains("Account"))
                             {
-                                var systemSettings = await _systemSettingsRepository.GetSystemSettings();
                                 if (systemSettings is not null)
                                 {
                                     switch (templateField.FieldName)
@@ -120,6 +125,15 @@ namespace Coms.Application.Services.TemplateFields
                                         case "Company Signature":
                                             content = "[" + templateField.FieldName + "]";
                                             break;
+                                        case "Bank Account":
+                                            content = systemSettings.BankAccount;
+                                            break;
+                                        case "Account Number":
+                                            content = systemSettings.BankAccountNumber;
+                                            break;
+                                        case "Bank":
+                                            content = systemSettings.BankName;
+                                            break;
                                         default: break;
                                     }
                                 }
@@ -131,7 +145,6 @@ namespace Coms.Application.Services.TemplateFields
                             if (templateField.FieldName.Contains("Signer Name") ||
                                     templateField.FieldName.Contains("Signer Position"))
                             {
-                                var flow = await _flowRepository.GetByContractCategoryId(contractCategoryId);
                                 if (flow is not null)
                                 {
                                     var flowDetail = await _flowDetailRepository.GetSignerByFlowId(flow.Id);
@@ -165,6 +178,26 @@ namespace Coms.Application.Services.TemplateFields
                                     stringChars[i] = chars[random.Next(chars.Length)];
                                 }
                                 content = new String(stringChars);
+                            }
+                            if (templateField.FieldName.Contains("Service"))
+                            {
+                                if (service is not null)
+                                {
+                                    switch (templateField.FieldName)
+                                    {
+                                        case "Service Name":
+                                            content = service.ServiceName;
+                                            break;
+                                        case "Service Price":
+                                            content = service.Price.ToString();
+                                            break;
+                                        default: break;
+                                    }
+                                }
+                                else
+                                {
+                                    return Error.NotFound("404", "Service is not found!");
+                                }
                             }
                         }
                         if (templateField.FieldName.Contains("Contract Title"))

@@ -28,7 +28,8 @@ namespace Coms.Application.Services.Contracts
         private readonly IAproveWorkflowRepository _aproveWorkflowRepository;
         private readonly IContractFlowDetailsRepository _contractFlowDetailsRepository;
         private readonly IFlowDetailRepository _flowDetailRepository;
-        private readonly IServiceRepository _serviceRepository;
+        private readonly IContractFieldRepository _contractFieldRepository;
+        private readonly IFlowRepository _flowRepository;
 
         public ContractService(IAccessRepository accessRepository,
                 IUserAccessRepository userAccessRepository,
@@ -42,7 +43,8 @@ namespace Coms.Application.Services.Contracts
                 IAproveWorkflowRepository aproveWorkflowRepository,
                 IContractFlowDetailsRepository contractFlowDetailsRepository,
                 IFlowDetailRepository flowDetailRepository,
-                IServiceRepository serviceRepository)
+                IContractFieldRepository contractFieldRepository,
+                IFlowRepository flowRepository)
         {
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
@@ -56,7 +58,8 @@ namespace Coms.Application.Services.Contracts
             _aproveWorkflowRepository = aproveWorkflowRepository;
             _contractFlowDetailsRepository = contractFlowDetailsRepository;
             _flowDetailRepository = flowDetailRepository;
-            _serviceRepository = serviceRepository;
+            _contractFieldRepository = contractFieldRepository;
+            _flowRepository = flowRepository;
         }
 
         public async Task<ErrorOr<ContractResult>> DeleteContract(int id)
@@ -432,28 +435,100 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<ContractResult>> AddContract(string[] names, string[] values, int contractCategoryId,
-                int serviceId, DateTime effectiveDate, int status)
+                int serviceId, DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate, 
+                int partnerId)
         {
             try
             {
                 var namesAndValues = names.Zip(values, (n, v) => new { Name = n, Value = v });
                 var template = await _templateRepository.GetTemplateByContractCategoryId(contractCategoryId);
                 if (template is not null)
-                {      
+                {
                     string contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts");
                     bool folderExists = Directory.Exists(contractFilePath);
                     if (!folderExists)
                         Directory.CreateDirectory(contractFilePath);
-                    var service = await _serviceRepository.GetService(serviceId);
-                    contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", "test1.docx");
                     string templateFilePath = Path.Combine(Environment.CurrentDirectory, "Templates", template.Id + ".docx");
                     Spire.Doc.Document document = new Spire.Doc.Document();
                     document.LoadFromFile(templateFilePath, FileFormat.Docx);
                     document.MailMerge.Execute(names, values);
+                    var contract = new Contract
+                    {
+                        TemplateId = template.Id,
+                        Link = "",
+                        CreatedDate = DateTime.Now,
+                        EffectiveDate = effectiveDate,
+                        Version = 1,
+                        Status = (DocumentStatus)status
+                    };
+                    foreach (var nav in namesAndValues)
+                    {
+                        if (nav.Name.Equals("Contract Title"))
+                        {
+                            contract.ContractName = nav.Value;
+                        }
+                        if (nav.Name.Equals("Contract Code"))
+                        {
+                            contract.Code = nav.Value;
+                        }
+                    }
+                    await _contractRepository.AddContract(contract);
+                    contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", contract.Id + ".docx");
                     document.SaveToFile(contractFilePath);
+                    document.Close();
+                    List<ContractField> contractFields = new List<ContractField>();
+                    foreach(var nav in namesAndValues)
+                    {
+                        var contractField = new ContractField()
+                        {
+                            FieldName = nav.Name,
+                            Content = nav.Value,
+                            ContractId = contract.Id,
+                        };
+                        contractFields.Add(contractField);
+                    }
+                    await _contractFieldRepository.AddRangeContractField(contractFields);
+                    var contractCost = new ContractCost()
+                    {
+                        ServiceId = serviceId,
+                        ContractId = contract.Id
+                    };
+                    await _contractCostRepository.AddContractCost(contractCost);
+                    var partnerReview = new PartnerReview()
+                    {
+                        PartnerId = partnerId,
+                        UserId = userId,
+                        ContractId = contract.Id,
+                        SendDate = sendDate,
+                        ReviewAt = reviewDate,
+                        IsApproved = false
+                    };
+                    await _partnerReviewRepository.AddPartnerReview(partnerReview);
+                    var flow = await _flowRepository.GetByContractCategoryId(contractCategoryId);
+                    var flowDetails = await _flowDetailRepository.GetByFlowId(flow.Id);
+                    List<Contract_FlowDetail> contractFlowDetails = new List<Contract_FlowDetail>();
+                    foreach(var flowDetail in flowDetails)
+                    {
+                        var contractFlowDetail = new Contract_FlowDetail()
+                        {
+                            FlowDetailId = flowDetail.Id,
+                            ContractId = contract.Id,
+                            Status = FlowDetailStatus.Waiting
+                        };
+                        contractFlowDetails.Add(contractFlowDetail);
+                    }
+                    await _contractFlowDetailsRepository.AddRangeContractFlowDetails(contractFlowDetails);
+                    var actionHistory = new ActionHistory()
+                    {
+                        ActionType = ActionType.Created,
+                        CreatedAt = DateTime.Now,
+                        UserId = userId,
+                        ContractId = contract.Id
+                    };
+                    await _actionHistoryRepository.AddActionHistory(actionHistory);
                     //string contractFilePdfPath = Path.Combine(Environment.CurrentDirectory, "Contracts", "test1.pdf");
                     //document.SaveToFile(contractFilePath, Spire.Doc.FileFormat.PDF);
-                    document.Close();
+
                     //var stream = File.Open(contractFilePdfPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
                     //var task = new FirebaseStorage(Bucket)
                     //    .Child("contracts")
@@ -461,28 +536,6 @@ namespace Coms.Application.Services.Contracts
                     //    .PutAsync(stream);
                     //string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/templates%2F" + id
                     //    + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
-                    //var contract = new Contract
-                    //{
-                    //    TemplateId = template.Id,
-                    //    Link = "",
-                    //    CreatedDate = DateTime.Now,
-                    //    EffectiveDate = effectiveDate,
-                    //    Version = 1,
-                    //    Status = (DocumentStatus)status
-                    //};
-                    //foreach (var nav in namesAndValues)
-                    //{
-                    //    if (nav.Name.Equals("Contract Title"))
-                    //    {
-                    //        contract.ContractName = nav.Value;
-                    //    }
-                    //    if (nav.Name.Equals("ContractCode"))
-                    //    {
-                    //        contract.Code = nav.Value;
-                    //    }
-                    //}
-                    //await _contractRepository.AddContract(contract);
-
                     return new ContractResult();
                 }
                 else

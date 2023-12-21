@@ -10,7 +10,8 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<PagingResult<ContractResult>>> GetYourContracts(int userId,
                 string name, string creatorName, int? status, int currentPage, int pageSize);
         Task<ErrorOr<ContractResult>> AddContract(string[] names, string[] values, int contractCategoryId,
-                int serviceId, DateTime effectiveDate, int status);
+                int serviceId, DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate,
+                int partnerId);
         Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport(int userId);
         Task<ErrorOr<ContractResult>> GetContract(int id);
         Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContracts(int userId,

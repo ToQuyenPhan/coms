@@ -89,7 +89,9 @@ namespace Coms.Api.Controllers
         public IActionResult Add([FromBody] ContractFormRequest request)
         {
             ErrorOr<ContractResult> result = _contractService.AddContract(request.Name, request.Value, request.ContractCategoryId, 
-                        request.ServiceId, request.EffectiveDate, request.Status).Result;
+                        request.ServiceId, request.EffectiveDate, request.Status, 
+                        int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.SendDate,
+                        request.ReviewDate, request.PartnerId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
