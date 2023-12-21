@@ -43,6 +43,7 @@ namespace Coms.Application
             services.AddScoped<IPartnerService, PartnerService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserAccessService, UserAccessService>();
+            services.AddScoped<ILiquidationRecordsService, LiquidationRecordsService>();
             return services;
         }
     }
