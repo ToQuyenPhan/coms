@@ -3,7 +3,7 @@ using Coms.Domain.Entities;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
-    public class AttachmentRepository: IAttachmentRepository
+    public class AttachmentRepository : IAttachmentRepository
     {
         private readonly IGenericRepository<Attachment> _genericRepository;
 
@@ -12,9 +12,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        public async Task<IList<Attachment>> GetAttachmentsByContractId(int contractId)
+        public async Task<IList<Attachment>?> GetAttachmentsByContractId(int contractId)
         {
-            var list = await _genericRepository.WhereAsync(a => a.ContractId.Equals(contractId) && 
+            IList<Attachment> list = await _genericRepository.WhereAsync(a => a.ContractId.Equals(contractId) &&
                 a.Status != Domain.Enum.AttachmentStatus.Inactive, null);
             return (list.Count() > 0) ? list : null;
         }
@@ -27,6 +27,11 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public async Task<Attachment?> GetAttachment(int id)
         {
             return await _genericRepository.FirstOrDefaultAsync(a => a.Id.Equals(id));
+        }
+
+        public async Task AddAttachment(Attachment attachment)
+        {
+            await _genericRepository.CreateAsync(attachment);
         }
     }
 }

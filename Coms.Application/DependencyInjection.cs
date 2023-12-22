@@ -17,6 +17,7 @@ using Coms.Application.Services.Users;
 using Coms.Application.Services.UserAccesses;
 using Coms.Application.Services.UserFlowDetails;
 using Coms.Application.Services.TemplateFields;
+using Coms.Application.Services.Attachments;
 
 namespace Coms.Application
 {

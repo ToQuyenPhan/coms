@@ -7,5 +7,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<IList<Attachment>> GetAttachmentsByContractId(int contractId);
         Task UpdateAttachment(Attachment attachment);
         Task<Attachment?> GetAttachment(int id);
+        Task AddAttachment(Attachment attachment);
     }
 }

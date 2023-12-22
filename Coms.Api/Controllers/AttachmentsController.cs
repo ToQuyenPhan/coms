@@ -1,4 +1,5 @@
-﻿using Coms.Application.Services.Common;
+﻿using Coms.Application.Services.Attachments;
+using Coms.Application.Services.Common;
 using Coms.Application.Services.Contracts;
 using Coms.Contracts.Attachments;
 using ErrorOr;
@@ -23,8 +24,8 @@ namespace Coms.Api.Controllers
         [SwaggerOperation(Summary = "Get all attachments of a contract in Coms")]
         public IActionResult GetAttachmentsByContractId([FromQuery] AttachmentRequest request)
         {
-            ErrorOr<PagingResult<AttachmentResult>> result = 
-                    _attachmentService.GetAttachmentsByContractId(request.ContractId, request.CurrentPage, 
+            ErrorOr<PagingResult<AttachmentResult>> result =
+                    _attachmentService.GetAttachmentsByContractId(request.ContractId, request.CurrentPage,
                     request.PageSize).Result;
             return result.Match(
                 result => Ok(result),
@@ -41,6 +42,18 @@ namespace Coms.Api.Controllers
                 result => Ok(result),
                 errors => Problem(errors)
                  );
+        }
+
+        //add new attachment
+        [HttpPost]
+        [SwaggerOperation(Summary = "Add an attachment of a contract in Coms")]
+        public IActionResult AddAttachment([FromBody] AddAttachmentRequest request)
+        {
+            ErrorOr<AttachmentResult> result = _attachmentService.AddAttachment(request.FileName, request.FileLink, request.UploadDate, request.Description, request.ContractId).Result;
+            return result.Match(
+                               result => Ok(result),
+                                              errors => Problem(errors)
+                                                              );
         }
     }
 }
