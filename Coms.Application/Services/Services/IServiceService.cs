@@ -9,6 +9,6 @@ namespace Coms.Application.Services.Services
         Task<ErrorOr<ServiceResult>> AddService(string serviceName,string description, double price);
         Task<ErrorOr<ServiceResult>> UpdateService(int serviceId, string serviceName, string description, double price);
         Task<ErrorOr<ServiceResult>> DeleteService(int serviceId);
-        Task<ErrorOr<IList<ServiceResult>>> GetActiveServices();
+        Task<ErrorOr<IList<ServiceResult>>> GetActiveServices(int? contractCategoryId);
     }
 }

@@ -9,6 +9,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<Service?> GetService(int id);
         Task AddService(Service service);
         Task UpdateService(Service service);
-
+        Task<IList<Service>?> GetByContractCategoryId(int contractCategoryId);
     }
 }

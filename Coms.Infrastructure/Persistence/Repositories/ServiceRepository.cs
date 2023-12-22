@@ -45,5 +45,12 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             await _genericRepository.UpdateAsync(service);
         }
+
+        public async Task<IList<Service>?> GetByContractCategoryId(int contractCategoryId)
+        {
+            var list = await _genericRepository.WhereAsync(s => s.Status == Domain.Enum.ServiceStatus.Active && 
+                s.ContractCategoryId.Equals(contractCategoryId), null);
+            return (list.Count() > 0) ? list : null;
+        }
     }
 }

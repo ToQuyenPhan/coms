@@ -171,11 +171,15 @@ namespace Coms.Application.Services.Services
             }
         }
 
-        public async Task<ErrorOr<IList<ServiceResult>>> GetActiveServices()
+        public async Task<ErrorOr<IList<ServiceResult>>> GetActiveServices(int? contractCategoryId)
         {
             try
             {
                 var services = await _serviceRepository.GetServices();
+                if (contractCategoryId.HasValue)
+                {
+                    services = await _serviceRepository.GetByContractCategoryId(contractCategoryId.Value);
+                }
                 if (services is not null)
                 {
                     IList<ServiceResult> results = new List<ServiceResult>();

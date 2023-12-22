@@ -33,18 +33,6 @@ namespace Coms.Api.Controllers
                  );
         }
 
-        [HttpDelete]
-        [SwaggerOperation(Summary = "Delete an attachment of a contract in Coms")]
-        public IActionResult DeleteAttachment([FromQuery] int id)
-        {
-            ErrorOr<AttachmentResult> result = _attachmentService.DeleteAttachment(id).Result;
-            return result.Match(
-                result => Ok(result),
-                errors => Problem(errors)
-                 );
-        }
-
-        //add new attachment
         [HttpPost]
         [SwaggerOperation(Summary = "Add an attachment of a contract in Coms")]
         public IActionResult AddAttachment([FromBody] AddAttachmentRequest request)
@@ -54,6 +42,17 @@ namespace Coms.Api.Controllers
                                result => Ok(result),
                                               errors => Problem(errors)
                                                               );
+        }
+
+        [HttpDelete]
+        [SwaggerOperation(Summary = "Delete an attachment of a contract in Coms")]
+        public IActionResult DeleteAttachment([FromQuery] int id)
+        {
+            ErrorOr<AttachmentResult> result = _attachmentService.DeleteAttachment(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+                 );
         }
     }
 }

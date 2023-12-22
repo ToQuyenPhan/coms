@@ -20,5 +20,6 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<ContractResult>> ApproveContract(int contractId, int userId, bool isApproved);
         Task<ErrorOr<AuthorResult>> IsAuthor(int userId, int contractId);
         Task<ErrorOr<string>> UploadContract(int contractId);
+        Task<ErrorOr<MemoryStream>> PreviewContract(string[] names, string[] values, int contractCategoryId);
     }
 }

@@ -79,7 +79,6 @@ namespace Coms.Application.Services.Attachments
             }
         }
 
-        //add new attachment
         public async Task<ErrorOr<AttachmentResult>> AddAttachment(string fileName, string fileLink, DateTime uploadDate, string description, int contractId)
         {
             try

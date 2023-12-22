@@ -8,8 +8,6 @@ namespace Coms.Application.Services.Attachments
     {
         Task<ErrorOr<PagingResult<AttachmentResult>>> GetAttachmentsByContractId(int contractId, int currentPage, int pageSize);
         Task<ErrorOr<AttachmentResult>> DeleteAttachment(int id);
-
-        //add new attachment
         Task<ErrorOr<AttachmentResult>> AddAttachment(string fileName, string fileLink, DateTime uploadDate, string description, int contractId);
     }
 }

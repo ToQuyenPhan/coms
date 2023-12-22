@@ -24,9 +24,9 @@ namespace Coms.Api.Controllers
         [HttpGet("active")]
         [SwaggerOperation(Summary = "Get active services in Coms")]
         [Authorize(Roles = "Staff, Manager")]
-        public IActionResult GetActiveServices()
+        public IActionResult GetActiveServices(int? contractCategoryId)
         {
-            ErrorOr<IList<ServiceResult>> result = _serviceService.GetActiveServices().Result;
+            ErrorOr<IList<ServiceResult>> result = _serviceService.GetActiveServices(contractCategoryId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

@@ -13,6 +13,7 @@ using Spire.Doc.Fields;
 using Syncfusion.DocIO;
 using Syncfusion.DocIO.DLS;
 using Syncfusion.DocIORenderer;
+using Syncfusion.EJ2.DocumentEditor;
 using Syncfusion.OfficeChart;
 using Syncfusion.Pdf;
 using System.Reflection.PortableExecutable;
@@ -553,7 +554,8 @@ namespace Coms.Application.Services.Contracts
                 //Open the file as Stream
                 FileStream docStream = new FileStream(contractFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
                 //Loads file stream into Word document
-                WordDocument wordDocument = new WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
+                Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, 
+                        Syncfusion.DocIO.FormatType.Automatic);
                 //Instantiation of DocIORenderer for Word to PDF conversion
                 DocIORenderer render = new DocIORenderer();
                 //Sets Chart rendering Options.
@@ -589,92 +591,49 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
-        //public async Task<ErrorOr<ContractResult>> AddContract(string contractName, string code, int partnerId, int authorId, int signerId, int templateId, DateTime effectiveDate,
-        //        int[] contractCosts, int status)
-        //{
-        //    try
-        //    {
-        //        var contract = new Contract
-        //        {
-        //            ContractName = contractName,
-        //            Code = code,
-        //            TemplateId = templateId,
-        //            Link = " ",
-        //            CreatedDate = DateTime.Now,
-        //            UpdatedDate = DateTime.Now,
-        //            EffectiveDate = effectiveDate,
-        //            Version = 1,
-        //            Status = (DocumentStatus)status
-
-        //        };
-        //        await _contractRepository.AddContract(contract);
-        //        var access = new Access
-        //        {
-        //            ContractId = contract.Id,
-        //            AccessRole = AccessRole.Author
-        //        };
-        //        await _accessRepository.AddAccess(access);
-
-        //        var userAccess = new User_Access
-        //        {
-        //            UserId = authorId,
-        //            AccessId = access.Id,
-        //        };
-        //        await _userAccessRepository.AddUserAccess(userAccess);
-        //        var partnerReview = new PartnerReview
-        //        {
-        //            ContractId = contract.Id,
-        //            PartnerId = partnerId,
-        //            UserId = signerId,
-        //            IsApproved = false,
-        //            SendDate = DateTime.Now,
-        //            ReviewAt = DateTime.Now,
-        //            Status = PartnerReviewStatus.Active
-        //        };
-        //        await _partnerReviewRepository.AddPartnerReview(partnerReview);
-        //        var actionHistory = new ActionHistory
-        //        {
-        //            ActionType = ActionType.Created,
-        //            UserId = authorId,
-        //            CreatedAt = DateTime.Now,
-        //            ContractId = contract.Id,
-        //        };
-        //        await _actionHistoryRepository.AddActionHistory(actionHistory);
-        //        await _contractCostRepository.AddContractCostsToContract(contractCosts, contract.Id);
-        //        var partner = _partnerRepository.GetPartner(partnerId).Result;
-        //        var template = _templateRepository.GetTemplate(templateId).Result;
-        //        var user = _userRepository.GetUser(userAccess.UserId ?? throw new InvalidOperationException("Value cannot be null")).Result;
-        //        var contractResult = new ContractResult
-        //        {
-        //            Id = contract.Id,
-        //            Code = contract.Code,
-        //            ContractName = contract.ContractName,
-        //            CreatedDate = contract.CreatedDate,
-        //            CreatedDateString = contract.CreatedDate.ToString(),
-        //            UpdatedDate = contract.UpdatedDate,
-        //            UpdatedDateString = contract.UpdatedDate.ToString(),
-        //            EffectiveDate = contract.EffectiveDate,
-        //            EffectiveDateString = contract.EffectiveDate.ToString(),
-        //            Link = contract.Link,
-        //            Status = (int)contract.Status,
-        //            StatusString = contract.Status.ToString(),
-        //            CreatorId = userAccess.UserId,
-        //            CreatorName = user.FullName,
-        //            CreatorEmail = user.Email,
-        //            CreatorImage = user.Image,
-        //            TemplateID = contract.TemplateId,
-        //            Version = 1,
-        //            PartnerId = partnerReview.PartnerId,
-        //            PartnerName = partner.CompanyName
-        //        };
-        //        return contractResult;
-        //        return Error.NotFound();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Error.Failure("500", ex.Message);
-        //    }
-        //}
+        public async Task<ErrorOr<MemoryStream>> PreviewContract(string[] names, string[] values, int contractCategoryId)
+        {
+            try
+            {
+                var template = await _templateRepository.GetTemplateByContractCategoryId(contractCategoryId);
+                if (template is not null)
+                {
+                    string templateFilePath = Path.Combine(Environment.CurrentDirectory, "Templates", template.Id + ".docx");
+                    //Opens the template document
+                    FileStream fileStreamPath = new FileStream(templateFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(fileStreamPath, Syncfusion.DocIO.FormatType.Automatic);
+                    //Performs the mail merge
+                    document.MailMerge.Execute(names, values);
+                    //Instantiation of DocIORenderer for Word to PDF conversion
+                    DocIORenderer render = new DocIORenderer();
+                    //Sets Chart rendering Options.
+                    render.Settings.ChartRenderingOptions.ImageFormat = Syncfusion.OfficeChart.ExportImageFormat.Jpeg;
+                    //Converts Word document into PDF document
+                    PdfDocument pdfDocument = render.ConvertToPDF(document);
+                    //Releases all resources used by the Word document and DocIO Renderer objects
+                    render.Dispose();
+                    document.Dispose();
+                    //Saves the Word document to MemoryStream
+                    MemoryStream stream = new MemoryStream();
+                    pdfDocument.Save(stream);
+                    //Closes the Word document
+                    pdfDocument.Close();
+                    fileStreamPath.Close();
+                    byte[] byteInfo = stream.ToArray();
+                    stream.Write(byteInfo, 0, byteInfo.Length);
+                    stream.Position = 0;
+                    return stream;
+                }
+                else
+                {
+                    return Error.Failure("500", "No template is activating in this category!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
 
         public async Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContracts(int userId,
                 string name, string creatorName, int? status, int currentPage, int pageSize)

@@ -110,19 +110,18 @@ namespace Coms.Api.Controllers
             );
         }
 
-        //[HttpPost("add")]
-        //[SwaggerOperation(Summary = "Add a contract in Coms")]
-        //[Authorize(Roles = "Staff, Manager")]
-        //public IActionResult Add([FromBody]ContractFormRequest request)
-        //{
-        //    ErrorOr<ContractResult> result =
-        //        _contractService.AddContract(request.ContractName,request.Code,request.PartnerId, int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value)
-        //        ,request.SignerId, request.TemplateId, request.EffectiveDate, request.Services,request.Status).Result;
-        //    return result.Match(
-        //        result => Ok(result),
-        //        errors => Problem(errors)
-        //    );
-        //}
+        [HttpPost("preview")]
+        [SwaggerOperation(Summary = "Upload a contract in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult PreviewContract([FromBody] ContractPreviewRequest request)
+        {
+            ErrorOr<MemoryStream> result = _contractService.PreviewContract(request.Name, request.Value, 
+                    request.ContractCategoryId).Result;
+            return result.Match(
+                result => new FileStreamResult(result, "application/pdf"),
+                errors => Problem(errors)
+            );
+        }
 
         [HttpGet("manager")]
         [SwaggerOperation(Summary = "Get contract list for manager in Coms")]
