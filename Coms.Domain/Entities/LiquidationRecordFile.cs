@@ -6,20 +6,7 @@ namespace Coms.Domain.Entities
     public class LiquidationRecordFile
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-
-        [Required]
-        [MaxLength(100)]
-        public string FileName { get; set; }
-
-        [Required]
-        [MaxLength(10)]
-        public string Extension { get; set; }
-
-        [Required]
-        [MaxLength(200)]
-        public string ContentType { get; set; }
+        public Guid UUID { get; set; }
 
         [Required]
         public byte[] FileData { get; set; }

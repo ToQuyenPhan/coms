@@ -37,6 +37,7 @@ namespace Coms.Application.Services.Contracts
         private readonly IFlowDetailRepository _flowDetailRepository;
         private readonly IContractFieldRepository _contractFieldRepository;
         private readonly IFlowRepository _flowRepository;
+        private readonly IContractFileRepository _contractFileRepository;
 
         public ContractService(IAccessRepository accessRepository,
                 IUserAccessRepository userAccessRepository,
@@ -51,7 +52,8 @@ namespace Coms.Application.Services.Contracts
                 IContractFlowDetailsRepository contractFlowDetailsRepository,
                 IFlowDetailRepository flowDetailRepository,
                 IContractFieldRepository contractFieldRepository,
-                IFlowRepository flowRepository)
+                IFlowRepository flowRepository,
+                IContractFileRepository contractFileRepository)
         {
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
@@ -67,6 +69,7 @@ namespace Coms.Application.Services.Contracts
             _flowDetailRepository = flowDetailRepository;
             _contractFieldRepository = contractFieldRepository;
             _flowRepository = flowRepository;
+            _contractFileRepository = contractFileRepository;
         }
 
         public async Task<ErrorOr<ContractResult>> DeleteContract(int id)
@@ -456,9 +459,27 @@ namespace Coms.Application.Services.Contracts
                     if (!folderExists)
                         Directory.CreateDirectory(contractFilePath);
                     string templateFilePath = Path.Combine(Environment.CurrentDirectory, "Templates", template.Id + ".docx");
-                    Spire.Doc.Document document = new Spire.Doc.Document();
-                    document.LoadFromFile(templateFilePath, FileFormat.Docx);
+                    //Opens the template document
+                    FileStream fileStreamPath = new FileStream(templateFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(fileStreamPath, Syncfusion.DocIO.FormatType.Automatic);
+                    //Performs the mail merge
                     document.MailMerge.Execute(names, values);
+                    //Instantiation of DocIORenderer for Word to PDF conversion
+                    DocIORenderer render = new DocIORenderer();
+                    //Sets Chart rendering Options.
+                    render.Settings.ChartRenderingOptions.ImageFormat = Syncfusion.OfficeChart.ExportImageFormat.Jpeg;
+                    //Converts Word document into PDF document
+                    PdfDocument pdfDocument = render.ConvertToPDF(document);
+                    //Releases all resources used by the Word document and DocIO Renderer objects
+                    render.Dispose();
+                    document.Dispose();
+                    //Saves the Word document to MemoryStream
+                    MemoryStream stream = new MemoryStream();
+                    pdfDocument.Save(stream);
+                    fileStreamPath.Close();
+                    byte[] byteInfo = stream.ToArray();
+                    stream.Write(byteInfo, 0, byteInfo.Length);
+                    stream.Position = 0;
                     var contract = new Contract
                     {
                         TemplateId = template.Id,
@@ -480,9 +501,22 @@ namespace Coms.Application.Services.Contracts
                         }
                     }
                     await _contractRepository.AddContract(contract);
-                    contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", contract.Id + ".docx");
-                    document.SaveToFile(contractFilePath);
-                    document.Dispose();
+                    Guid UUID = new Guid();
+                    var contractFile = new ContractFile()
+                    {
+                        UUID = UUID,
+                        FileData = stream.ToArray(),
+                        UploadedDate = DateTime.Now,
+                        ContractId = contract.Id,
+                        FileSize = stream.ToArray().Length,
+                    };
+                    await _contractFileRepository.Add(contractFile);
+                    contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", contract.Id + ".pdf");
+                    FileStream fileStream = new FileStream(contractFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                    pdfDocument.Save(fileStream);
+                    //Closes the Word document
+                    pdfDocument.Close();
+                    fileStream.Close(); 
                     List<ContractField> contractFields = new List<ContractField>();
                     foreach(var nav in namesAndValues)
                     {
@@ -550,30 +584,8 @@ namespace Coms.Application.Services.Contracts
         {
             try
             {
-                string contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", contractId + ".docx");
-                //Open the file as Stream
-                FileStream docStream = new FileStream(contractFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
-                //Loads file stream into Word document
-                Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, 
-                        Syncfusion.DocIO.FormatType.Automatic);
-                //Instantiation of DocIORenderer for Word to PDF conversion
-                DocIORenderer render = new DocIORenderer();
-                //Sets Chart rendering Options.
-                render.Settings.ChartRenderingOptions.ImageFormat = Syncfusion.OfficeChart.ExportImageFormat.Jpeg;
-                //Converts Word document into PDF document
-                PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
-                string filePath = Path.Combine(Environment.CurrentDirectory, "Contracts", contractId + ".pdf");
-                // Saves the document to server machine file system, you can customize here to save into databases or file servers based on requirement.
-                FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
-                //Releases all resources used by the Word document and DocIO Renderer objects
-                render.Dispose();
-                wordDocument.Dispose();
-                pdfDocument.Save(fileStream);
-                //Closes the instance of PDF document object
-                pdfDocument.Close();
-                fileStream.Close();
-                wordDocument.Close();
-                var stream = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                string contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", contractId + ".pdf");
+                var stream = File.Open(contractFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
                 var task = new FirebaseStorage(Bucket)
                     .Child("contracts")
                     .Child(contractId + ".pdf")

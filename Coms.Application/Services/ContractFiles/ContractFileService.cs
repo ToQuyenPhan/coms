@@ -31,9 +31,6 @@ namespace Coms.Application.Services.ContractFiles
                 }
                 var contractFile = new ContractFile()
                 {
-                    FileName = name,
-                    Extension = extension,
-                    ContentType = contenType,
                     FileData = document,
                     FileSize = size,
                     UploadedDate = DateTime.UtcNow,
