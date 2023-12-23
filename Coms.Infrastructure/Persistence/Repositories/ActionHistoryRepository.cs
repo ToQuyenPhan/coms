@@ -24,7 +24,8 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public async Task<IList<ActionHistory>?> GetCommentActionByContractId(int contractId, int userId)
         {
             var list = await _genericRepository.WhereAsync(ah => ah.ContractId.Equals(contractId) &&
-                ah.ActionType.Equals(ActionType.Commented) && !ah.UserId.Equals(userId), null);
+                ah.ActionType.Equals(ActionType.Commented) && !ah.UserId.Equals(userId) && !ah.Contract.Status.Equals(DocumentStatus.Deleted), 
+                new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User, ah => ah.Contract });
             return (list.Count() > 0) ? list : null;
         }
 

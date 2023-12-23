@@ -3,7 +3,6 @@ using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
-using System.Diagnostics.Contracts;
 
 namespace Coms.Application.Services.Comments
 {

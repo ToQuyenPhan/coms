@@ -1,6 +1,5 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
-using Coms.Application.Services.Accesses;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
@@ -31,9 +30,16 @@ namespace Coms.Application.Services.ActionHistories
                     {
                         foreach (var actionHistory in actionHistoryList)
                         {
-                            if (!actionHistories.Contains(actionHistory))
+                            if (actionHistory.Contract.Status.Equals(DocumentStatus.Deleted))
                             {
-                                actionHistories.Add(actionHistory);
+                                continue;
+                            }
+                            else
+                            {
+                                if (!actionHistories.Contains(actionHistory))
+                                {
+                                    actionHistories.Add(actionHistory);
+                                }
                             }
                         }
                     }
