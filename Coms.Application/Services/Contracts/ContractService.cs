@@ -848,9 +848,17 @@ namespace Coms.Application.Services.Contracts
                 var contract = await _contractRepository.GetContract(contractId);
                 if (contract is not null)
                 {
-                    if (isSentToPartner)
+                    if (isApproved)
                     {
-                        contract.Status = DocumentStatus.Approved;
+                        if (isSentToPartner)
+                        {
+                            contract.Status = DocumentStatus.Approved;
+                            await _contractRepository.UpdateContract(contract);
+                        }
+                    }
+                    else
+                    {
+                        contract.Status = DocumentStatus.Rejected;
                         await _contractRepository.UpdateContract(contract);
                     }
                     var actionHistory = new ActionHistory
