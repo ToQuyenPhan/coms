@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Domain.Entities;
+using Coms.Domain.Enum;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
@@ -36,6 +37,20 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public async Task AddRangeContractFlowDetails(List<Contract_FlowDetail> contractFlowDetails)
         {
             await _genericRepository.CreateRangeAsync(contractFlowDetails);
+        }
+
+        public async Task UpdateContractFlowDetail(Contract_FlowDetail contractFlowDetail)
+        {
+            await _genericRepository.UpdateAsync(contractFlowDetail);
+        }
+
+        public async Task<IList<Contract_FlowDetail>?> GetApproversByContractId(int contractId)
+        {
+            var list = await _genericRepository.WhereAsync(ufd =>
+                ufd.ContractId.Equals(contractId) && ufd.FlowDetail.FlowRole.Equals(FlowRole.Approver), 
+                new System.Linq.Expressions.Expression<Func<Contract_FlowDetail, object>>[] 
+                { ufd => ufd.FlowDetail });
+            return (list.Count() > 0) ? list : null;
         }
     }
 }

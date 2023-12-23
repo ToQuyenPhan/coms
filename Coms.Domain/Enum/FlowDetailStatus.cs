@@ -3,6 +3,7 @@
     public enum FlowDetailStatus
     {
         Waiting,
-        Done
+        Done,
+        Rejected
     }
 }

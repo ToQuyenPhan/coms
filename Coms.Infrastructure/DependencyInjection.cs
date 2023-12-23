@@ -22,8 +22,10 @@ namespace Coms.Infrastructure
         {         
             services.AddAuth(configuration);
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-            services.AddDbContext<ComsDBContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("ComsDB")));
+            services.AddDbContext<ComsDBContext>(options => {
+                options.UseSqlServer(configuration.GetConnectionString("ComsDB"));
+                options.EnableSensitiveDataLogging();
+            });
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IContractCategoryRepository, ContractCategoryRepository>();
             services.AddScoped<ITemplateTypeRepository, TemplateTypeRepository>();

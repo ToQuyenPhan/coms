@@ -8,5 +8,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<IList<Contract_FlowDetail>?> GetByFlowDetailId(int flowDetailId);
         Task<IList<Contract_FlowDetail>?> GetByContractId(int contractId);
         Task AddRangeContractFlowDetails(List<Contract_FlowDetail> contractFlowDetails);
+        Task UpdateContractFlowDetail(Contract_FlowDetail contractFlowDetail);
+        Task<IList<Contract_FlowDetail>?> GetApproversByContractId(int contractId);
     }
 }

@@ -808,108 +808,87 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
-        public async Task<ErrorOr<ContractResult>> ApproveContract(int contractId, int userId,
-                bool isApproved)
+        public async Task<ErrorOr<ContractResult>> ApproveContract(int contractId, int userId, bool isApproved)
         {
             try
             {
-                //var yourAccesses = await _userAccessRepository.GetYourAccesses(userId);
-                //if (yourAccesses is not null)
-                //{
-                var isAuthorized = false;
                 var isSentToPartner = false;
                 var isPreviousApproved = true;
-                //var accesses = await _accessRepository.GetAccessByContractId(contractId);
-                //int totalApprovers = accesses.Where(a => a.AccessRole.Equals(AccessRole.Approver)).Count();
-                //foreach (var yourAccess in yourAccesses)
-                //{
-                //var access = await _accessRepository.GetAccessById((int)yourAccess.AccessId);
-                //if (access.AccessRole.Equals(AccessRole.Approver) && access.ContractId.Equals(contractId))
-                //{
-                isAuthorized = true;
-                //var currentWorkflow = await _aproveWorkflowRepository.GetByAccessId(access.Id);
-                //var approverAccesses = accesses.Where(a => a.AccessRole.Equals(AccessRole.Approver)).ToList();
-                //foreach (var approverAccess in approverAccesses)
-                //{
-                //var approveWorkflow = await _aproveWorkflowRepository.GetByAccessId(approverAccess.Id);
-                //if((approveWorkflow.Order < currentWorkflow.Order) && approveWorkflow.Status.Equals(ApproveWorkflowStatus.Waiting))
-                //{
-                //    isPreviousApproved = false;
-                //    break;
-                //}
-
-                //}
+                int yourOrder = 0;
+                var approvers = await _contractFlowDetailsRepository.GetApproversByContractId(contractId);
+                var yourFlowDetail = approvers.FirstOrDefault(cfd => cfd.FlowDetail.UserId.Equals(userId));
+                if (yourFlowDetail is not null)
+                {
+                    yourOrder = (int)yourFlowDetail.FlowDetail.Order;
+                }
+                if (yourOrder > 1)
+                {
+                    var previousFlowDetail = approvers.FirstOrDefault(cfd => cfd.FlowDetail.Order.Equals(yourOrder - 1));
+                    if (previousFlowDetail.Status.Equals(FlowDetailStatus.Done))
+                    {
+                        isPreviousApproved = true;
+                    }
+                }
+                else
+                {
+                    isPreviousApproved = true;
+                }
                 if (!isPreviousApproved)
                 {
                     return Error.Conflict("403", "The previous approver has not approved yet!");
                 }
-                //if (currentWorkflow.Order.Equals(totalApprovers))
-                //{
-                //    isSentToPartner = true;
-                //}
-                //if (isApproved)
-                //{
-                //    currentWorkflow.Status = ApproveWorkflowStatus.Approved;
-                //}
-                //else
-                //{
-                //    currentWorkflow.Status = ApproveWorkflowStatus.Rejected;
-                //}
-                //await _aproveWorkflowRepository.UpdateApproveWorkflow(currentWorkflow);
-                //}
-                //}
-                if (isAuthorized)
+                if (yourFlowDetail.FlowDetail.Order.Equals(approvers.Count()))
                 {
-                    //var contract = await _contractRepository.GetContract(contractId);
-                    //if (contract is not null)
-                    //{
-                    //    if (isSentToPartner)
-                    //    {
-                    //        contract.Status = DocumentStatus.Approved;
-                    //        await _contractRepository.UpdateContract(contract);
-                    //    }
-                    //    var actionHistory = new ActionHistory
-                    //    {
-                    //        ActionType = isApproved ? ActionType.Approved : ActionType.Rejected,
-                    //        CreatedAt = DateTime.Now,
-                    //        UserId = userId,
-                    //        ContractId = contractId,
-                    //    };
-                    //    await _actionHistoryRepository.AddActionHistory(actionHistory);
-                    //    var contractResult = new ContractResult()
-                    //    {
-                    //        Id = contract.Id,
-                    //        ContractName = contract.ContractName,
-                    //        Version = contract.Version,
-                    //        CreatedDate = contract.CreatedDate,
-                    //        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
-                    //        UpdatedDate = contract.UpdatedDate,
-                    //        UpdatedDateString = contract.UpdatedDate.ToString(),
-                    //        EffectiveDate = contract.EffectiveDate,
-                    //        EffectiveDateString = contract.EffectiveDate.ToString("dd/MM/yyyy"),
-                    //        Status = (int)contract.Status,
-                    //        StatusString = contract.Status.ToString(),
-                    //        TemplateID = contract.TemplateId,
-                    //        Code = contract.Code,
-                    //        Link = contract.Link
-                    //    };
-                    //    return contractResult;
-                    //}
-                    //else
-                    //{
-                    //    return Error.NotFound("404", "Contract is not found!");
-                    //}
-                    return Error.NotFound();
+                    isSentToPartner = true;
+                }
+                if (isApproved)
+                {
+                    yourFlowDetail.Status = FlowDetailStatus.Done;
                 }
                 else
                 {
-                    return Error.Conflict("403", "You are not authorized to approve this contract!");
+                    yourFlowDetail.Status = FlowDetailStatus.Rejected;
                 }
-                //}
-                //else
-                //{
-                //    return Error.NotFound("404", "You do not have any accesses");
-                //}
+                await _contractFlowDetailsRepository.UpdateContractFlowDetail(yourFlowDetail);
+                var contract = await _contractRepository.GetContract(contractId);
+                if (contract is not null)
+                {
+                    if (isSentToPartner)
+                    {
+                        contract.Status = DocumentStatus.Approved;
+                        await _contractRepository.UpdateContract(contract);
+                    }
+                    var actionHistory = new ActionHistory
+                    {
+                        ActionType = isApproved ? ActionType.Approved : ActionType.Rejected,
+                        CreatedAt = DateTime.Now,
+                        UserId = userId,
+                        ContractId = contract.Id,
+                    };
+                    await _actionHistoryRepository.AddActionHistory(actionHistory);
+                    var contractResult = new ContractResult()
+                    {
+                        Id = contract.Id,
+                        ContractName = contract.ContractName,
+                        Version = contract.Version,
+                        CreatedDate = contract.CreatedDate,
+                        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        UpdatedDate = contract.UpdatedDate,
+                        UpdatedDateString = contract.UpdatedDate.ToString(),
+                        EffectiveDate = contract.EffectiveDate,
+                        EffectiveDateString = contract.EffectiveDate.ToString("dd/MM/yyyy"),
+                        Status = (int)contract.Status,
+                        StatusString = contract.Status.ToString(),
+                        TemplateID = contract.TemplateId,
+                        Code = contract.Code,
+                        Link = contract.Link
+                    };
+                    return contractResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Contract is not found!");
+                }
             }
             catch (Exception ex)
             {
