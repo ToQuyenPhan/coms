@@ -2,21 +2,11 @@
 using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
-using ConvertApiDotNet;
 using ErrorOr;
 using Firebase.Storage;
 using LinqKit;
-using Microsoft.Office.Interop.Word;
-using Spire.Doc;
-using Spire.Doc.Documents;
-using Spire.Doc.Fields;
-using Syncfusion.DocIO;
-using Syncfusion.DocIO.DLS;
 using Syncfusion.DocIORenderer;
-using Syncfusion.EJ2.DocumentEditor;
-using Syncfusion.OfficeChart;
 using Syncfusion.Pdf;
-using System.Reflection.PortableExecutable;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -112,7 +102,7 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<PagingResult<ContractResult>>> GetYourContracts(int userId,
-                string name, string creatorName, int? status, int currentPage, int pageSize)
+                string name, string creatorName, int? status, bool isYours, int currentPage, int pageSize)
         {
             IList<Contract> contracts = new List<Contract>();
             var createAction = await _actionHistoryRepository.GetCreateActionByUserId(userId);
@@ -130,25 +120,28 @@ namespace Coms.Application.Services.Contracts
                     }
                 }
             }
-            var flowDetails = await _flowDetailRepository.GetUserFlowDetailsByUserId(userId);
-            if (flowDetails is not null)
+            if (!isYours)
             {
-                foreach (var flowDetail in flowDetails)
+                var flowDetails = await _flowDetailRepository.GetUserFlowDetailsByUserId(userId);
+                if (flowDetails is not null)
                 {
-                    var contractFlowDetails = await _contractFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);
-                    if (contractFlowDetails is not null)
+                    foreach (var flowDetail in flowDetails)
                     {
-                        foreach(var contractFlowDetail in contractFlowDetails)
+                        var contractFlowDetails = await _contractFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);
+                        if (contractFlowDetails is not null)
                         {
-                            var contract = await _contractRepository.GetContract(contractFlowDetail.ContractId);
-                            if (!contract.Status.Equals(DocumentStatus.Deleted))
+                            foreach (var contractFlowDetail in contractFlowDetails)
                             {
-                                var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
-                                if (existedContract is null)
+                                var contract = await _contractRepository.GetContract(contractFlowDetail.ContractId);
+                                if (!contract.Status.Equals(DocumentStatus.Deleted))
                                 {
-                                    if (!string.IsNullOrEmpty(contract.Link))
+                                    var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
+                                    if (existedContract is null)
                                     {
-                                        contracts.Add(contract);
+                                        if (!string.IsNullOrEmpty(contract.Link))
+                                        {
+                                            contracts.Add(contract);
+                                        }
                                     }
                                 }
                             }
@@ -445,7 +438,7 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<int>> AddContract(string[] names, string[] values, int contractCategoryId,
-                int serviceId, DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate, 
+                int serviceId, DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate,
                 int partnerId)
         {
             try
@@ -516,9 +509,9 @@ namespace Coms.Application.Services.Contracts
                     pdfDocument.Save(fileStream);
                     //Closes the Word document
                     pdfDocument.Close();
-                    fileStream.Close(); 
+                    fileStream.Close();
                     List<ContractField> contractFields = new List<ContractField>();
-                    foreach(var nav in namesAndValues)
+                    foreach (var nav in namesAndValues)
                     {
                         var contractField = new ContractField()
                         {
@@ -548,7 +541,7 @@ namespace Coms.Application.Services.Contracts
                     var flow = await _flowRepository.GetByContractCategoryId(contractCategoryId);
                     var flowDetails = await _flowDetailRepository.GetByFlowId(flow.Id);
                     List<Contract_FlowDetail> contractFlowDetails = new List<Contract_FlowDetail>();
-                    foreach(var flowDetail in flowDetails)
+                    foreach (var flowDetail in flowDetails)
                     {
                         var contractFlowDetail = new Contract_FlowDetail()
                         {
@@ -597,7 +590,8 @@ namespace Coms.Application.Services.Contracts
                 await _contractRepository.UpdateContract(contract);
                 var downloadUrl = await task;
                 return link;
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }

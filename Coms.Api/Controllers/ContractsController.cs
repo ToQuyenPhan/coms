@@ -26,7 +26,7 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<PagingResult<ContractResult>> result = _contractService.GetYourContracts(
                 int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
-                request.ContractName, request.CreatorName, request.Status, request.CurrentPage,
+                request.ContractName, request.CreatorName, request.Status, request.IsYours, request.CurrentPage,
                 request.PageSize).Result;
             return result.Match(
                 result => Ok(result),

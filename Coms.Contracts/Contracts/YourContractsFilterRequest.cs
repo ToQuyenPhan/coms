@@ -7,5 +7,6 @@ namespace Coms.Contracts.Contracts
         public string? ContractName { get; set; }
         public string? CreatorName { get; set; }
         public int? Status { get; set; }
+        public bool IsYours { get; set; }
     }
 }
