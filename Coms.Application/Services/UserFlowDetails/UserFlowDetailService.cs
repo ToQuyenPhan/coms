@@ -9,26 +9,26 @@ namespace Coms.Application.Services.UserFlowDetails
         private readonly IContractFlowDetailsRepository _userFlowDetailsRepository;
         private readonly IFlowDetailRepository _flowDetailRepository;
 
-        public UserFlowDetailService(IContractFlowDetailsRepository userFlowDetailsRepository, 
+        public UserFlowDetailService(IContractFlowDetailsRepository userFlowDetailsRepository,
                 IFlowDetailRepository flowDetailRepository)
         {
             _userFlowDetailsRepository = userFlowDetailsRepository;
             _flowDetailRepository = flowDetailRepository;
         }
 
-        public async Task<ErrorOr<PagingResult<UserFlowDetailResult>>> GetContractFlowDetails(int contractId, 
+        public async Task<ErrorOr<PagingResult<UserFlowDetailResult>>> GetContractFlowDetails(int contractId,
                 int currentPage, int pageSize)
         {
             var contractFlowDetails = await _userFlowDetailsRepository.GetByContractId(contractId);
-            if(contractFlowDetails is not null )
+            if (contractFlowDetails is not null)
             {
                 IList<UserFlowDetailResult> results = new List<UserFlowDetailResult>();
-                foreach(var contractFlowDetail in contractFlowDetails)
+                foreach (var contractFlowDetail in contractFlowDetails)
                 {
                     var flowDetailResult = new UserFlowDetailResult()
                     {
                         Id = contractFlowDetail.Id,
-                        Status = (int) contractFlowDetail.Status,
+                        Status = (int)contractFlowDetail.Status,
                         StatusString = contractFlowDetail.Status.ToString(),
                         ContractId = contractFlowDetail.ContractId,
                         UserId = (int)contractFlowDetail.FlowDetail.UserId,

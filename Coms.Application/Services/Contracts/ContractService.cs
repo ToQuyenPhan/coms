@@ -813,10 +813,13 @@ namespace Coms.Application.Services.Contracts
             try
             {
                 var isSentToPartner = false;
-                var isPreviousApproved = true;
                 int yourOrder = 0;
                 var approvers = await _contractFlowDetailsRepository.GetApproversByContractId(contractId);
                 var yourFlowDetail = approvers.FirstOrDefault(cfd => cfd.FlowDetail.UserId.Equals(userId));
+                if (!yourFlowDetail.Status.Equals(FlowDetailStatus.Waiting))
+                {
+                    return Error.Conflict("409", "You are already " + yourFlowDetail.Status.ToString().ToLower() + "!");
+                }
                 if (yourFlowDetail is not null)
                 {
                     yourOrder = (int)yourFlowDetail.FlowDetail.Order;
@@ -824,18 +827,10 @@ namespace Coms.Application.Services.Contracts
                 if (yourOrder > 1)
                 {
                     var previousFlowDetail = approvers.FirstOrDefault(cfd => cfd.FlowDetail.Order.Equals(yourOrder - 1));
-                    if (previousFlowDetail.Status.Equals(FlowDetailStatus.Done))
+                    if (previousFlowDetail.Status.Equals(FlowDetailStatus.Waiting))
                     {
-                        isPreviousApproved = true;
+                        return Error.Conflict("403", "The previous approver has not approved yet!");
                     }
-                }
-                else
-                {
-                    isPreviousApproved = true;
-                }
-                if (!isPreviousApproved)
-                {
-                    return Error.Conflict("403", "The previous approver has not approved yet!");
                 }
                 if (yourFlowDetail.FlowDetail.Order.Equals(approvers.Count()))
                 {
@@ -843,7 +838,7 @@ namespace Coms.Application.Services.Contracts
                 }
                 if (isApproved)
                 {
-                    yourFlowDetail.Status = FlowDetailStatus.Done;
+                    yourFlowDetail.Status = FlowDetailStatus.Approved;
                 }
                 else
                 {
