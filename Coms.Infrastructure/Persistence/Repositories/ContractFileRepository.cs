@@ -22,5 +22,16 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return await _genericRepository
                 .FirstOrDefaultAsync(tf => tf.ContractId.Equals(contractId));
         }
+
+        public async Task<ContractFile?> GetContractFileById(Guid id)
+        {
+            return await _genericRepository
+                .FirstOrDefaultAsync(tf => tf.UUID.Equals(id));
+        }
+
+        public async Task Update(ContractFile contractFile)
+        {
+            await _genericRepository.UpdateAsync(contractFile);
+        }
     }
 }
