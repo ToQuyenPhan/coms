@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
+using Coms.Domain.Entities;
 using ErrorOr;
 
 namespace Coms.Application.Services.PartnerComments
@@ -9,25 +10,25 @@ namespace Coms.Application.Services.PartnerComments
         private readonly IPartnerReviewRepository _partnerReviewRepository;
         private readonly IPartnerCommentRepository _partnerCommentRepository;
 
-        public PartnerCommentService(IPartnerReviewRepository partnerReviewRepository, 
+        public PartnerCommentService(IPartnerReviewRepository partnerReviewRepository,
                 IPartnerCommentRepository partnerCommentRepository)
         {
             _partnerReviewRepository = partnerReviewRepository;
             _partnerCommentRepository = partnerCommentRepository;
         }
 
-        public async Task<ErrorOr<PagingResult<PartnerCommentResult>>> GetPartnerComments(int contractId, int currentPage, 
+        public async Task<ErrorOr<PagingResult<PartnerCommentResult>>> GetPartnerComments(int contractId, int currentPage,
                 int pageSize)
         {
             var partnerReview = await _partnerReviewRepository.GetByContractId(contractId);
-            if(partnerReview is not null)
+            if (partnerReview is not null)
             {
                 var partnerComments = await _partnerCommentRepository.GetByPartnerReviewId(partnerReview.Id);
-                if(partnerComments is not null)
+                if (partnerComments is not null)
                 {
                     partnerComments = partnerComments.OrderByDescending(pc => pc.CreatedAt).ToList();
                     IList<PartnerCommentResult> commentResults = new List<PartnerCommentResult>();
-                    foreach(var partnerComment in partnerComments)
+                    foreach (var partnerComment in partnerComments)
                     {
                         var commentResult = new PartnerCommentResult()
                         {
@@ -55,6 +56,41 @@ namespace Coms.Application.Services.PartnerComments
             else
             {
                 return Error.NotFound("404", "Contract not found!");
+            }
+        }
+
+        public async Task<ErrorOr<PartnerCommentResult>> AddPartnerComment(int contractId, string content)
+        {
+            try
+            {
+                var partnerReview = await _partnerReviewRepository.GetByContractId(contractId);
+                if (partnerReview is not null)
+                {
+                    var partnerComment = new PartnerComment()
+                    {
+                        Content = content,
+                        CreatedAt = DateTime.Now,
+                        PartnerReviewId = partnerReview.Id,
+                    };
+                    await _partnerCommentRepository.AddPartnerComment(partnerComment);
+                    var commentResult = new PartnerCommentResult()
+                    {
+                        Id = partnerComment.Id,
+                        Content = partnerComment.Content,
+                        ReplyId = partnerComment.Id,
+                        PartnerReviewId = partnerComment.PartnerReviewId,
+                        CreatedAt = partnerComment.CreatedAt.ToString(),
+                        Long = AsTimeAgo(partnerComment.CreatedAt)
+                    };
+                    return commentResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Partner review not found!");
+                }
+            }catch(Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
             }
         }
 

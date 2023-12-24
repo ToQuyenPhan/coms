@@ -1,6 +1,7 @@
 ﻿using Coms.Application.Services.Common;
 using Coms.Application.Services.PartnerComments;
 using Coms.Contracts.Common.Paging;
+using Coms.Contracts.PartnerComments;
 using ErrorOr;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -23,6 +24,15 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<PagingResult<PartnerCommentResult>> result =
                 _partnerCommentService.GetPartnerComments(contractId, request.CurrentPage, request.PageSize).Result;
+            return result.Match(result => Ok(result), errors => Problem(errors));
+        }
+
+        [HttpPost]
+        [SwaggerOperation(Summary = "Partner comment for a contract in Coms")]
+        public IActionResult AddComment([FromBody] PartnerCommentFormRequest request)
+        {
+            ErrorOr<PartnerCommentResult> result = _partnerCommentService.AddPartnerComment(request.ContractId, 
+                    request.Content).Result;
             return result.Match(result => Ok(result), errors => Problem(errors));
         }
     }

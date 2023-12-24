@@ -17,5 +17,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
             var list = await _genericRepository.WhereAsync(pc => pc.PartnerReviewId.Equals(partnerReviewId), null);
             return (list.Count() > 0 ? list : null);
         }
+
+        public async Task AddPartnerComment(PartnerComment partnerComment)
+        {
+            await _genericRepository.CreateAsync(partnerComment);
+        }
     }
 }
