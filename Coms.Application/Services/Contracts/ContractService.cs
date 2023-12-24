@@ -535,7 +535,8 @@ namespace Coms.Application.Services.Contracts
                         ContractId = contract.Id,
                         SendDate = sendDate,
                         ReviewAt = reviewDate,
-                        IsApproved = false
+                        IsApproved = false,
+                        Status = PartnerReviewStatus.Active
                     };
                     await _partnerReviewRepository.AddPartnerReview(partnerReview);
                     var flow = await _flowRepository.GetByContractCategoryId(contractCategoryId);
@@ -766,8 +767,11 @@ namespace Coms.Application.Services.Contracts
                 IList<Contract> contracts = new List<Contract>();
                 foreach (var review in reviews)
                 {
-                    //var contract = await _contractRepository.GetContract(review.ContractId);
-                    //contracts.Add(contract);
+                    var contract = await _contractRepository.GetContract(review.ContractId);
+                    if (!string.IsNullOrEmpty(contract.Link))
+                    {
+                        contracts.Add(contract);
+                    }
                 }
                 IList<Contract> filteredList = contracts.Where(predicate).ToList();
                 var total = filteredList.Count();
