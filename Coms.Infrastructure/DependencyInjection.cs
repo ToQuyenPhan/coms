@@ -50,6 +50,7 @@ namespace Coms.Infrastructure
             services.AddScoped<IContractFieldRepository, ContractFieldRepository>();
             services.AddScoped<ISystemSettingsRepository, SystemSettingRepository>();
             services.AddScoped<IFlowRepository, FlowRepository>();
+            services.AddScoped<IPartnerCommentRepository, PartnerCommentRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             //add attachment repository
             services.AddScoped<IAttachmentRepository, AttachmentRepository>();

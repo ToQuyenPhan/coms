@@ -46,15 +46,21 @@ namespace Coms.Api.Controllers
         }
 
         [HttpGet("contract")]
-        [SwaggerOperation(Summary = "Get all comment of a contract in Coms")]
+        [SwaggerOperation(Summary = "Get all comments of a contract in Coms")]
         public IActionResult GetContractComments([FromQuery] int contractId, [FromQuery] PagingRequest request)
         {
             ErrorOr<PagingResult<CommentResult>> result =
                 _commentService.GetContractComments(contractId, request.CurrentPage, request.PageSize).Result;
-            return result.Match(
-                               result => Ok(result),
-                                              errors => Problem(errors)
-                                                         );
+            return result.Match(result => Ok(result), errors => Problem(errors));
+        }
+
+        [HttpGet("contract-partner")]
+        [SwaggerOperation(Summary = "Get all partner comments of a contract in Coms")]
+        public IActionResult GetContractPartnerComments([FromQuery] int contractId, [FromQuery] PagingRequest request)
+        {
+            ErrorOr<PagingResult<CommentResult>> result =
+                _commentService.GetContractComments(contractId, request.CurrentPage, request.PageSize).Result;
+            return result.Match(result => Ok(result), errors => Problem(errors));
         }
 
         [HttpPost]
@@ -62,19 +68,8 @@ namespace Coms.Api.Controllers
         public IActionResult LeaveComment([FromBody] CommentFormRequest request)
         {
             ErrorOr<CommentResult> result = _commentService.LeaveComment(
-                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.ContractId, 
+                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.ContractId,
                     request.Content, request.ReplyId).Result;
-            return result.Match(
-                result => Ok(result),
-                errors => Problem(errors)
-            );
-        }
-
-        [HttpPut("dismiss")]
-        [SwaggerOperation(Summary = "Dismiss a comment in Coms")]
-        public IActionResult DismissComment([FromQuery] int id)
-        {
-            ErrorOr<CommentResult> result = _commentService.DismissComment(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

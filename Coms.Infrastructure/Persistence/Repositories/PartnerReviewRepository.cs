@@ -13,7 +13,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        public async Task<PartnerReview> GetByContractId(int contractId)
+        public async Task<PartnerReview?> GetByContractId(int contractId)
         {
             return await _genericRepository.FirstOrDefaultAsync(pr => pr.ContractId.Equals(contractId),
                 new System.Linq.Expressions.Expression<Func<PartnerReview, object>>[] {

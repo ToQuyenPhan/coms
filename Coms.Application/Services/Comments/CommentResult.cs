@@ -1,6 +1,4 @@
-﻿using Coms.Domain.Enum;
-
-namespace Coms.Application.Services.Comments
+﻿namespace Coms.Application.Services.Comments
 {
     public class CommentResult
     {
