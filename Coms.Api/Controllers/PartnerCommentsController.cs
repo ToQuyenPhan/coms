@@ -1,8 +1,7 @@
-﻿using Coms.Application.Services.Common;
-using Coms.Application.Services.PartnerComments;
-using Coms.Contracts.Common.Paging;
+﻿using Coms.Application.Services.PartnerComments;
 using Coms.Contracts.PartnerComments;
 using ErrorOr;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -20,10 +19,10 @@ namespace Coms.Api.Controllers
 
         [HttpGet]
         [SwaggerOperation(Summary = "Get all partner comments of a contract in Coms")]
-        public IActionResult GetComments([FromQuery] int contractId, [FromQuery]PagingRequest request)
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult GetComments([FromQuery] int contractId)
         {
-            ErrorOr<PagingResult<PartnerCommentResult>> result =
-                _partnerCommentService.GetPartnerComments(contractId, request.CurrentPage, request.PageSize).Result;
+            ErrorOr<PartnerCommentResult> result = _partnerCommentService.GetPartnerComment(contractId).Result;
             return result.Match(result => Ok(result), errors => Problem(errors));
         }
 

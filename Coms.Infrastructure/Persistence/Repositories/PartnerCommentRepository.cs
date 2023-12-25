@@ -12,10 +12,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
-        public async Task<IList<PartnerComment>?> GetByPartnerReviewId(int partnerReviewId)
+        public async Task<PartnerComment?> GetByPartnerReviewId(int partnerReviewId)
         {
-            var list = await _genericRepository.WhereAsync(pc => pc.PartnerReviewId.Equals(partnerReviewId), null);
-            return (list.Count() > 0 ? list : null);
+            return await _genericRepository.FirstOrDefaultAsync(pc => pc.PartnerReviewId.Equals(partnerReviewId), null);
         }
 
         public async Task AddPartnerComment(PartnerComment partnerComment)
