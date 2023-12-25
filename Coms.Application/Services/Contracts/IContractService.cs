@@ -21,5 +21,7 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<AuthorResult>> IsAuthor(int userId, int contractId);
         Task<ErrorOr<string>> UploadContract(int contractId);
         Task<ErrorOr<MemoryStream>> PreviewContract(string[] names, string[] values, int contractCategoryId);
+        Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContractsForSign(int userId,
+                string name, string creatorName, int? status, int currentPage, int pageSize);
     }
 }

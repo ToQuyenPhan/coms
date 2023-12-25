@@ -1,4 +1,5 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
+using Coms.Application.Services.ContractCategories;
 using Coms.Application.Services.TemplateFiles;
 using Coms.Domain.Entities;
 using ErrorOr;
@@ -108,6 +109,28 @@ namespace Coms.Application.Services.ContractFiles
                     return FormatType.WordML;
                 default:
                     throw new NotSupportedException("This file format is not supported!");
+            }
+        }
+
+        public async Task<ErrorOr<ContractFileObjectResult>> GetContracFile(int contractId)
+        {
+            if (_contractFileRepository.GetContractFileByContractId(contractId).Result is not null)
+            {
+                var result = _contractFileRepository.GetContractFileByContractId(contractId).Result;
+                var response = new ContractFileObjectResult
+                {
+                    UUID = result.UUID,
+                    FileData =result.FileData,
+                    ContractId = result.ContractId,
+                    FileSize = result.FileSize,
+                    UploadedDate = result.UploadedDate,
+                    UpdatedDate = result.UpdatedDate
+                };
+                return response;
+            }
+            else
+            {
+                return new ContractFileObjectResult();
             }
         }
     }

@@ -13,5 +13,6 @@ namespace Coms.Application.Services.ContractFiles
         Task<ErrorOr<ContractFileResult>> Add(string name, string extension, string contenType, byte[] document,
                 int size, int contractId);
         Task<ErrorOr<ContractFileResult>> ExportPDf(string content, int id);
+        Task<ErrorOr<ContractFileObjectResult>> GetContracFile(int contractId);
     }
 }

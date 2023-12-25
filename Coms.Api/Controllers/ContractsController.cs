@@ -165,5 +165,20 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpGet("manager/sign")]
+        [SwaggerOperation(Summary = "Get contract list for manager to sign in Coms")]
+        [Authorize(Roles = "Manager")]
+        public IActionResult GetManagerContractsForSign([FromQuery] YourContractsFilterRequest request)
+        {
+            ErrorOr<PagingResult<ContractResult>> result = _contractService.GetManagerContractsForSign(
+                int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
+                request.ContractName, request.CreatorName, request.Status, request.CurrentPage,
+                request.PageSize).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

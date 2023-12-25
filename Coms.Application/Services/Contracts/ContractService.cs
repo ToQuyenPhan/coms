@@ -7,6 +7,8 @@ using Firebase.Storage;
 using LinqKit;
 using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
+using System;
+using System.Linq;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -928,6 +930,108 @@ namespace Coms.Application.Services.Contracts
             else
             {
                 return Error.NotFound("404", "Contract is not found!");
+            }
+        }
+
+        public async Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContractsForSign(int userId,
+                string name, string creatorName, int? status, int currentPage, int pageSize)
+        {
+            IList<Contract> contracts = new List<Contract>();
+            var flowDetails = await _flowDetailRepository.GetUserFlowDetailsSignerByUserId(userId);
+            if (flowDetails is not null)
+            {
+                foreach (var flowDetail in flowDetails)
+                {
+                    var contractFlowDetails = await _contractFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);
+                    if (contractFlowDetails is not null)
+                    {
+                        foreach (var contractFlowDetail in contractFlowDetails)
+                        {
+                            var contract = await _contractRepository.GetContract(contractFlowDetail.ContractId);
+                            if (!contract.Status.Equals(DocumentStatus.Deleted))
+                            {
+                                var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
+                                if (existedContract is null)
+                                {
+                                    if (!string.IsNullOrEmpty(contract.Link))
+                                    {
+                                        contracts.Add(contract);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (contracts.Count() > 0)
+            {
+                var predicate = PredicateBuilder.New<Contract>(true);
+                predicate = predicate.And(c => c.Status != DocumentStatus.Deleted);
+                if (!string.IsNullOrEmpty(name))
+                {
+                    predicate = predicate.And(c => c.ContractName.ToUpper().Contains(name.ToUpper().Trim()));
+                }
+                if (status is not null)
+                {
+                    if (status >= 0)
+                    {
+                        predicate = predicate.And(c => c.Status.Equals((DocumentStatus)status));
+                    }
+                }
+                IList<Contract> filteredList = contracts.Where(predicate).OrderByDescending(c => c.CreatedDate)
+                        .ToList();
+                var total = filteredList.Count();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    filteredList = filteredList.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                            .ToList();
+                }
+                IList<ContractResult> responses = new List<ContractResult>();
+                foreach (var contract in filteredList)
+                {
+                    var contractResult = new ContractResult()
+                    {
+                        Id = contract.Id,
+                        ContractName = contract.ContractName,
+                        Version = contract.Version,
+                        CreatedDate = contract.CreatedDate,
+                        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        EffectiveDate = contract.EffectiveDate,
+                        EffectiveDateString = contract.EffectiveDate.ToString(),
+                        Status = (int)contract.Status,
+                        StatusString = contract.Status.ToString(),
+                        TemplateID = contract.TemplateId,
+                        Code = contract.Code,
+                        Link = contract.Link
+                    };
+                    if (contract.UpdatedDate is not null)
+                    {
+                        contractResult.UpdatedDate = contract.UpdatedDate;
+                        contractResult.UpdatedDateString = contract.UpdatedDate.ToString();
+                    }
+                    var actionHistory = await _actionHistoryRepository.GetCreateActionByContractId(contract.Id);
+                    if (actionHistory is not null)
+                    {
+                        contractResult.CreatorId = actionHistory.User.Id;
+                        contractResult.CreatorName = actionHistory.User.FullName;
+                        contractResult.CreatorEmail = actionHistory.User.Email;
+                        contractResult.CreatorImage = actionHistory.User.Image;
+                    }
+                    var partner = await _partnerReviewRepository.GetByContractId(contract.Id);
+                    if (partner is not null)
+                    {
+                        contractResult.PartnerId = partner.Partner.Id;
+                        contractResult.PartnerName = partner.Partner.CompanyName;
+                    }
+                    responses.Add(contractResult);
+                }
+                return new
+                    PagingResult<ContractResult>(responses, total, currentPage, pageSize);
+            }
+            else
+            {
+                return new PagingResult<ContractResult>(new List<ContractResult>(), 0, currentPage,
+                    pageSize);
             }
         }
     }
