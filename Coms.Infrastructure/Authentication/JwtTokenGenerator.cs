@@ -61,7 +61,7 @@ namespace Coms.Infrastructure.Authentication
             };
             var securityToken = new JwtSecurityToken(issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
-                expires: _dateTimeProvider.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+                expires: _dateTimeProvider.UtcNow.AddDays(1),
                 claims: claims, signingCredentials: signingCredentials);
             return new JwtSecurityTokenHandler().WriteToken(securityToken);
         }
