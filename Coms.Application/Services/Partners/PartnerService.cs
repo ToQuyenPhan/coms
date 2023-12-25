@@ -20,10 +20,10 @@ namespace Coms.Application.Services.Partners
             if (_partnerRepository.GetActivePartners().Result is not null)
             {
                 IList<PartnerResult> responses = new List<PartnerResult>();
-                var results = _partnerRepository.GetActivePartners().Result;
-                foreach (var partner in results)
+                IList<Partner>? results = _partnerRepository.GetActivePartners().Result;
+                foreach (Partner partner in results)
                 {
-                    var response = new PartnerResult
+                    PartnerResult response = new()
                     {
                         Id = partner.Id,
                         Address = partner.Address,
@@ -50,7 +50,7 @@ namespace Coms.Application.Services.Partners
 
         public async Task<ErrorOr<PartnerResult>> GetPartner(int id)
         {
-            var partner = await _partnerRepository.GetPartner(id);
+            Partner? partner = await _partnerRepository.GetPartner(id);
             if (partner is not null)
             {
                 PartnerResult response = new()
@@ -133,6 +133,11 @@ namespace Coms.Application.Services.Partners
             {
                 return Error.NotFound("404", "Email is exist!");
             }
+            //check code is exist
+            if (_partnerRepository.GetPartnerByCode(partner.Code).Result is not null)
+            {
+                return Error.NotFound("404", "Code is exist!");
+            }
 
             Partner newPartner = new()
             {
@@ -214,6 +219,11 @@ namespace Coms.Application.Services.Partners
             if (_partnerRepository.GetPartnerByEmail(partner.Email).Result is not null && _partnerRepository.GetPartnerByEmail(partner.Email).Result.Id != id)
             {
                 return Error.NotFound("404", "Email is exist!");
+            }
+            //check code is exist
+            if (_partnerRepository.GetPartnerByCode(partner.Code).Result is not null && _partnerRepository.GetPartnerByCode(partner.Code).Result.Id != id)
+            {
+                return Error.NotFound("404", "Code is exist!");
             }
 
 
