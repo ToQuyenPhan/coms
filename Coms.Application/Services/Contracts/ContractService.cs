@@ -159,7 +159,7 @@ namespace Coms.Application.Services.Contracts
                 predicate = predicate.And(c => c.Status != DocumentStatus.Deleted);
                 if (!string.IsNullOrEmpty(name))
                 {
-                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim()));
+                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
                 }
                 if (status is not null)
                 {
@@ -682,7 +682,7 @@ namespace Coms.Application.Services.Contracts
                 predicate = predicate.And(c => c.Status != DocumentStatus.Deleted);
                 if (!string.IsNullOrEmpty(name))
                 {
-                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim()));
+                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
                 }
                 if (status is not null)
                 {
@@ -758,7 +758,7 @@ namespace Coms.Application.Services.Contracts
                 predicate = predicate.And(c => c.Status == DocumentStatus.Approved);
                 if (!string.IsNullOrEmpty(name))
                 {
-                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim()));
+                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
                 }
                 if (!string.IsNullOrEmpty(code))
                 {
