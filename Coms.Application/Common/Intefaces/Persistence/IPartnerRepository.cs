@@ -1,4 +1,5 @@
-﻿using Coms.Domain.Entities;
+﻿using Coms.Application.Services.Common;
+using Coms.Domain.Entities;
 
 namespace Coms.Application.Common.Intefaces.Persistence
 {
@@ -7,5 +8,10 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<Partner?> GetPartner(int id);
         Task<IList<Partner>?> GetActivePartners();
         Task<Partner?> GetPartnerByCode(string code);
+        Task<Partner?> GetPartnerByEmail(string email);
+        Task<PagingResult<Partner>?> GetPartners(int? partnerId, string pepresentative, string companyName, 
+                int? status, int currentPage, int pageSize);
+        Task AddPartner(Partner partner);
+        Task UpdatePartner(Partner partner);
     }
 }

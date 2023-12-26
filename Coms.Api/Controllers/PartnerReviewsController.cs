@@ -30,11 +30,11 @@ namespace Coms.Api.Controllers
             );
         }
 
-        [HttpPut("approve")]
-        [SwaggerOperation(Summary = "Approve a contract for partner in Coms")]
-        public IActionResult ApproveContract([FromQuery] int contractId)
+        [HttpPut("approveOrReject")]
+        [SwaggerOperation(Summary = "Approve or reject a contract for partner in Coms")]
+        public IActionResult ApproveContract([FromQuery] int contractId, [FromQuery] bool isApproved)
         {
-            ErrorOr<PartnerReviewResult> result = _partnerReviewService.ApprovePartnerReview(contractId).Result;
+            ErrorOr<PartnerReviewResult> result = _partnerReviewService.ApprovePartnerReview(contractId, isApproved).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

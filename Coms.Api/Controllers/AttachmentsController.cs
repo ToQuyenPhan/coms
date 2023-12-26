@@ -10,7 +10,6 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Coms.Api.Controllers
 {
     [Route("[controller]")]
-    [Authorize(Roles = "Staff, Manager")]
     public class AttachmentsController : ApiController
     {
         private readonly IAttachmentService _attachmentService;
@@ -35,6 +34,7 @@ namespace Coms.Api.Controllers
 
         [HttpPost]
         [SwaggerOperation(Summary = "Add an attachment of a contract in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
         public IActionResult AddAttachment([FromBody] AddAttachmentRequest request)
         {
             ErrorOr<AttachmentResult> result = _attachmentService.AddAttachment(request.FileName, request.FileLink, request.UploadDate, request.Description, request.ContractId).Result;
@@ -46,6 +46,7 @@ namespace Coms.Api.Controllers
 
         [HttpDelete]
         [SwaggerOperation(Summary = "Delete an attachment of a contract in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
         public IActionResult DeleteAttachment([FromQuery] int id)
         {
             ErrorOr<AttachmentResult> result = _attachmentService.DeleteAttachment(id).Result;

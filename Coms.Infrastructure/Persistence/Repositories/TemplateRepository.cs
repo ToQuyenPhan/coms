@@ -63,7 +63,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             predicate = predicate.And(t => t.TemplateLink != "" && t.TemplateLink != null);
             if (!string.IsNullOrEmpty(templateName))
             {
-                predicate = predicate.And(t => t.TemplateName.Contains(templateName.Trim()));
+                predicate = predicate.And(t => t.TemplateName.Contains(templateName.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
             }
             if (contractCategoryId > 0)
             {
@@ -78,7 +78,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
                 predicate = predicate.And(t => t.Status.Equals((TemplateStatus)status));
             }
             if(!string.IsNullOrEmpty(email)) {
-                predicate = predicate.And(t => t.User.Email.Contains(email.Trim()));
+                predicate = predicate.And(t => t.User.Email.Contains(email.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
             }
             return predicate;
         }

@@ -1,5 +1,4 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
-using Coms.Application.Services.Templates;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
@@ -10,7 +9,6 @@ namespace Coms.Application.Services.PartnerReviews
     {
         private readonly IPartnerReviewRepository _partnerReviewRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IContractRepository _contractRepository;
         private readonly IPartnerRepository _partnerRepository;
         public PartnerReviewService(IPartnerReviewRepository partnerReviewRepository,
             IUserRepository userRepository,
@@ -19,7 +17,6 @@ namespace Coms.Application.Services.PartnerReviews
         {
             _partnerReviewRepository = partnerReviewRepository;
             _userRepository = userRepository;
-            _contractRepository = contractRepository;
             _partnerRepository = partnerRepository;
         }
 
@@ -63,14 +60,21 @@ namespace Coms.Application.Services.PartnerReviews
             }
         }
 
-        public async Task<ErrorOr<PartnerReviewResult>> ApprovePartnerReview(int contractId)
+        public async Task<ErrorOr<PartnerReviewResult>> ApprovePartnerReview(int contractId, bool isApproved)
         {
             try
             {
                 var partnerPreview = await _partnerReviewRepository.GetByContractId(contractId);
                 if(partnerPreview is not null)
                 {
-                    partnerPreview.IsApproved = true;
+                    if (isApproved)
+                    {
+                        partnerPreview.IsApproved = true;
+                    }
+                    else
+                    {
+                        partnerPreview.Status = PartnerReviewStatus.Inactive;
+                    }
                     partnerPreview.ReviewAt = DateTime.Now;
                     await _partnerReviewRepository.UpdatePartnerPreview(partnerPreview);
                     var partnerReviewResult = new PartnerReviewResult

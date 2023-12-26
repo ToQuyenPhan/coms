@@ -153,7 +153,7 @@ namespace Coms.Api.Controllers
         }
 
         [HttpPut("approveOrReject")]
-        [SwaggerOperation(Summary = "Approve a contract by manager in Coms")]
+        [SwaggerOperation(Summary = "Approve or reject a contract by manager in Coms")]
         [Authorize(Roles = "Manager")]
         public IActionResult ApproveContract([FromQuery] int id, bool isApproved)
         {

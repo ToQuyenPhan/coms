@@ -1,5 +1,4 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
-using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using ErrorOr;
 
@@ -17,40 +16,28 @@ namespace Coms.Application.Services.PartnerComments
             _partnerCommentRepository = partnerCommentRepository;
         }
 
-        public async Task<ErrorOr<PagingResult<PartnerCommentResult>>> GetPartnerComments(int contractId, int currentPage,
-                int pageSize)
+        public async Task<ErrorOr<PartnerCommentResult>> GetPartnerComment(int contractId)
         {
             var partnerReview = await _partnerReviewRepository.GetByContractId(contractId);
             if (partnerReview is not null)
             {
-                var partnerComments = await _partnerCommentRepository.GetByPartnerReviewId(partnerReview.Id);
-                if (partnerComments is not null)
+                var partnerComment = await _partnerCommentRepository.GetByPartnerReviewId(partnerReview.Id);
+                if (partnerComment is not null)
                 {
-                    partnerComments = partnerComments.OrderByDescending(pc => pc.CreatedAt).ToList();
-                    IList<PartnerCommentResult> commentResults = new List<PartnerCommentResult>();
-                    foreach (var partnerComment in partnerComments)
+                    var commentResult = new PartnerCommentResult()
                     {
-                        var commentResult = new PartnerCommentResult()
-                        {
-                            Id = partnerComment.Id,
-                            Content = partnerComment.Content,
-                            ReplyId = partnerComment.Id,
-                            PartnerReviewId = partnerComment.PartnerReviewId,
-                            CreatedAt = partnerComment.CreatedAt.ToString(),
-                            Long = AsTimeAgo(partnerComment.CreatedAt)
-                        };
-                        commentResults.Add(commentResult);
-                    }
-                    int total = commentResults.Count();
-                    if (currentPage > 0 && pageSize > 0)
-                    {
-                        commentResults = commentResults.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
-                    }
-                    return new PagingResult<PartnerCommentResult>(commentResults, total, currentPage, pageSize);
+                        Id = partnerComment.Id,
+                        Content = partnerComment.Content,
+                        ReplyId = partnerComment.Id,
+                        PartnerReviewId = partnerComment.PartnerReviewId,
+                        CreatedAt = partnerComment.CreatedAt.ToString(),
+                        Long = AsTimeAgo(partnerComment.CreatedAt)
+                    };
+                    return commentResult;
                 }
                 else
                 {
-                    return new PagingResult<PartnerCommentResult>(new List<PartnerCommentResult>(), 0, currentPage, pageSize);
+                    return Error.NotFound("404", "Not have any comment");
                 }
             }
             else

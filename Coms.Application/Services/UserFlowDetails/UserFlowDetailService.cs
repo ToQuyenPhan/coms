@@ -1,6 +1,8 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
+using Coms.Domain.Enum;
 using ErrorOr;
+using static SkiaSharp.HarfBuzz.SKShaper;
 
 namespace Coms.Application.Services.UserFlowDetails
 {
@@ -54,6 +56,91 @@ namespace Coms.Application.Services.UserFlowDetails
             {
                 return Error.NotFound("404", "Not found any flow details!");
             }
+        }
+
+        public async Task<ErrorOr<PagingResult<NotificationResult>>> GetNotifications(int userId, int currentPage, int pageSize)
+        {
+            var flowDetails = await _flowDetailRepository.GetUserFlowDetailsByUserId(userId);
+            if (flowDetails is not null)
+            {
+                IList<NotificationResult> results = new List<NotificationResult>();
+                foreach (var flowDetail in flowDetails)
+                {
+                    var contractFlowDetails = await _userFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);
+                    if(contractFlowDetails is not null)
+                    {
+                        contractFlowDetails = contractFlowDetails.OrderByDescending(cfd => cfd.Contract.CreatedDate).ToList();
+                        foreach (var contractFlowDetail in contractFlowDetails)
+                        {
+                            if (contractFlowDetail.Contract.Status.Equals(DocumentStatus.Deleted))
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                var notificationResult = new NotificationResult()
+                                {
+                                    Title = "New Contract",
+                                    Message = "You have a new contract to ",
+                                    Long = AsTimeAgo(contractFlowDetail.Contract.CreatedDate),
+                                    ContractId = contractFlowDetail.ContractId,
+                                };
+                                if (flowDetail.FlowRole.Equals(FlowRole.Approver))
+                                {
+                                    notificationResult.Message += "approve!";
+                                }
+                                else
+                                {
+                                    notificationResult.Message += "sign!";
+                                }
+                                results.Add(notificationResult);
+                            }
+                        }
+                    }
+                }
+                int total = results.Count();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    results = results.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+                }
+                return new PagingResult<NotificationResult>(results, total, currentPage, pageSize);
+            }
+            else
+            {
+                return new PagingResult<NotificationResult>(new List<NotificationResult>(), 0, currentPage, pageSize);
+            }
+        }
+
+        private string AsTimeAgo(DateTime dateTime)
+        {
+            TimeSpan timeSpan = DateTime.Now.Subtract(dateTime);
+
+            return timeSpan.TotalSeconds switch
+            {
+                <= 60 => $"{timeSpan.Seconds} seconds ago",
+
+                _ => timeSpan.TotalMinutes switch
+                {
+                    <= 1 => "About a minute ago",
+                    < 60 => $"About {timeSpan.Minutes} minutes ago",
+                    _ => timeSpan.TotalHours switch
+                    {
+                        <= 1 => "About an hour ago",
+                        < 24 => $"About {timeSpan.Hours} hours ago",
+                        _ => timeSpan.TotalDays switch
+                        {
+                            <= 1 => "yesterday",
+                            <= 30 => $"About {timeSpan.Days} days ago",
+
+                            <= 60 => "About a month ago",
+                            < 365 => $"About {timeSpan.Days / 30} months ago",
+
+                            <= 365 * 2 => "About a year ago",
+                            _ => $"About {timeSpan.Days / 365} years ago"
+                        }
+                    }
+                }
+            };
         }
     }
 }
