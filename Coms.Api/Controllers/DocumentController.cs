@@ -19,9 +19,9 @@ namespace Coms.Api.Controllers
             _documentService = documentService;
         }
 
-        [HttpGet("content")]
+        [HttpGet("{id}/content")]
         [SwaggerOperation(Summary = "Get content of a Document")]
-        public IActionResult GetUserById([FromQuery] Guid id, Guid versionId)
+        public IActionResult GetUserById([FromRoute] Guid id, Guid versionId)
         {
             ErrorOr<ResponseModel> result = _documentService.DownloadDocument(id, versionId).Result;
             return result.Match(
