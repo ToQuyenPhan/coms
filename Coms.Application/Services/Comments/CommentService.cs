@@ -33,17 +33,17 @@ namespace Coms.Application.Services.Comments
         public async Task<ErrorOr<PagingResult<CommentResult>>> GetAllComments(int userId, int currentPage,
                 int pageSize)
         {
-            var createActions = await _actionHistoryRepository.GetCreateActionByUserId(userId);
+            IList<ActionHistory>? createActions = await _actionHistoryRepository.GetCreateActionByUserId(userId);
             if (createActions is not null)
             {
                 IList<ActionHistory> commentHistories = new List<ActionHistory>();
-                foreach (var action in createActions)
+                foreach (ActionHistory action in createActions)
                 {
-                    var commentHistoryList = await _actionHistoryRepository
+                    IList<ActionHistory>? commentHistoryList = await _actionHistoryRepository
                             .GetCommentActionByContractId(action.ContractId, userId);
                     if (commentHistoryList is not null)
                     {
-                        foreach (var commentHistory in commentHistoryList)
+                        foreach (ActionHistory commentHistory in commentHistoryList)
                         {
                             if (!commentHistories.Contains(commentHistory))
                             {
@@ -52,26 +52,26 @@ namespace Coms.Application.Services.Comments
                         }
                     }
                 }
-                if(commentHistories.Count() > 0)
+                if (commentHistories.Count() > 0)
                 {
                     IList<CommentResult> comments = new List<CommentResult>();
-                    foreach (var commentHistory in commentHistories)
+                    foreach (ActionHistory commentHistory in commentHistories)
                     {
-                        var comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);
+                        Comment? comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);
                         if (comment is not null)
                         {
-                            var commentResult = new CommentResult()
+                            CommentResult commentResult = new()
                             {
                                 Id = comment.Id,
                                 Content = comment.Content,
                                 ActionHistoryId = comment.ActionHistoryId,
                                 ReplyId = comment.ReplyId,
                                 Status = (int)comment.Status,
-                                StatusString = comment.Status.ToString()
+                                StatusString = comment.Status.ToString(),
+                                Long = AsTimeAgo(comment.ActionHistory.CreatedAt),
+                                CreatedAt = comment.ActionHistory.CreatedAt.ToString()
                             };
-                            commentResult.Long = AsTimeAgo(comment.ActionHistory.CreatedAt);
-                            commentResult.CreatedAt = comment.ActionHistory.CreatedAt.ToString();
-                            var user = await _userRepository.GetUser((int)comment.ActionHistory.UserId);
+                            User? user = await _userRepository.GetUser((int)comment.ActionHistory.UserId);
                             commentResult.UserId = user.Id;
                             commentResult.FullName = user.FullName;
                             comments.Add(commentResult);
@@ -97,15 +97,16 @@ namespace Coms.Application.Services.Comments
             }
         }
 
-        public async Task<ErrorOr<CommentResult>> DismissComment(int id) {
+        public async Task<ErrorOr<CommentResult>> DismissComment(int id)
+        {
             try
             {
-                var comment = await _commentRepository.GetComment(id);
+                Comment? comment = await _commentRepository.GetComment(id);
                 if (comment is not null)
                 {
                     comment.Status = Domain.Enum.CommentStatus.Dismissed;
                     await _commentRepository.UpdateComment(comment);
-                    var commentResult = new CommentResult()
+                    CommentResult commentResult = new()
                     {
                         Id = comment.Id,
                         Content = comment.Content,
@@ -120,7 +121,8 @@ namespace Coms.Application.Services.Comments
                 {
                     return Error.NotFound("404", "Comment is not found!");
                 }
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }
@@ -129,50 +131,50 @@ namespace Coms.Application.Services.Comments
         public async Task<ErrorOr<PagingResult<CommentResult>>> GetContractComments(int contractId, int currentPage,
                            int pageSize)
         {
-            var histories = await _actionHistoryRepository.GetCommentActionByContractId(contractId);
+            IList<ActionHistory>? histories = await _actionHistoryRepository.GetCommentActionByContractId(contractId);
             if (histories is not null)
             {
                 IList<CommentResult> comments = new List<CommentResult>();
-                foreach (var commentHistory in histories)
+                foreach (ActionHistory commentHistory in histories)
                 {
-                    var comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);
+                    Comment? comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);
                     if (comment is not null)
                     {
-                        var commentResult = new CommentResult()
+                        CommentResult commentResult = new()
                         {
                             Id = comment.Id,
                             Content = comment.Content,
                             ActionHistoryId = comment.ActionHistoryId,
                             ReplyId = comment.ReplyId,
                             Status = (int)comment.Status,
-                            StatusString = comment.Status.ToString()
+                            StatusString = comment.Status.ToString(),
+                            Long = AsTimeAgo(commentHistory.CreatedAt),
+                            CreatedAt = commentHistory.CreatedAt.ToString(),
+                            UserId = commentHistory.User.Id,
+                            FullName = commentHistory.User.FullName
                         };
-                        commentResult.Long = AsTimeAgo(commentHistory.CreatedAt);
-                        commentResult.CreatedAt = commentHistory.CreatedAt.ToString();
-                        commentResult.UserId = commentHistory.User.Id;
-                        commentResult.FullName = commentHistory.User.FullName;
                         if (commentHistory.User.Image is not null)
                         {
                             commentResult.UserImage = commentHistory.User.Image;
                         }
-                        var userFlowDetails = 
+                        IList<Contract_FlowDetail>? userFlowDetails =
                             await _userFlowDetailsRepository.GetByContractId(commentHistory.ContractId);
-                        if(userFlowDetails is not null)
+                        if (userFlowDetails is not null)
                         {
                             int numberOfRole = 0;
-                            foreach (var userFlowDetail in userFlowDetails)
+                            foreach (Contract_FlowDetail userFlowDetail in userFlowDetails)
                             {
-                                var flowDetail = await _flowDetailRepository.GetFlowDetail(userFlowDetail.FlowDetailId);
-                                if(flowDetail is not null)
+                                FlowDetail? flowDetail = await _flowDetailRepository.GetFlowDetail(userFlowDetail.FlowDetailId);
+                                if (flowDetail is not null)
                                 {
                                     numberOfRole++;
-                                    if(numberOfRole > 1)
+                                    if (numberOfRole > 1)
                                     {
                                         commentResult.AccessRole += ", " + flowDetail.FlowRole.ToString();
                                     }
                                     else
                                     {
-                                        commentResult.AccessRole = flowDetail.FlowRole.ToString(); 
+                                        commentResult.AccessRole = flowDetail.FlowRole.ToString();
                                     }
                                 }
                             }
@@ -198,18 +200,18 @@ namespace Coms.Application.Services.Comments
                                        pageSize);
             }
         }
-        
+
         public async Task<ErrorOr<CommentDetailResult>> GetCommentDetail(int id)
         {
-            var comment = await _commentRepository.GetComment(id);
+            Comment? comment = await _commentRepository.GetComment(id);
             if (comment is not null)
             {
                 if (comment.Status.Equals(CommentStatus.Inactive))
                 {
                     return Error.Conflict("409", "Comment is inactive!");
                 }
-                var contract = await _contractRepository.GetContract(comment.ActionHistory.ContractId);
-                if(contract is not null)
+                Contract? contract = await _contractRepository.GetContract(comment.ActionHistory.ContractId);
+                if (contract is not null)
                 {
                     if (contract.Status.Equals(DocumentStatus.Deleted))
                     {
@@ -217,7 +219,7 @@ namespace Coms.Application.Services.Comments
                     }
                     else
                     {
-                        CommentDetailResult result = new CommentDetailResult()
+                        CommentDetailResult result = new()
                         {
                             ContractId = contract.Id
                         };
@@ -235,19 +237,19 @@ namespace Coms.Application.Services.Comments
             }
         }
 
-        public async Task<ErrorOr<CommentResult>> LeaveComment(int userId, int contractId, string content, 
-                int? replyId)
+        public async Task<ErrorOr<CommentResult>> LeaveComment(int userId, int contractId, string content,
+        int? replyId)
         {
             try
             {
-                var contract = await _contractRepository.GetContract(contractId);
-                if(contract is not null)
+                Contract? contract = await _contractRepository.GetContract(contractId);
+                if (contract is not null)
                 {
                     if (contract.Status.Equals(DocumentStatus.Deleted))
                     {
                         return Error.Conflict("409", "Contract no longer exist!");
                     }
-                    var actionHistory = new ActionHistory()
+                    ActionHistory actionHistory = new()
                     {
                         ActionType = ActionType.Commented,
                         CreatedAt = DateTime.Now,
@@ -255,25 +257,31 @@ namespace Coms.Application.Services.Comments
                         ContractId = contractId
                     };
                     await _actionHistoryRepository.AddActionHistory(actionHistory);
-                    var comment = new Comment()
+                    Comment comment = new()
                     {
                         Content = content,
                         Status = CommentStatus.Active,
                         ActionHistoryId = actionHistory.Id
                     };
-                    if(replyId is not null && replyId > 0)
+                    if (replyId is not null and > 0)
                     {
                         comment.ReplyId = replyId;
                     }
+                    ActionHistory actionHistorycreated = await _actionHistoryRepository.GetActionHistoryById(actionHistory.Id);
                     await _commentRepository.AddComment(comment);
-                    var commentResult = new CommentResult()
+                    CommentResult commentResult = new()
                     {
                         Id = comment.Id,
                         Content = comment.Content,
                         ActionHistoryId = comment.ActionHistoryId,
                         ReplyId = comment.ReplyId,
                         Status = (int)comment.Status,
-                        StatusString = comment.Status.ToString()
+                        StatusString = comment.Status.ToString(),
+                        UserId = (int)actionHistorycreated.UserId,
+                        FullName = actionHistorycreated.User.FullName,
+                        UserImage = actionHistorycreated.User.Image,
+                        CreatedAt = actionHistorycreated.CreatedAt.ToString(),
+                        Long = AsTimeAgo(actionHistorycreated.CreatedAt)
                     };
                     return commentResult;
                 }
@@ -281,7 +289,8 @@ namespace Coms.Application.Services.Comments
                 {
                     return Error.NotFound("404", "Contract is not found!");
                 }
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }
@@ -291,12 +300,12 @@ namespace Coms.Application.Services.Comments
         {
             try
             {
-                var comment = await _commentRepository.GetComment(id);
+                Comment? comment = await _commentRepository.GetComment(id);
                 if (comment is not null)
                 {
                     comment.Status = CommentStatus.Inactive;
                     await _commentRepository.UpdateComment(comment);
-                    var commentResult = new CommentResult()
+                    CommentResult commentResult = new()
                     {
                         Id = comment.Id,
                         Content = comment.Content,
@@ -322,7 +331,7 @@ namespace Coms.Application.Services.Comments
         {
             try
             {
-                var comment = await _commentRepository.GetComment(id);
+                Comment? comment = await _commentRepository.GetComment(id);
                 if (comment is not null)
                 {
                     //var actionHistory = await _actionHistoryRepository.GetActionHistoryById((int)comment.ActionHistoryId); 
@@ -330,7 +339,7 @@ namespace Coms.Application.Services.Comments
                     //await _actionHistoryRepository.UpdateActionHistory(actionHistory);
                     comment.Content = content;
                     await _commentRepository.UpdateComment(comment);
-                    var commentResult = new CommentResult()
+                    CommentResult commentResult = new()
                     {
                         Id = comment.Id,
                         Content = comment.Content,
