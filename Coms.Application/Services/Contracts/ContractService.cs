@@ -161,7 +161,7 @@ namespace Coms.Application.Services.Contracts
                 predicate = predicate.And(c => c.Status != DocumentStatus.Deleted);
                 if (!string.IsNullOrEmpty(name))
                 {
-                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim()));
+                    predicate = predicate.And(c => c.ContractName.ToUpper().Contains(name.ToUpper().Trim()));
                 }
                 if (status is not null)
                 {
@@ -684,7 +684,7 @@ namespace Coms.Application.Services.Contracts
                 predicate = predicate.And(c => c.Status != DocumentStatus.Deleted);
                 if (!string.IsNullOrEmpty(name))
                 {
-                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim()));
+                    predicate = predicate.And(c => c.ContractName.ToUpper().Contains(name.ToUpper().Trim()));
                 }
                 if (status is not null)
                 {
@@ -760,7 +760,7 @@ namespace Coms.Application.Services.Contracts
                 predicate = predicate.And(c => c.Status == DocumentStatus.Approved);
                 if (!string.IsNullOrEmpty(name))
                 {
-                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim()));
+                    predicate = predicate.And(c => c.ContractName.ToUpper().Contains(name.ToUpper().Trim()));
                 }
                 if (!string.IsNullOrEmpty(code))
                 {
@@ -1033,6 +1033,6 @@ namespace Coms.Application.Services.Contracts
                 return new PagingResult<ContractResult>(new List<ContractResult>(), 0, currentPage,
                     pageSize);
             }
-        }
+        }     
     }
 }
