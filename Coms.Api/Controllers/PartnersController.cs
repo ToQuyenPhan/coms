@@ -56,7 +56,6 @@ namespace Coms.Api.Controllers
             );
         }
 
-        //get all partners
         [HttpGet("all")]
         [SwaggerOperation(Summary = "Get all partners in Coms")]
         [Authorize(Roles = "Sale Manager")]
@@ -76,32 +75,6 @@ namespace Coms.Api.Controllers
             }
         }
 
-
-
-
-
-
-        //delete partner by id
-        [HttpDelete("{partnerId}")]
-        [SwaggerOperation(Summary = "Delete partner by id")]
-        [Authorize(Roles = "Sale Manager")]
-        public IActionResult DeletePartner(int partnerId)
-        {
-            try
-            {
-                ErrorOr<PartnerResult> result = _partnerService.DeletePartner(partnerId).Result;
-                return result.Match(
-                    result => Ok(result),
-                    errors => Problem(errors)
-                );
-            }
-            catch (Exception e)
-            {
-                return Problem(e.Message);
-            }
-        }
-
-        //add partner
         [HttpPost("add")]
         [SwaggerOperation(Summary = "Add a partner in Coms")]
         [Authorize(Roles = "Sale Manager")]
@@ -121,7 +94,6 @@ namespace Coms.Api.Controllers
             }
         }
 
-        //update partner
         [HttpPut("update")]
         [SwaggerOperation(Summary = "Update a partner in Coms")]
         [Authorize(Roles = "Sale Manager")]
@@ -141,7 +113,6 @@ namespace Coms.Api.Controllers
             }
         }
 
-        //update partner status
         [HttpPut("update-status")]
         [SwaggerOperation(Summary = "Update status of a partner in Coms")]
         [Authorize(Roles = "Sale Manager")]
@@ -154,6 +125,25 @@ namespace Coms.Api.Controllers
                                        result => Ok(result),
                                                           errors => Problem(errors)
                                                                              );
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpDelete("{partnerId}")]
+        [SwaggerOperation(Summary = "Delete partner by id")]
+        [Authorize(Roles = "Sale Manager")]
+        public IActionResult DeletePartner(int partnerId)
+        {
+            try
+            {
+                ErrorOr<PartnerResult> result = _partnerService.DeletePartner(partnerId).Result;
+                return result.Match(
+                    result => Ok(result),
+                    errors => Problem(errors)
+                );
             }
             catch (Exception e)
             {

@@ -2,11 +2,6 @@
 using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LinqKit;
 using System.Linq.Expressions;
 
@@ -38,7 +33,6 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return await _genericRepository.FirstOrDefaultAsync(c => c.Code.Equals(code), null);
         }
 
-        //get all partners
         public async Task<PagingResult<Partner>?> GetPartners(int? partnerId, string pepresentative, string companyName, int? status, int currentPage, int pageSize)
         {
             IList<Partner> query = await _genericRepository.WhereAsync(BuildExpression(partnerId, pepresentative, companyName, status), null);
@@ -49,20 +43,16 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return (list.Count() > 0) ? new PagingResult<Partner>(list, totalCount, currentPage, pageSize) : null;
         }
 
-
-        //get partner by email
         public async Task<Partner?> GetPartnerByEmail(string email)
         {
             return await _genericRepository.FirstOrDefaultAsync(c => c.Email.Equals(email), null);
         }
 
-        //add partner
         public async Task AddPartner(Partner partner)
         {
             await _genericRepository.CreateAsync(partner);
         }
 
-        //update partner
         public async Task UpdatePartner(Partner partner)
         {
             await _genericRepository.UpdateAsync(partner);

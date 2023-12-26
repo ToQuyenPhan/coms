@@ -115,8 +115,6 @@ namespace Coms.Application.Services.Partners
             }
         }
 
-
-        //add partner
         public async Task<ErrorOr<PartnerResult>> AddPartnerAsync(AddPartnerResult partner)
         {
 
@@ -138,7 +136,6 @@ namespace Coms.Application.Services.Partners
             {
                 return Error.NotFound("404", "Code is exist!");
             }
-
             Partner newPartner = new()
             {
                 Id = 0,
@@ -180,7 +177,6 @@ namespace Coms.Application.Services.Partners
             }
         }
 
-        //delete partner by id
         public async Task<ErrorOr<PartnerResult>> DeletePartner(int id)
         {
             Partner? partner = _partnerRepository.GetPartner(id).Result;
@@ -212,15 +208,12 @@ namespace Coms.Application.Services.Partners
             }
         }
 
-        //update partner
         public async Task<ErrorOr<PartnerResult>> UpdatePartner(int id, AddPartnerResult partner)
         {
-            //check email is exist
             if (_partnerRepository.GetPartnerByEmail(partner.Email).Result is not null && _partnerRepository.GetPartnerByEmail(partner.Email).Result.Id != id)
             {
                 return Error.NotFound("404", "Email is exist!");
             }
-            //check code is exist
             if (_partnerRepository.GetPartnerByCode(partner.Code).Result is not null && _partnerRepository.GetPartnerByCode(partner.Code).Result.Id != id)
             {
                 return Error.NotFound("404", "Code is exist!");
@@ -263,7 +256,7 @@ namespace Coms.Application.Services.Partners
                 return Error.NotFound("404", "Partner is not found!");
             }
         }
-        //update partner status check status if active change to inactive and vice versa
+
         public async Task<ErrorOr<PartnerResult>> UpdatePartnerStatus(int id)
         {
             Partner? partner = _partnerRepository.GetPartner(id).Result;
