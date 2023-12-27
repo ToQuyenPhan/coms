@@ -38,5 +38,12 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     new System.Linq.Expressions.Expression<Func<FlowDetail, object>>[] { fd => fd.User, fd => fd.Flow });
             return (list.Count() > 0) ? list : null;
         }
+
+        public async Task<IList<FlowDetail>?> GetUserFlowDetailsSignerByUserId(int userId)
+        {
+            var list = await _genericRepository.WhereAsync(fd => fd.UserId.Equals(userId) && (int)fd.FlowRole == 1,
+                new System.Linq.Expressions.Expression<Func<FlowDetail, object>>[] { fd => fd.User, fd => fd.Flow });
+            return (list.Count() > 0) ? list : null;
+        }
     }
 }

@@ -19,6 +19,8 @@ using Coms.Application.Services.UserFlowDetails;
 using Coms.Application.Services.TemplateFields;
 using Coms.Application.Services.Attachments;
 using Coms.Application.Services.PartnerComments;
+using Coms.Application.Services.Documents;
+using Coms.Application.Services.Signs;
 
 namespace Coms.Application
 {
@@ -47,6 +49,8 @@ namespace Coms.Application
             services.AddScoped<IUserFlowDetailService, UserFlowDetailService>();
             services.AddScoped<ITemplateFieldService, TemplateFieldService>();
             services.AddScoped<IPartnerCommentService, PartnerCommentService>();
+            services.AddScoped<IDocumentService, DocumentService>();
+            services.AddScoped<ISignService, SignService>();
             return services;
         }
     }
