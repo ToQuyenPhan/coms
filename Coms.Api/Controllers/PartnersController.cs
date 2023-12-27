@@ -105,11 +105,11 @@ namespace Coms.Api.Controllers
         [HttpPost("add")]
         [SwaggerOperation(Summary = "Add a partner in Coms")]
         [Authorize(Roles = "Sale Manager")]
-        public IActionResult AddPartner([FromBody] AddPartnerResult request)
+        public IActionResult AddPartner([FromBody] AddPartnerRequest request)
         {
             try
             {
-                ErrorOr<PartnerResult> result = _partnerService.AddPartnerAsync(request).Result;
+                ErrorOr<PartnerResult> result = _partnerService.AddPartnerAsync(request.Image, request.Representative, request.RepresentativePosition, request.Email, request.Code, request.Phone, request.Address, request.CompanyName, request.TaxCode).Result;
                 return result.Match(
                     result => Ok(result),
                     errors => Problem(errors)
@@ -125,11 +125,11 @@ namespace Coms.Api.Controllers
         [HttpPut("update")]
         [SwaggerOperation(Summary = "Update a partner in Coms")]
         [Authorize(Roles = "Sale Manager")]
-        public IActionResult UpdatePartner([FromQuery] int id, [FromBody] AddPartnerResult request)
+        public IActionResult UpdatePartner([FromQuery] int id, [FromBody] AddPartnerRequest request)
         {
             try
             {
-                ErrorOr<PartnerResult> result = _partnerService.UpdatePartner(id, request).Result;
+                ErrorOr<PartnerResult> result = _partnerService.UpdatePartner(id, request.Image, request.Representative, request.RepresentativePosition, request.Email, request.Code, request.Phone, request.Address, request.CompanyName, request.TaxCode).Result;
                 return result.Match(
                     result => Ok(result),
                     errors => Problem(errors)
