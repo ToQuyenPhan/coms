@@ -339,6 +339,7 @@ namespace Coms.Application.Services.Comments
                     //await _actionHistoryRepository.UpdateActionHistory(actionHistory);
                     comment.Content = content;
                     await _commentRepository.UpdateComment(comment);
+                    ActionHistory actionHistory = await _actionHistoryRepository.GetActionHistoryById(comment.ActionHistory.Id);
                     CommentResult commentResult = new()
                     {
                         Id = comment.Id,
@@ -346,7 +347,12 @@ namespace Coms.Application.Services.Comments
                         ActionHistoryId = comment.ActionHistoryId,
                         ReplyId = comment.ReplyId,
                         Status = (int)comment.Status,
-                        StatusString = comment.Status.ToString()
+                        StatusString = comment.Status.ToString(),
+                        CreatedAt = comment.ActionHistory.CreatedAt.ToString(),
+                        FullName = actionHistory.User.FullName,
+                        UserId = (int)actionHistory.UserId,
+                        UserImage = actionHistory.User.Image,
+                        Long = AsTimeAgo(actionHistory.CreatedAt),
                     };
                     return commentResult;
                 }
