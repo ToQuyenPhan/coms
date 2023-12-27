@@ -56,6 +56,7 @@ namespace Coms.Api.Controllers
             );
         }
 
+        //get all partners
         [HttpGet("all")]
         [SwaggerOperation(Summary = "Get all partners in Coms")]
         [Authorize(Roles = "Sale Manager")]
@@ -75,63 +76,12 @@ namespace Coms.Api.Controllers
             }
         }
 
-        [HttpPost("add")]
-        [SwaggerOperation(Summary = "Add a partner in Coms")]
-        [Authorize(Roles = "Sale Manager")]
-        public IActionResult AddPartner([FromBody] AddPartnerResult request)
-        {
-            try
-            {
-                ErrorOr<PartnerResult> result = _partnerService.AddPartnerAsync(request).Result;
-                return result.Match(
-                    result => Ok(result),
-                    errors => Problem(errors)
-                                                                                                                                                                   );
-            }
-            catch (Exception e)
-            {
-                return Problem(e.Message);
-            }
-        }
 
-        [HttpPut("update")]
-        [SwaggerOperation(Summary = "Update a partner in Coms")]
-        [Authorize(Roles = "Sale Manager")]
-        public IActionResult UpdatePartner([FromQuery] int id, [FromBody] AddPartnerResult request)
-        {
-            try
-            {
-                ErrorOr<PartnerResult> result = _partnerService.UpdatePartner(id, request).Result;
-                return result.Match(
-                    result => Ok(result),
-                    errors => Problem(errors)
-                    );
-            }
-            catch (Exception e)
-            {
-                return Problem(e.Message);
-            }
-        }
 
-        [HttpPut("update-status")]
-        [SwaggerOperation(Summary = "Update status of a partner in Coms")]
-        [Authorize(Roles = "Sale Manager")]
-        public IActionResult UpdatePartnerStatus([FromQuery] int id)
-        {
-            try
-            {
-                ErrorOr<PartnerResult> result = _partnerService.UpdatePartnerStatus(id).Result;
-                return result.Match(
-                                       result => Ok(result),
-                                                          errors => Problem(errors)
-                                                                             );
-            }
-            catch (Exception e)
-            {
-                return Problem(e.Message);
-            }
-        }
 
+
+
+        //delete partner by id
         [HttpDelete("{partnerId}")]
         [SwaggerOperation(Summary = "Delete partner by id")]
         [Authorize(Roles = "Sale Manager")]
@@ -144,6 +94,66 @@ namespace Coms.Api.Controllers
                     result => Ok(result),
                     errors => Problem(errors)
                 );
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        //add partner
+        [HttpPost("add")]
+        [SwaggerOperation(Summary = "Add a partner in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public IActionResult AddPartner([FromBody] AddPartnerRequest request)
+        {
+            try
+            {
+                ErrorOr<PartnerResult> result = _partnerService.AddPartnerAsync(request.Image, request.Representative, request.RepresentativePosition, request.Email, request.Code, request.Phone, request.Address, request.CompanyName, request.TaxCode).Result;
+                return result.Match(
+                    result => Ok(result),
+                    errors => Problem(errors)
+                                                                                                                                                                   );
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        //update partner
+        [HttpPut("update")]
+        [SwaggerOperation(Summary = "Update a partner in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public IActionResult UpdatePartner([FromQuery] int id, [FromBody] AddPartnerRequest request)
+        {
+            try
+            {
+                ErrorOr<PartnerResult> result = _partnerService.UpdatePartner(id, request.Image, request.Representative, request.RepresentativePosition, request.Email, request.Code, request.Phone, request.Address, request.CompanyName, request.TaxCode).Result;
+                return result.Match(
+                    result => Ok(result),
+                    errors => Problem(errors)
+                    );
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        //update partner status
+        [HttpPut("update-status")]
+        [SwaggerOperation(Summary = "Update status of a partner in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public IActionResult UpdatePartnerStatus([FromQuery] int id)
+        {
+            try
+            {
+                ErrorOr<PartnerResult> result = _partnerService.UpdatePartnerStatus(id).Result;
+                return result.Match(
+                                       result => Ok(result),
+                                                          errors => Problem(errors)
+                                                                             );
             }
             catch (Exception e)
             {
