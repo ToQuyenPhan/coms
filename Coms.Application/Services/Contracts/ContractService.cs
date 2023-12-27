@@ -7,8 +7,6 @@ using Firebase.Storage;
 using LinqKit;
 using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
-using System;
-using System.Linq;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -161,7 +159,7 @@ namespace Coms.Application.Services.Contracts
                 predicate = predicate.And(c => c.Status != DocumentStatus.Deleted);
                 if (!string.IsNullOrEmpty(name))
                 {
-                    predicate = predicate.And(c => c.ContractName.ToUpper().Contains(name.ToUpper().Trim()));
+                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
                 }
                 if (status is not null)
                 {

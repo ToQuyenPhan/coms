@@ -1,14 +1,9 @@
 ﻿using Coms.Api.Common.Request;
-using Coms.Application.Services.Accesses;
-using Coms.Application.Services.ContractFiles;
-using Coms.Application.Services.Contracts;
 using Coms.Application.Services.Signs;
-using Coms.Contracts.ActionHistories;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Security.Claims;
 
 namespace Coms.Api.Controllers
 {
