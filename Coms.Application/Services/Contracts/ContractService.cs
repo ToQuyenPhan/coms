@@ -7,6 +7,8 @@ using Firebase.Storage;
 using LinqKit;
 using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
+using System.Net.Mail;
+using System.Net;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -28,6 +30,7 @@ namespace Coms.Application.Services.Contracts
         private readonly IContractFieldRepository _contractFieldRepository;
         private readonly IFlowRepository _flowRepository;
         private readonly IContractFileRepository _contractFileRepository;
+        private readonly ISystemSettingsRepository _systemSettingsRepository;
 
         public ContractService(IAccessRepository accessRepository,
                 IUserAccessRepository userAccessRepository,
@@ -43,7 +46,8 @@ namespace Coms.Application.Services.Contracts
                 IFlowDetailRepository flowDetailRepository,
                 IContractFieldRepository contractFieldRepository,
                 IFlowRepository flowRepository,
-                IContractFileRepository contractFileRepository)
+                IContractFileRepository contractFileRepository,
+                ISystemSettingsRepository systemSettingsRepository)
         {
             _accessRepository = accessRepository;
             _userAccessRepository = userAccessRepository;
@@ -60,6 +64,7 @@ namespace Coms.Application.Services.Contracts
             _contractFieldRepository = contractFieldRepository;
             _flowRepository = flowRepository;
             _contractFileRepository = contractFileRepository;
+            _systemSettingsRepository = systemSettingsRepository;
         }
 
         public async Task<ErrorOr<ContractResult>> DeleteContract(int id)
@@ -858,6 +863,7 @@ namespace Coms.Application.Services.Contracts
                         {
                             contract.Status = DocumentStatus.Approved;
                             await _contractRepository.UpdateContract(contract);
+                            await SendEmail(contractId);
                         }
                     }
                     else
@@ -1031,6 +1037,27 @@ namespace Coms.Application.Services.Contracts
                 return new PagingResult<ContractResult>(new List<ContractResult>(), 0, currentPage,
                     pageSize);
             }
-        }     
+        }
+
+        private async Task SendEmail(int contractId)
+        {
+            var systemSettings = await _systemSettingsRepository.GetSystemSettings();
+            var partnerReview = await _partnerReviewRepository.GetByContractId(contractId);
+            MailMessage message = new MailMessage();
+            SmtpClient smtp = new SmtpClient();
+            message.From = new MailAddress(systemSettings.Email);
+            message.To.Add(new MailAddress(partnerReview.Partner.Email));
+            string bodyMessage = "You have a new contract to approve! Here is your code to sign in into our system: " + 
+                partnerReview.Partner.Code;
+            message.Subject = "Approve New Contract";
+            message.Body = bodyMessage;
+            smtp.Port = 587;
+            smtp.Host = "smtp.gmail.com";
+            smtp.EnableSsl = true;
+            smtp.UseDefaultCredentials = false;
+            smtp.Credentials = new NetworkCredential(systemSettings.Email, "nkxh eosw gypq pkji");
+            smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+            smtp.Send(message);
+        }
     }
 }
