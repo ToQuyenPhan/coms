@@ -66,7 +66,6 @@ namespace Coms.Api.Controllers
             );
         }
         
-        //add get user by id
         [HttpGet("id")]
         [SwaggerOperation(Summary = "Get user by id in Coms")]
         public IActionResult GetUserById([FromQuery] int id)
@@ -77,5 +76,7 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+
     }
 }
