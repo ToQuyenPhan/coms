@@ -21,6 +21,7 @@ using Coms.Application.Services.Attachments;
 using Coms.Application.Services.PartnerComments;
 using Coms.Application.Services.Documents;
 using Coms.Application.Services.Signs;
+using Coms.Application.Services.ContractAnnexes;
 
 namespace Coms.Application
 {
@@ -51,6 +52,7 @@ namespace Coms.Application
             services.AddScoped<IPartnerCommentService, PartnerCommentService>();
             services.AddScoped<IDocumentService, DocumentService>();
             services.AddScoped<ISignService, SignService>();
+            services.AddScoped<IContractAnnexesService, ContractAnnexesService>();
             return services;
         }
     }
