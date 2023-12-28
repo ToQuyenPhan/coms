@@ -495,7 +495,15 @@ namespace Coms.Application.Services.Contracts
                         }
                         if (nav.Name.Equals("Contract Code"))
                         {
-                            contract.Code = nav.Value;
+                            var existingCode = await _contractRepository.GetByContractCode(nav.Value);
+                            if (existingCode is null)
+                            {
+                                contract.Code = nav.Value;
+                            }
+                            else
+                            {
+                                return Error.Conflict("409", "The contract is already exist!");
+                            }
                         }
                     }
                     await _contractRepository.AddContract(contract);

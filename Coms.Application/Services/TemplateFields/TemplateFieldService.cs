@@ -53,8 +53,7 @@ namespace Coms.Application.Services.TemplateFields
                         bool isReadOnly = false;
                         if (templateField.FieldName.Contains("Company") || templateField.FieldName.Contains("Partner") ||
                                 templateField.FieldName.Contains("Signer") || 
-                                templateField.FieldName.Contains("Created Date") ||
-                                templateField.FieldName.Contains("Contract Code") || 
+                                templateField.FieldName.Contains("Created Date") || 
                                 templateField.FieldName.Contains("Bank") || templateField.FieldName.Contains("Account") ||
                                 templateField.FieldName.Contains("Service"))
                         {
@@ -167,17 +166,6 @@ namespace Coms.Application.Services.TemplateFields
                             if (templateField.FieldName.Contains("Created Date"))
                             {
                                 content = DateTime.Now.ToString("dd/MM/yyyy");
-                            }
-                            if (templateField.FieldName.Contains("Contract Code"))
-                            {
-                                var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-                                var stringChars = new char[8];
-                                var random = new Random();
-                                for (int i = 0; i < stringChars.Length; i++)
-                                {
-                                    stringChars[i] = chars[random.Next(chars.Length)];
-                                }
-                                content = new String(stringChars);
                             }
                             if (templateField.FieldName.Contains("Service"))
                             {
