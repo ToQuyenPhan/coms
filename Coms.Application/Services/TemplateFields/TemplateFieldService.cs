@@ -202,7 +202,6 @@ namespace Coms.Application.Services.TemplateFields
                         templateFieldResult.Type = "text";
                         if (templateFieldResult.Name.Contains("Duration"))
                         {
-                            templateFieldResult.Name += " (month)";
                             templateFieldResult.Type = "number";
                             templateFieldResult.MinValue = 0;
                         }
