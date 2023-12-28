@@ -22,7 +22,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             var list = await _genericRepository.WhereAsync(BuildExpression(templateName,
                     contractCategoryId, templateTypeId, status, email),
                     new System.Linq.Expressions.Expression<Func<Template, object>>[] { 
-                            t => t.ContractCategory, t => t.TemplateType, t => t.User });
+                            t => t.ContractCategory, t => t.User });
             return (list.Count() > 0) ? list : null;
         }
 
@@ -30,7 +30,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             return await _genericRepository.FirstOrDefaultAsync(t => t.Id.Equals(id),
                 new System.Linq.Expressions.Expression<Func<Template, object>>[]
-                    {t => t.ContractCategory, t => t.TemplateType, t => t.User});
+                    {t => t.ContractCategory, t => t.User});
         }
 
         public async Task AddTemplate(Template template)
@@ -57,7 +57,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
         }
 
         private Expression<Func<Template, bool>> BuildExpression(string templateName, 
-                int? contractCategoryId, int? templateTypeId, int? status, string email)
+                int? contractCategoryId, int? templateType, int? status, string email)
         {
             var predicate = PredicateBuilder.New<Template>(true);
             predicate = predicate.And(t => t.TemplateLink != "" && t.TemplateLink != null);
@@ -69,9 +69,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
             {
                 predicate = predicate.And(t => t.ContractCategoryId.Equals(contractCategoryId));
             }
-            if (templateTypeId > 0)
+            if (templateType.HasValue)
             {
-                predicate = predicate.And(t => t.TemplateTypeId.Equals(templateTypeId));
+                predicate = predicate.And(t => t.TemplateType.Equals((Domain.Enum.TemplateType)templateType));
             }
             if (status >= 0)
             {

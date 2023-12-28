@@ -30,8 +30,7 @@ namespace Coms.Domain.Entities
         public int ContractCategoryId { get; set; }
         public virtual ContractCategory? ContractCategory { get; set; }
 
-        public int TemplateTypeId { get; set; }
-        public virtual TemplateType? TemplateType { get; set; }
+        public Coms.Domain.Enum.TemplateType TemplateType { get; set; }
 
         public int? UserId { get; set; }
         public virtual User? User { get; set; }
