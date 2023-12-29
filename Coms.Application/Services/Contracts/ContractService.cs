@@ -1056,7 +1056,7 @@ namespace Coms.Application.Services.Contracts
             message.From = new MailAddress(systemSettings.Email);
             message.To.Add(new MailAddress(partnerReview.Partner.Email));
             string bodyMessage = "You have a new contract to approve! Here is your code to sign in into our system: " + 
-                partnerReview.Partner.Code;
+                partnerReview.Partner.Code + ".";
             message.Subject = "Approve New Contract";
             message.Body = bodyMessage;
             smtp.Port = 587;
