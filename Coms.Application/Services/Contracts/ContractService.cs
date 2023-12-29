@@ -1063,7 +1063,7 @@ namespace Coms.Application.Services.Contracts
             smtp.Host = "smtp.gmail.com";
             smtp.EnableSsl = true;
             smtp.UseDefaultCredentials = false;
-            smtp.Credentials = new NetworkCredential(systemSettings.Email, "nkxh eosw gypq pkji");
+            smtp.Credentials = new NetworkCredential(systemSettings.Email, "hibz dgyu xnww dnvx");
             smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtp.Send(message);
         }
