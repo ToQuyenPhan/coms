@@ -10,7 +10,7 @@ namespace Coms.Application.Services.Contracts
                 string name, string creatorName, int? status, bool isYours, int currentPage, int pageSize);
         Task<ErrorOr<int>> AddContract(string[] names, string[] values, int contractCategoryId,
                 int serviceId, DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate,
-                int partnerId);
+                int partnerId, int templateType);
         Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport(int userId);
         Task<ErrorOr<ContractResult>> GetContract(int id);
         Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContracts(int userId,
@@ -20,7 +20,7 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<ContractResult>> ApproveContract(int contractId, int userId, bool isApproved);
         Task<ErrorOr<AuthorResult>> IsAuthor(int userId, int contractId);
         Task<ErrorOr<string>> UploadContract(int contractId);
-        Task<ErrorOr<MemoryStream>> PreviewContract(string[] names, string[] values, int contractCategoryId);
+        Task<ErrorOr<MemoryStream>> PreviewContract(string[] names, string[] values, int contractCategoryId, int templateType);
         Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContractsForSign(int userId,
                 string name, string creatorName, int? status, int currentPage, int pageSize);
     }

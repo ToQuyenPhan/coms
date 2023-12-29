@@ -34,9 +34,9 @@ namespace Coms.Application.Services.TemplateFields
         }
 
         public async Task<ErrorOr<IList<TemplateFieldResult>>> GetTemplateFields(int contractCategoryId, 
-                int partnerId, int serviceId)
+                int partnerId, int serviceId, int templateType)
         {
-            var template = await _templateRepository.GetTemplateByContractCategoryId(contractCategoryId);
+            var template = await _templateRepository.GetTemplateByContractCategoryIdAndTemplateType(contractCategoryId, templateType);
             if (template is not null)
             {
                 var templateFields = await _templateFieldRepository.GetTemplateFieldsByTemplateId(template.Id);

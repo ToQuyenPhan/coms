@@ -50,10 +50,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return (list.Count() > 0) ? list.ToList() : null; 
         }
 
-        public async Task<Template?> GetTemplateByContractCategoryId(int contractCategoryId)
+        public async Task<Template?> GetTemplateByContractCategoryIdAndTemplateType(int contractCategoryId, int templateType)
         {
             return await _genericRepository.FirstOrDefaultAsync(t => t.ContractCategoryId.Equals(contractCategoryId)
-                && t.Status.Equals(TemplateStatus.Activating), null);
+                && t.Status.Equals(TemplateStatus.Activating) && t.TemplateType.Equals((Domain.Enum.TemplateType) templateType), null);
         }
 
         private Expression<Func<Template, bool>> BuildExpression(string templateName, 

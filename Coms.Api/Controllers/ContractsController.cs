@@ -91,7 +91,7 @@ namespace Coms.Api.Controllers
             ErrorOr<int> result = _contractService.AddContract(request.Name, request.Value, request.ContractCategoryId, 
                         request.ServiceId, request.EffectiveDate, request.Status, 
                         int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.SendDate,
-                        request.ReviewDate, request.PartnerId).Result;
+                        request.ReviewDate, request.PartnerId, request.TemplateType).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
@@ -116,7 +116,7 @@ namespace Coms.Api.Controllers
         public IActionResult PreviewContract([FromBody] ContractPreviewRequest request)
         {
             ErrorOr<MemoryStream> result = _contractService.PreviewContract(request.Name, request.Value, 
-                    request.ContractCategoryId).Result;
+                    request.ContractCategoryId, request.TemplateType).Result;
             return result.Match(
                 result => new FileStreamResult(result, "application/pdf"),
                 errors => Problem(errors)

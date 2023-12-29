@@ -444,12 +444,12 @@ namespace Coms.Application.Services.Contracts
 
         public async Task<ErrorOr<int>> AddContract(string[] names, string[] values, int contractCategoryId,
                 int serviceId, DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate,
-                int partnerId)
+                int partnerId, int templatetype)
         {
             try
             {
                 var namesAndValues = names.Zip(values, (n, v) => new { Name = n, Value = v });
-                var template = await _templateRepository.GetTemplateByContractCategoryId(contractCategoryId);
+                var template = await _templateRepository.GetTemplateByContractCategoryIdAndTemplateType(contractCategoryId, templatetype);
                 if (template is not null)
                 {
                     string contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts");
@@ -611,11 +611,13 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
-        public async Task<ErrorOr<MemoryStream>> PreviewContract(string[] names, string[] values, int contractCategoryId)
+        public async Task<ErrorOr<MemoryStream>> PreviewContract(string[] names, string[] values, int contractCategoryId, 
+                int templateType)
         {
             try
             {
-                var template = await _templateRepository.GetTemplateByContractCategoryId(contractCategoryId);
+                var template = await _templateRepository.GetTemplateByContractCategoryIdAndTemplateType(contractCategoryId, 
+                        templateType);
                 if (template is not null)
                 {
                     string templateFilePath = Path.Combine(Environment.CurrentDirectory, "Templates", template.Id + ".docx");

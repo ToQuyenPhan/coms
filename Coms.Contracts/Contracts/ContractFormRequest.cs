@@ -19,5 +19,6 @@ namespace Coms.Contracts.Contracts
         [DataType(DataType.Date)]
         public DateTime ReviewDate { get; set; }
         public int Status {  get; set; }
+        public int TemplateType {  get; set; }
     }
 }
