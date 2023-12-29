@@ -161,6 +161,7 @@ namespace Coms.Application.Services.TemplateFiles
                 if (templateFile is not null)
                 {
                     string filePath = Path.Combine(Environment.CurrentDirectory, "Templates", templateId + ".docx");
+                    File.WriteAllBytes(filePath, document);
                     Spire.Doc.Document checkingDocument = new Spire.Doc.Document();
                     checkingDocument.LoadFromFile(filePath);
                     string[] mailMergeFieldNames = checkingDocument.MailMerge.GetMergeFieldNames();
