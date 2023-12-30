@@ -83,15 +83,27 @@ namespace Coms.Api.Controllers
             );
         }
 
+        [HttpGet("partner-service")]
+        [SwaggerOperation(Summary = "Get contract partner and service in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult GetContractPartnerAndService([FromQuery] int id)
+        {
+            ErrorOr<ContractResult> result = _contractService.GetPartnerAndService(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
         [HttpPost]
         [SwaggerOperation(Summary = "Add a contract in Coms")]
         [Authorize(Roles = "Staff, Manager")]
         public IActionResult AddContract([FromBody] ContractFormRequest request)
         {
-            ErrorOr<int> result = _contractService.AddContract(request.Name, request.Value, request.ContractCategoryId, 
+            ErrorOr<int> result = _contractService.AddContract(request.Name, request.Value, (int)request.ContractCategoryId, 
                         request.ServiceId, request.EffectiveDate, request.Status, 
                         int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.SendDate,
-                        request.ReviewDate, request.PartnerId, request.TemplateType).Result;
+                        request.ReviewDate, request.PartnerId, (int)request.TemplateType).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
@@ -146,6 +158,21 @@ namespace Coms.Api.Controllers
                 int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
                 request.ContractName, request.Code, request.IsApproved, request.CurrentPage,
                 request.PageSize).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpPut]
+        [SwaggerOperation(Summary = "Edit a contract in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult EditContract([FromQuery] int contractId, [FromBody] ContractFormRequest request)
+        {
+            ErrorOr<int> result = _contractService.EditContract(contractId, request.Name, request.Value, request.ServiceId, 
+                    request.EffectiveDate, request.Status, 
+                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.SendDate, request.ReviewDate, 
+                    request.PartnerId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

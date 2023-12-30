@@ -23,5 +23,8 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<MemoryStream>> PreviewContract(string[] names, string[] values, int contractCategoryId, int templateType);
         Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContractsForSign(int userId,
                 string name, string creatorName, int? status, int currentPage, int pageSize);
+        Task<ErrorOr<ContractResult>> GetPartnerAndService(int id);
+        Task<ErrorOr<int>> EditContract(int contractId, string[] names, string[] values, int serviceId,
+                DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate, int partnerId);
     }
 }

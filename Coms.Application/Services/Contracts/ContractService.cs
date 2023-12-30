@@ -611,12 +611,12 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
-        public async Task<ErrorOr<MemoryStream>> PreviewContract(string[] names, string[] values, int contractCategoryId, 
+        public async Task<ErrorOr<MemoryStream>> PreviewContract(string[] names, string[] values, int contractCategoryId,
                 int templateType)
         {
             try
             {
-                var template = await _templateRepository.GetTemplateByContractCategoryIdAndTemplateType(contractCategoryId, 
+                var template = await _templateRepository.GetTemplateByContractCategoryIdAndTemplateType(contractCategoryId,
                         templateType);
                 if (template is not null)
                 {
@@ -1049,6 +1049,178 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
+        public async Task<ErrorOr<ContractResult>> GetPartnerAndService(int id)
+        {
+            try
+            {
+                var contract = await _contractRepository.GetContract(id);
+                if (contract is not null)
+                {
+                    var partnerReview = await _partnerReviewRepository.GetByContractId(id);
+                    var contractCost = await _contractCostRepository.GetByContractId(id);
+                    var contractResult = new ContractResult
+                    {
+                        Id = contract.Id,
+                        ContractName = contract.ContractName,
+                        Version = contract.Version,
+                        CreatedDate = contract.CreatedDate,
+                        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        EffectiveDate = contract.EffectiveDate,
+                        EffectiveDateString = contract.EffectiveDate.ToString(),
+                        Status = (int)contract.Status,
+                        StatusString = contract.Status.ToString(),
+                        TemplateID = contract.TemplateId,
+                        Code = contract.Code,
+                        Link = contract.Link,
+                        PartnerId = partnerReview.PartnerId,
+                        PartnerName = partnerReview.Partner.CompanyName,
+                        ServiceId = contractCost.ServiceId,
+                        ServiceName = contractCost.Service.ServiceName
+                    };
+                    if (contract.UpdatedDate is not null)
+                    {
+                        contractResult.UpdatedDate = contract.UpdatedDate;
+                        contractResult.UpdatedDateString = contract.UpdatedDate.ToString();
+                    }
+                    var template = await _templateRepository.GetTemplate(contract.TemplateId);
+                    contractResult.ContractCategoryId = template.ContractCategoryId;
+                    contractResult.ContractCategory = template.ContractCategory.CategoryName;
+                    return contractResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Contract is not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<int>> EditContract(int contractId, string[] names, string[] values, int serviceId, 
+                DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate, int partnerId)
+        {
+            try
+            {
+                var namesAndValues = names.Zip(values, (n, v) => new { Name = n, Value = v });
+                var oldContract = await _contractRepository.GetContract(contractId);
+                string templateFilePath = Path.Combine(Environment.CurrentDirectory, "Templates", oldContract.TemplateId + ".docx");
+                //Opens the template document
+                FileStream fileStreamPath = new FileStream(templateFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(fileStreamPath, Syncfusion.DocIO.FormatType.Automatic);
+                //Performs the mail merge
+                document.MailMerge.Execute(names, values);
+                //Instantiation of DocIORenderer for Word to PDF conversion
+                DocIORenderer render = new DocIORenderer();
+                //Sets Chart rendering Options.
+                render.Settings.ChartRenderingOptions.ImageFormat = Syncfusion.OfficeChart.ExportImageFormat.Jpeg;
+                //Converts Word document into PDF document
+                PdfDocument pdfDocument = render.ConvertToPDF(document);
+                //Releases all resources used by the Word document and DocIO Renderer objects
+                render.Dispose();
+                document.Dispose();
+                //Saves the Word document to MemoryStream
+                MemoryStream stream = new MemoryStream();
+                pdfDocument.Save(stream);
+                fileStreamPath.Close();
+                byte[] byteInfo = stream.ToArray();
+                stream.Write(byteInfo, 0, byteInfo.Length);
+                stream.Position = 0;
+                var contract = new Contract
+                {
+                    Code = oldContract.Code,
+                    TemplateId = oldContract.TemplateId,
+                    Link = "",
+                    CreatedDate = oldContract.CreatedDate,
+                    EffectiveDate = effectiveDate,
+                    Version = oldContract.Version + 1,
+                    Status = (DocumentStatus)status
+                };
+                foreach (var nav in namesAndValues)
+                {
+                    if (nav.Name.Equals("Contract Title"))
+                    {
+                        contract.ContractName = nav.Value;
+                    }
+                }
+                await _contractRepository.AddContract(contract);
+                Guid UUID = new Guid();
+                var contractFile = new ContractFile()
+                {
+                    UUID = UUID,
+                    FileData = stream.ToArray(),
+                    UploadedDate = DateTime.Now,
+                    ContractId = contract.Id,
+                    FileSize = stream.ToArray().Length,
+                };
+                await _contractFileRepository.Add(contractFile);
+                string contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", contract.Id + ".pdf");
+                FileStream fileStream = new FileStream(contractFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                pdfDocument.Save(fileStream);
+                //Closes the Word document
+                pdfDocument.Close();
+                fileStream.Close();
+                List<ContractField> contractFields = new List<ContractField>();
+                foreach (var nav in namesAndValues)
+                {
+                    var contractField = new ContractField()
+                    {
+                        FieldName = nav.Name,
+                        Content = nav.Value,
+                        ContractId = contract.Id,
+                    };
+                    contractFields.Add(contractField);
+                }
+                await _contractFieldRepository.AddRangeContractField(contractFields);
+                var contractCost = new ContractCost()
+                {
+                    ServiceId = serviceId,
+                    ContractId = contract.Id
+                };
+                await _contractCostRepository.AddContractCost(contractCost);
+                var partnerReview = new PartnerReview()
+                {
+                    PartnerId = partnerId,
+                    UserId = userId,
+                    ContractId = contract.Id,
+                    SendDate = sendDate,
+                    ReviewAt = reviewDate,
+                    IsApproved = false,
+                    Status = PartnerReviewStatus.Active
+                };
+                await _partnerReviewRepository.AddPartnerReview(partnerReview);
+                var template = await _templateRepository.GetTemplate(oldContract.TemplateId);
+                var flow = await _flowRepository.GetByContractCategoryId(template.ContractCategoryId);
+                var flowDetails = await _flowDetailRepository.GetByFlowId(flow.Id);
+                List<Contract_FlowDetail> contractFlowDetails = new List<Contract_FlowDetail>();
+                foreach (var flowDetail in flowDetails)
+                {
+                    var contractFlowDetail = new Contract_FlowDetail()
+                    {
+                        FlowDetailId = flowDetail.Id,
+                        ContractId = contract.Id,
+                        Status = FlowDetailStatus.Waiting
+                    };
+                    contractFlowDetails.Add(contractFlowDetail);
+                }
+                await _contractFlowDetailsRepository.AddRangeContractFlowDetails(contractFlowDetails);
+                var actionHistory = new ActionHistory()
+                {
+                    ActionType = ActionType.Created,
+                    CreatedAt = DateTime.Now,
+                    UserId = userId,
+                    ContractId = contract.Id
+                };
+                await _actionHistoryRepository.AddActionHistory(actionHistory);
+                return contract.Id;
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
         private async Task SendEmail(int contractId)
         {
             var systemSettings = await _systemSettingsRepository.GetSystemSettings();
@@ -1057,7 +1229,7 @@ namespace Coms.Application.Services.Contracts
             SmtpClient smtp = new SmtpClient();
             message.From = new MailAddress(systemSettings.Email);
             message.To.Add(new MailAddress(partnerReview.Partner.Email));
-            string bodyMessage = "You have a new contract to approve! Here is your code to sign in into our system: " + 
+            string bodyMessage = "You have a new contract to approve! Here is your code to sign in into our system: " +
                 partnerReview.Partner.Code + ".";
             message.Subject = "Approve New Contract";
             message.Body = bodyMessage;

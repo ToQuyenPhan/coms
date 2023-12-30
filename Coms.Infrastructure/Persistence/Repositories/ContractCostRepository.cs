@@ -19,12 +19,11 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     { a => a.Contract, a => a.Service});
         }
 
-        public async Task<IList<ContractCost>> GetContractCostByContractId(int contractId)
+        public async Task<ContractCost?> GetByContractId(int contractId)
         {
-            var list = await _genericRepository.WhereAsync(a => a.ContractId.Equals(contractId),
+            return await _genericRepository.FirstOrDefaultAsync(a => a.ContractId.Equals(contractId),
                 new System.Linq.Expressions.Expression<Func<ContractCost, object>>[] {
                     a => a.Contract, a=> a.Service });
-            return (list.Count() > 0) ? list : null;
         }
 
         public async Task AddContractCost(ContractCost contractCost)

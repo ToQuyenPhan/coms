@@ -23,6 +23,9 @@
         public string PartnerName { get; set;}
         public string Code { get; set; }
         public string Link { get; set; }
+        public int? ContractCategoryId {  get; set; }
         public string ContractCategory { get; set; }
+        public int? ServiceId { get; set; }
+        public string ServiceName { get; set; }
     }
 }
