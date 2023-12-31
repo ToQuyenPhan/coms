@@ -9,6 +9,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task UpdateContract(Contract contract);
         Task<IList<Contract>> GetContractsByStatus(DocumentStatus status);
         Task AddContract(Contract contract);
-        Task<Contract?> GetByContractCode(string code);
+        Task<IList<Contract>?> GetByContractCode(string code);
     }
 }

@@ -1064,9 +1064,9 @@ namespace Coms.Application.Services.Contracts
                         ContractName = contract.ContractName,
                         Version = contract.Version,
                         CreatedDate = contract.CreatedDate,
-                        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        CreatedDateString = contract.CreatedDate.Date.ToString(),
                         EffectiveDate = contract.EffectiveDate,
-                        EffectiveDateString = contract.EffectiveDate.ToString(),
+                        EffectiveDateString = contract.EffectiveDate.ToString("yyyy-MM-dd"),
                         Status = (int)contract.Status,
                         StatusString = contract.Status.ToString(),
                         TemplateID = contract.TemplateId,
@@ -1075,7 +1075,9 @@ namespace Coms.Application.Services.Contracts
                         PartnerId = partnerReview.PartnerId,
                         PartnerName = partnerReview.Partner.CompanyName,
                         ServiceId = contractCost.ServiceId,
-                        ServiceName = contractCost.Service.ServiceName
+                        ServiceName = contractCost.Service.ServiceName,
+                        SendDateString = partnerReview.SendDate.ToString("yyyy-MM-dd"),
+                        ReviewDateString = partnerReview.ReviewAt.ToString("yyyy-MM-dd")
                     };
                     if (contract.UpdatedDate is not null)
                     {
@@ -1105,6 +1107,7 @@ namespace Coms.Application.Services.Contracts
             {
                 var namesAndValues = names.Zip(values, (n, v) => new { Name = n, Value = v });
                 var oldContract = await _contractRepository.GetContract(contractId);
+                int version = 1;
                 string templateFilePath = Path.Combine(Environment.CurrentDirectory, "Templates", oldContract.TemplateId + ".docx");
                 //Opens the template document
                 FileStream fileStreamPath = new FileStream(templateFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -1134,7 +1137,6 @@ namespace Coms.Application.Services.Contracts
                     Link = "",
                     CreatedDate = oldContract.CreatedDate,
                     EffectiveDate = effectiveDate,
-                    Version = oldContract.Version + 1,
                     Status = (DocumentStatus)status
                 };
                 foreach (var nav in namesAndValues)
@@ -1143,7 +1145,13 @@ namespace Coms.Application.Services.Contracts
                     {
                         contract.ContractName = nav.Value;
                     }
+                    if (nav.Name.Equals("Contract Code"))
+                    {
+                        var existingCode = await _contractRepository.GetByContractCode(nav.Value);
+                        version = existingCode.Count() + 1;
+                    }
                 }
+                contract.Version = version;
                 await _contractRepository.AddContract(contract);
                 Guid UUID = new Guid();
                 var contractFile = new ContractFile()
