@@ -1,9 +1,11 @@
 ﻿using Coms.Api.Common.Request;
 using Coms.Application.Services.Signs;
+using Coms.Contracts.Signs;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Coms.Api.Controllers
 {
@@ -19,12 +21,12 @@ namespace Coms.Api.Controllers
 
         [HttpPost("document/upload-version")]
         [SwaggerOperation(Summary = "Upload and verify signature on version signed file ")]
-        public IActionResult Add([FromQuery] Guid fileId, [FromForm] FormUploadRequest file)
+        public IActionResult Add([FromQuery] Guid id, [FromForm]UploadRequest request)
         {
             var ms = new MemoryStream();
-            file.File.CopyTo(ms);
+            request.File.CopyTo(ms);
             var fileContent = ms.ToArray();
-            ErrorOr<ResponseModel> result = _signService.UploadVersion(fileId, fileContent)
+            ErrorOr<ResponseModel> result = _signService.UploadVersion(id, fileContent)
                     .Result;
             return result.Match(
                 result => Ok(result),
