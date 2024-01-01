@@ -54,6 +54,7 @@ namespace Coms.Infrastructure
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             //add attachment repository
             services.AddScoped<IAttachmentRepository, AttachmentRepository>();
+            services.AddScoped<ILiquidationRecordRepository, LiquidationRecordRepository>();
             services.AddScoped<ILiquidationRecordFileRepository, LiquidationRecordFileRepository>();
             services.AddScoped<IContractAnnexFileRepository, ContractAnnexFileRepository>();
             services.AddScoped<IContractAnnexRepository, ContractAnnexRepository>();
