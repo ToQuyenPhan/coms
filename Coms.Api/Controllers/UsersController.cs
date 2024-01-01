@@ -79,5 +79,29 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpPut("inactive")]
+        [SwaggerOperation(Summary = "Inactive an user in Coms")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult InactiveUser([FromQuery] int id)
+        {
+            ErrorOr<UserResult> result = _userService.InactiveUser(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpPut("active")]
+        [SwaggerOperation(Summary = "Active an user in Coms")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult ActiveUser([FromQuery] int id)
+        {
+            ErrorOr<UserResult> result = _userService.ActiveUser(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

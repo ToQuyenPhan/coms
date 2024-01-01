@@ -1,6 +1,7 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
+using Coms.Domain.Enum;
 using ErrorOr;
 
 namespace Coms.Application.Services.Users
@@ -71,6 +72,76 @@ namespace Coms.Application.Services.Users
                 else
                 {
                     return new PagingResult<UserResult>(new List<UserResult>(), 0, currentPage, pageSize);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<UserResult>> InactiveUser(int id)
+        {
+            try
+            {
+                var user = await _userRepository.GetUser(id);
+                if (user is not null)
+                {
+                    user.Status = (int)UserStatus.Inactive;
+                    await _userRepository.UpdateUser(user);
+                    var result = new UserResult()
+                    {
+                        Id = user.Id,
+                        FullName = user.FullName,
+                        Username = user.Username,
+                        Dob = user.Dob,
+                        Email = user.Email,
+                        Image = user.Image,
+                        Password = user.Password,
+                        Status = user.Status,
+                        RoleId = user.RoleId,
+                        Role = user.Role.RoleName
+                    };
+                    return result;
+                }
+                else
+                {
+                    return Error.NotFound("404", "User not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<UserResult>> ActiveUser(int id)
+        {
+            try
+            {
+                var user = await _userRepository.GetUser(id);
+                if (user is not null)
+                {
+                    user.Status = (int)UserStatus.Active;
+                    await _userRepository.UpdateUser(user);
+                    var result = new UserResult()
+                    {
+                        Id = user.Id,
+                        FullName = user.FullName,
+                        Username = user.Username,
+                        Dob = user.Dob,
+                        Email = user.Email,
+                        Image = user.Image,
+                        Password = user.Password,
+                        Status = user.Status,
+                        RoleId = user.RoleId,
+                        Role = user.Role.RoleName
+                    };
+                    return result;
+                }
+                else
+                {
+                    return Error.NotFound("404", "User not found!");
                 }
             }
             catch (Exception ex)

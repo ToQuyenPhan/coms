@@ -30,6 +30,11 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return (list.Count() > 0) ? list : null;
         }
 
+        public async Task UpdateUser(User user)
+        {
+            await _genericRepository.UpdateAsync(user);
+        }
+
         //public async Task<IList<User>> GetManagers()
         //{
         //    var list = await _genericRepository.WhereAsync(a => a.RoleId == 2
