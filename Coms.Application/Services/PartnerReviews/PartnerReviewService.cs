@@ -75,7 +75,7 @@ namespace Coms.Application.Services.PartnerReviews
                     {
                         partnerPreview.Status = PartnerReviewStatus.Inactive;
                     }
-                    partnerPreview.ReviewAt = DateTime.Now;
+                    //partnerPreview.ReviewAt = DateTime.Now;
                     await _partnerReviewRepository.UpdatePartnerPreview(partnerPreview);
                     var partnerReviewResult = new PartnerReviewResult
                     {

@@ -16,5 +16,11 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             await _genericRepository.CreateRangeAsync(contractFields);
         }
+
+        public async Task<IList<ContractField>?> GetByContractId(int contractId)
+        {
+            var list = await _genericRepository.WhereAsync(cf => cf.ContractId.Equals(contractId), null);
+            return (list.Count() > 0) ? list : null;
+        }
     }
 }

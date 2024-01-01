@@ -328,7 +328,7 @@ namespace Coms.Application.Services.Templates
                 if (template is not null)
                 {
                     var activatingTemplate = await _templateRepository.GetTemplates(string.Empty,
-                        template.ContractCategoryId, 0, (int)TemplateStatus.Activating, string.Empty);
+                        template.ContractCategoryId, (int)template.TemplateType, (int)TemplateStatus.Activating, string.Empty);
                     if (activatingTemplate is not null)
                     {
                         return Error.Conflict("409", "The contract category already has a activating " +

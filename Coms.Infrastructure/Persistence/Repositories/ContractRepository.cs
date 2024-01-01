@@ -35,9 +35,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
             await _genericRepository.CreateAsync(contract);
         }
 
-        public async Task<Contract?> GetByContractCode(string code)
+        public async Task<IList<Contract>?> GetByContractCode(string code)
         {
-            return await _genericRepository.FirstOrDefaultAsync(c => c.Code.Contains(code), null);
+            var list = await _genericRepository.WhereAsync(c => c.Code.Contains(code), null);
+            return (list.Count() > 0) ? list : null;
         }
     }
 }
