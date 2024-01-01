@@ -1,6 +1,5 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Domain.Entities;
-using Coms.Domain.Enum;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {

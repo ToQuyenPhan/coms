@@ -1,7 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
-using Coms.Domain.Enum;
 using ErrorOr;
 
 namespace Coms.Application.Services.Users
@@ -15,7 +14,8 @@ namespace Coms.Application.Services.Users
             _userRepository = userRepository;
         }
 
-        public async Task<ErrorOr<PagingResult<UserResult>>> GetUsers(int currentPage, int pageSize)
+        public async Task<ErrorOr<PagingResult<UserResult>>> GetUsers(string fullName, string email, int? roleId, int? status, 
+                int currentPage, int pageSize)
         {
             try
             {
@@ -42,6 +42,24 @@ namespace Coms.Application.Services.Users
                             };
                             results.Add(result);
                         }
+                    }
+                    if (!string.IsNullOrEmpty(fullName))
+                    {
+                        results = results.Where(u => u.FullName.Contains(fullName.Trim(), StringComparison.CurrentCultureIgnoreCase))
+                                .ToList();
+                    }
+                    if (!string.IsNullOrEmpty(email))
+                    {
+                        results = results.Where(u => u.Email.Contains(email.Trim(), StringComparison.CurrentCultureIgnoreCase))
+                                .ToList();
+                    }
+                    if(roleId.HasValue)
+                    {
+                        results = results.Where(u => u.RoleId.Equals(roleId)).ToList();
+                    }
+                    if (status.HasValue)
+                    {
+                        results = results.Where(u => u.Status.Equals(status)).ToList();
                     }
                     int total = results.Count();
                     if (currentPage > 0 && pageSize > 0)

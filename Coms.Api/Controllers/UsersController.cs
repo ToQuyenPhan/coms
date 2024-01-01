@@ -1,6 +1,5 @@
 ﻿using Coms.Application.Services.Common;
 using Coms.Application.Services.Users;
-using Coms.Contracts.Common.Paging;
 using Coms.Contracts.Users;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
@@ -22,10 +21,11 @@ namespace Coms.Api.Controllers
 
         [HttpGet]
         [SwaggerOperation(Summary = "Get all users in Coms")]
-        //[Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Admin")]
         public IActionResult GetUsers([FromQuery] UserFilterRequest request)
         {
-            ErrorOr<PagingResult<UserResult>> results = _userService.GetUsers(request.CurrentPage, request.PageSize).Result;
+            ErrorOr<PagingResult<UserResult>> results = _userService.GetUsers(request.Fullname, request.Email, request.RoleId, 
+                    request.Status, request.CurrentPage, request.PageSize).Result;
             return results.Match(
                 result => Ok(result),
                 errors => Problem(errors)
