@@ -1,12 +1,8 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
-using Coms.Application.Services.Services;
+using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
+using Coms.Domain.Enum;
 using ErrorOr;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Coms.Application.Services.Users
 {
@@ -18,38 +14,50 @@ namespace Coms.Application.Services.Users
         {
             _userRepository = userRepository;
         }
-        public async Task<ErrorOr<IList<UserResult>>> GetUsers()
+
+        public async Task<ErrorOr<PagingResult<UserResult>>> GetUsers(int currentPage, int pageSize)
         {
             try
             {
-                IList<User> users = new List<User>();
-                //users = _userRepository.GetUsers().Result;
-                var results = new List<UserResult>();
-                if (users != null)
+                var users = _userRepository.GetUsers();
+                if(users is not null)
                 {
-                    foreach (var user in users)
+                    var results = new List<UserResult>();
+                    if (users != null)
                     {
-                        var result = new UserResult()
+                        foreach (var user in users)
                         {
-                            Id = user.Id,
-                            FullName = user.FullName,
-                            Username =user.Username,
-                            Dob = user.Dob,
-                            Email = user.Email,
-                            Image = user.Image,
-                            Password = user.Password,
-                            Status = user.Status,
-                            RoleId = user.RoleId,
-                            Role = user.Role.RoleName
-                        };
-                        results.Add(result);
+                            var result = new UserResult()
+                            {
+                                Id = user.Id,
+                                FullName = user.FullName,
+                                Username = user.Username,
+                                Dob = user.Dob,
+                                Email = user.Email,
+                                Image = user.Image,
+                                Password = user.Password,
+                                Status = user.Status,
+                                RoleId = user.RoleId,
+                                Role = user.Role.RoleName
+                            };
+                            results.Add(result);
+                        }
                     }
+                    int total = results.Count();
+                    if (currentPage > 0 && pageSize > 0)
+                    {
+                        results = results.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+                    }
+                    return new PagingResult<UserResult>(results, total, currentPage, pageSize);
                 }
-                return results;
+                else
+                {
+                    return new PagingResult<UserResult>(new List<UserResult>(), 0, currentPage, pageSize);
+                }
             }
             catch (Exception ex)
             {
-                return Error.NotFound("Users not found!");
+                return Error.Failure("500", ex.Message);
             }
         }
 
