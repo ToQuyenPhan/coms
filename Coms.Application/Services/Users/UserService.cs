@@ -151,7 +151,7 @@ namespace Coms.Application.Services.Users
         }
 
         public async Task<ErrorOr<UserResult>> AddUser(string fullName, string username, DateTime dob, string image, 
-                string password, int roleId, string email, string position)
+                string password, int roleId, string email, string position, string phone)
         {
             try
             {
@@ -165,6 +165,11 @@ namespace Coms.Application.Services.Users
                 {
                     return Error.Conflict("409", "Email already exists!");
                 }
+                var existingPhone = await _userRepository.GetByPhone(phone);
+                if (existingPhone is not null)
+                {
+                    return Error.Conflict("409", "Phone number already exists!");
+                }
                 var user = new User()
                 {
                     FullName = fullName,
@@ -175,7 +180,8 @@ namespace Coms.Application.Services.Users
                     Password = password,
                     Status = (int) UserStatus.Active,
                     RoleId = roleId,
-                    Position = position
+                    Position = position,
+                    Phone = phone
                 };
                 await _userRepository.AddUser(user);
                 var result = new UserResult()
@@ -188,7 +194,8 @@ namespace Coms.Application.Services.Users
                     Image = user.Image,
                     Password = user.Password,
                     Status = user.Status,
-                    RoleId = user.RoleId
+                    RoleId = user.RoleId,
+                    Phone = user.Phone
                 };
                 return result;
             }

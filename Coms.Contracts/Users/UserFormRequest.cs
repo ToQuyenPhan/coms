@@ -11,5 +11,6 @@
         public string? Image { get; set; }
         public DateTime Dob { get; set; }
         public int RoleId { get; set; }
+        public string Phone {  get; set; }
     }
 }

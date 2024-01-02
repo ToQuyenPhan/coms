@@ -10,6 +10,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task UpdateUser(User user);
         Task AddUser(User user);
         Task<User?> GetByEmail(string email);
+        Task<User?> GetByPhone(string phone);
         //Task<IList<User>> GetManagers();
         //Task<IList<User>> GetStaffs();
     }

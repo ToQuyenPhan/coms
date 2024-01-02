@@ -86,7 +86,7 @@ namespace Coms.Api.Controllers
         public IActionResult ActiveUser([FromBody] UserFormRequest request)
         {
             ErrorOr<UserResult> result = _userService.AddUser(request.FullName, request.Username, request.Dob, request.Image, 
-                    request.Password, request.RoleId, request.Email, request.Position).Result;
+                    request.Password, request.RoleId, request.Email, request.Position, request.Phone).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

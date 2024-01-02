@@ -47,6 +47,12 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
         }
 
+        public async Task<User?> GetByPhone(string phone)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(u => u.Phone.Equals(phone),
+                    new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
+        }
+
         //public async Task<IList<User>> GetManagers()
         //{
         //    var list = await _genericRepository.WhereAsync(a => a.RoleId == 2
