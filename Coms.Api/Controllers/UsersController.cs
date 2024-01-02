@@ -32,6 +32,30 @@ namespace Coms.Api.Controllers
             );
         }
 
+        [HttpGet("id")]
+        [SwaggerOperation(Summary = "Get user by id in Coms")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult GetUserById([FromQuery] int id)
+        {
+            ErrorOr<UserResult> result = _userService.GetUser(id).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet("current-user")]
+        [SwaggerOperation(Summary = "Get current user in Coms")]
+        public IActionResult GetCurrentUser()
+        {
+            ErrorOr<UserResult> result = _userService.GetUser(int.Parse(this.User.Claims.First(i =>
+                i.Type == ClaimTypes.NameIdentifier).Value)).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
         [HttpGet("getManagers")]
         [SwaggerOperation(Summary = "Get all Manager in Coms")]
         [Authorize(Roles = "Staff")]
@@ -51,29 +75,6 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<IList<UserResult>> result = _userService.GetStaffs(int.Parse(this.User.Claims.First(i =>
                 i.Type == ClaimTypes.NameIdentifier).Value)).Result;
-            return result.Match(
-                result => Ok(result),
-                errors => Problem(errors)
-            );
-        }
-
-        [HttpGet("current-user")]
-        [SwaggerOperation(Summary = "Get current user in Coms")]
-        public IActionResult GetCurrentUser()
-        {
-            ErrorOr<UserResult> result = _userService.GetUser(int.Parse(this.User.Claims.First(i => 
-                i.Type == ClaimTypes.NameIdentifier).Value)).Result;
-            return result.Match(
-                result => Ok(result),
-                errors => Problem(errors)
-            );
-        }
-        
-        [HttpGet("id")]
-        [SwaggerOperation(Summary = "Get user by id in Coms")]
-        public IActionResult GetUserById([FromQuery] int id)
-        {
-            ErrorOr<UserResult> result = _userService.GetUser(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
