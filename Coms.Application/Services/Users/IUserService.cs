@@ -12,5 +12,7 @@ namespace Coms.Application.Services.Users
         Task<ErrorOr<UserResult>> GetUser(int id);
         Task<ErrorOr<UserResult>> InactiveUser(int id);
         Task<ErrorOr<UserResult>> ActiveUser(int id);
+        Task<ErrorOr<UserResult>> AddUser(string fullName, string username, DateTime dob, string image,
+                string password, int roleId, string email, string position);
     }
 }

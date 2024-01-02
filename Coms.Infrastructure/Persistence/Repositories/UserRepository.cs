@@ -17,6 +17,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return await _genericRepository.FirstOrDefaultAsync(u => u.Username == username, 
                     new System.Linq.Expressions.Expression<Func<User, object>>[] {u => u.Role});
         }
+
         public async Task<User?> GetUser(int id)
         {
             return await _genericRepository.FirstOrDefaultAsync(u => u.Id == id,
@@ -33,6 +34,17 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public async Task UpdateUser(User user)
         {
             await _genericRepository.UpdateAsync(user);
+        }
+
+        public async Task AddUser(User user)
+        {
+            await _genericRepository.CreateAsync(user);
+        }
+
+        public async Task<User?> GetByEmail(string email)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(u => u.Email.Equals(email),
+                    new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
         }
 
         //public async Task<IList<User>> GetManagers()

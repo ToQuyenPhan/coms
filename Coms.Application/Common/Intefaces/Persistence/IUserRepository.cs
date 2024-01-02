@@ -8,6 +8,8 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<User?> GetUser(int id);
         IList<User>? GetUsers();
         Task UpdateUser(User user);
+        Task AddUser(User user);
+        Task<User?> GetByEmail(string email);
         //Task<IList<User>> GetManagers();
         //Task<IList<User>> GetStaffs();
     }

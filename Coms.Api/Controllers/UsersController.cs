@@ -80,6 +80,19 @@ namespace Coms.Api.Controllers
             );
         }
 
+        [HttpPost]
+        [SwaggerOperation(Summary = "Add an user in Coms")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult ActiveUser([FromBody] UserFormRequest request)
+        {
+            ErrorOr<UserResult> result = _userService.AddUser(request.FullName, request.Username, request.Dob, request.Image, 
+                    request.Password, request.RoleId, request.Email, request.Position).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
         [HttpPut("inactive")]
         [SwaggerOperation(Summary = "Inactive an user in Coms")]
         [Authorize(Roles = "Admin")]

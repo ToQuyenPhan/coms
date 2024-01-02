@@ -150,6 +150,54 @@ namespace Coms.Application.Services.Users
             }
         }
 
+        public async Task<ErrorOr<UserResult>> AddUser(string fullName, string username, DateTime dob, string image, 
+                string password, int roleId, string email, string position)
+        {
+            try
+            {
+                var existingUsername = await _userRepository.GetUserByUsername(username);
+                if(existingUsername is not null)
+                {
+                    return Error.Conflict("409", "Username already exists!");
+                }
+                var existingEmail = await _userRepository.GetByEmail(email);
+                if (existingEmail is not null)
+                {
+                    return Error.Conflict("409", "Email already exists!");
+                }
+                var user = new User()
+                {
+                    FullName = fullName,
+                    Username = username,
+                    Dob = dob,
+                    Email = email,
+                    Image = image,
+                    Password = password,
+                    Status = (int) UserStatus.Active,
+                    RoleId = roleId,
+                    Position = position
+                };
+                await _userRepository.AddUser(user);
+                var result = new UserResult()
+                {
+                    Id = user.Id,
+                    FullName = user.FullName,
+                    Username = user.Username,
+                    Dob = user.Dob,
+                    Email = user.Email,
+                    Image = user.Image,
+                    Password = user.Password,
+                    Status = user.Status,
+                    RoleId = user.RoleId
+                };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
         public async Task<ErrorOr<IList<UserResult>>> GetManagers()
         {
             try
