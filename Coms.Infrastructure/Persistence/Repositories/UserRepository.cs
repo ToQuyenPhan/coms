@@ -53,6 +53,29 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
         }
 
+        public async Task<User?> GetByOtherEmail(string email, int userId)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(u => u.Email.Equals(email) && u.Id != userId,
+                    new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
+        }
+
+        public async Task<User?> GetByOtherPhone(string phone, int userId)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(u => u.Phone.Equals(phone) && u.Id != userId,
+                    new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
+        }
+
+        public async Task<User?> GetByOtherUsername(string username, int userId)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(u => u.Username.Equals(username) && u.Id != userId,
+                    new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
+        }
+
+        public async Task EditUser(User user)
+        {
+            await _genericRepository.UpdateAsync(user);
+        }
+
         //public async Task<IList<User>> GetManagers()
         //{
         //    var list = await _genericRepository.WhereAsync(a => a.RoleId == 2
