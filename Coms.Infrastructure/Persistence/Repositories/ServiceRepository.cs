@@ -23,9 +23,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
 
         public async Task<IList<Service>?> GetServices()
         {
-            var list = await _genericRepository.WhereAsync(a=> a.Status == Domain.Enum.ServiceStatus.Active,
+            var list = await _genericRepository.WhereAsync(s => s.Status == Domain.Enum.ServiceStatus.Active,
                 new System.Linq.Expressions.Expression<Func<Service, object>>[] {
-                    a => a.ContractCosts});
+                    s => s.ContractCategory});
             return (list.Count() > 0) ? list : null;
         }
 
