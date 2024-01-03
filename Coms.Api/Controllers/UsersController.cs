@@ -96,7 +96,6 @@ namespace Coms.Api.Controllers
 
         [HttpPut]
         [SwaggerOperation(Summary = "Edit an user in Coms")]
-        [Authorize(Roles = "Admin")]
         public IActionResult InactiveUser([FromQuery] int id, [FromBody] UserFormRequest request)
         {
             ErrorOr<UserResult> result = _userService.EditUser(id, request.FullName, request.Username, request.Dob, request.Image,
