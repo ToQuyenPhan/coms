@@ -6,6 +6,7 @@ using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.IO;
 using System.Security.Claims;
 
 namespace Coms.Api.Controllers
@@ -33,6 +34,24 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpGet("export")]
+        [SwaggerOperation(Summary = "Export action activities of your contracts in Coms")]
+        public IActionResult ExportExcel()
+        {
+            var fileDownloadName = "action-reports.xlsx";
+            var contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            ErrorOr<MemoryStream> result =
+                _actionHistoryService.ExportActionHistories(int.Parse(this.User.Claims.First(i => i.Type ==
+                ClaimTypes.NameIdentifier).Value)).Result;
+            var fsr = new FileStreamResult(result.Value, contentType);
+            fsr.FileDownloadName = fileDownloadName;
+            return result.Match(
+                result => fsr,
+                errors => Problem(errors)
+            );
+        }
+
         [Authorize(Roles = "Staff")]
         [HttpPost("add")]
         [SwaggerOperation(Summary = "Add a action history in Coms")]
