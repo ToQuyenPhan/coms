@@ -14,7 +14,7 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport(int userId);
         Task<ErrorOr<ContractResult>> GetContract(int id);
         Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContracts(int userId,
-                string name, string creatorName, int? status, int currentPage, int pageSize);
+                string name, string code, string partnerName, int? version, int? status, int currentPage, int pageSize);
         Task<ErrorOr<PagingResult<ContractResult>>> GetContractForPartner(int partnerId,
                 string name, string code, bool isApproved, int currentPage, int pageSize);
         Task<ErrorOr<ContractResult>> ApproveContract(int contractId, int userId, bool isApproved);

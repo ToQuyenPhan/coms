@@ -168,7 +168,7 @@ namespace Coms.Application.Services.Contracts
                 }
                 if (version is not null)
                 {
-                    if (version >= 0)
+                    if (version > 0)
                     {
                         predicate = predicate.And(c => c.Version.Equals(version));
                     }
@@ -665,7 +665,7 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContracts(int userId,
-                string name, string creatorName, int? status, int currentPage, int pageSize)
+                string name, string code, string partnerName, int? version, int? status, int currentPage, int pageSize)
         {
             IList<Contract> contracts = new List<Contract>();
             var flowDetails = await _flowDetailRepository.GetUserFlowDetailsByUserId(userId);
@@ -696,15 +696,19 @@ namespace Coms.Application.Services.Contracts
             }
             if (contracts.Count() > 0)
             {
-                //if (string.IsNullOrEmpty(creatorName))
-                //{
-                //    creatorName = "";
-                //}
                 var predicate = PredicateBuilder.New<Contract>(true);
                 predicate = predicate.And(c => c.Status != DocumentStatus.Deleted);
                 if (!string.IsNullOrEmpty(name))
                 {
-                    predicate = predicate.And(c => c.ContractName.ToUpper().Contains(name.ToUpper().Trim()));
+                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim(), StringComparison.CurrentCultureIgnoreCase));
+                }
+                if (!string.IsNullOrEmpty(code))
+                {
+                    predicate = predicate.And(c => c.Code.Contains(code.Trim(), StringComparison.CurrentCultureIgnoreCase));
+                }
+                if (string.IsNullOrEmpty(partnerName))
+                {
+                    partnerName = "";
                 }
                 if (status is not null)
                 {
@@ -713,14 +717,15 @@ namespace Coms.Application.Services.Contracts
                         predicate = predicate.And(c => c.Status.Equals((DocumentStatus)status));
                     }
                 }
+                if (version is not null)
+                {
+                    if (version > 0)
+                    {
+                        predicate = predicate.And(c => c.Version.Equals(version));
+                    }
+                }
                 IList<Contract> filteredList = contracts.Where(predicate).OrderByDescending(c => c.CreatedDate)
                         .ToList();
-                var total = filteredList.Count();
-                if (currentPage > 0 && pageSize > 0)
-                {
-                    filteredList = filteredList.Skip((currentPage - 1) * pageSize).Take(pageSize)
-                            .ToList();
-                }
                 IList<ContractResult> responses = new List<ContractResult>();
                 foreach (var contract in filteredList)
                 {
@@ -758,7 +763,20 @@ namespace Coms.Application.Services.Contracts
                         contractResult.PartnerId = partner.Partner.Id;
                         contractResult.PartnerName = partner.Partner.CompanyName;
                     }
-                    responses.Add(contractResult);
+                    if (contractResult.PartnerName.Contains(partnerName.Trim(), StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        responses.Add(contractResult);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                var total = responses.Count();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    responses = responses.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                            .ToList();
                 }
                 return new
                     PagingResult<ContractResult>(responses, total, currentPage, pageSize);

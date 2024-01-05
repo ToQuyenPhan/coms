@@ -9,5 +9,6 @@ namespace Coms.Contracts.Contracts
         public int? Status { get; set; }
         public int? Version { get; set; }
         public bool IsYours { get; set; }
+        public string? PartnerName {  get; set; }
     }
 }
