@@ -5,6 +5,6 @@
         public string Title {  get; set; }
         public string Message { get; set; }
         public string Long {  get; set; }
-        public int ContractId {  get; set; }
+        public int? ContractId {  get; set; }
     }
 }

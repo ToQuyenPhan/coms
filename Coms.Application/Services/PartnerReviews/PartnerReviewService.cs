@@ -42,7 +42,7 @@ namespace Coms.Application.Services.PartnerReviews
                 var partnerReviewResult = new PartnerReviewResult
                 {
                     Id = createdPartnerReview.Id,
-                    ContractId = createdPartnerReview.Id,
+                    ContractId = createdPartnerReview.ContractId,
                     ContractName= createdPartnerReview.Contract.ContractName,
                     IsApproved=false,
                     PartnerId= createdPartnerReview.Id,
@@ -80,7 +80,7 @@ namespace Coms.Application.Services.PartnerReviews
                     var partnerReviewResult = new PartnerReviewResult
                     {
                         Id = partnerPreview.Id,
-                        ContractId = partnerPreview.Id,
+                        ContractId = partnerPreview.ContractId,
                         ContractName = partnerPreview.Contract.ContractName,
                         IsApproved = partnerPreview.IsApproved,
                         PartnerId = partnerPreview.Id,

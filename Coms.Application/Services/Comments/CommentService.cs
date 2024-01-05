@@ -40,7 +40,7 @@ namespace Coms.Application.Services.Comments
                 foreach (var action in createActions)
                 {
                     var commentHistoryList = await _actionHistoryRepository
-                            .GetCommentActionByContractId(action.ContractId, userId);
+                            .GetCommentActionByContractId((int)action.ContractId, userId);
                     if (commentHistoryList is not null)
                     {
                         foreach (var commentHistory in commentHistoryList)
@@ -156,7 +156,7 @@ namespace Coms.Application.Services.Comments
                             commentResult.UserImage = commentHistory.User.Image;
                         }
                         var userFlowDetails = 
-                            await _userFlowDetailsRepository.GetByContractId(commentHistory.ContractId);
+                            await _userFlowDetailsRepository.GetByContractId((int)commentHistory.ContractId);
                         if(userFlowDetails is not null)
                         {
                             int numberOfRole = 0;
@@ -208,7 +208,7 @@ namespace Coms.Application.Services.Comments
                 {
                     return Error.Conflict("409", "Comment is inactive!");
                 }
-                var contract = await _contractRepository.GetContract(comment.ActionHistory.ContractId);
+                var contract = await _contractRepository.GetContract((int)comment.ActionHistory.ContractId);
                 if(contract is not null)
                 {
                     if (contract.Status.Equals(DocumentStatus.Deleted))

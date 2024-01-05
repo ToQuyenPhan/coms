@@ -13,8 +13,14 @@ namespace Coms.Domain.Entities
         [Required]
         public FlowDetailStatus Status { get; set; }
         
-        public int ContractId { get; set; }
+        public int? ContractId { get; set; }
         public virtual Contract? Contract { get; set; }
+
+        public int? ContractAnnexId { get; set; }
+        public virtual ContractAnnex? ContractAnnex { get; set; }
+
+        public int? LiquidationRecordId { get; set; }
+        public virtual LiquidationRecord? LiquidationRecord { get; set; }
 
         public int FlowDetailId { get; set; }
         public virtual FlowDetail? FlowDetail { get; set; }

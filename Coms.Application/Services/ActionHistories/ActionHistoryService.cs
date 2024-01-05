@@ -27,7 +27,7 @@ namespace Coms.Application.Services.ActionHistories
                 foreach (var history in createHistories)
                 {
                     var actionHistoryList = await _actionHistoryRepository
-                            .GetOtherUserActionByContractId(history.ContractId, userId);
+                            .GetOtherUserActionByContractId((int)history.ContractId, userId);
                     if (actionHistoryList is not null)
                     {
                         foreach (var actionHistory in actionHistoryList)
@@ -125,7 +125,7 @@ namespace Coms.Application.Services.ActionHistories
                     foreach (var history in createHistories)
                     {
                         var actionHistoryList = await _actionHistoryRepository
-                                .GetOtherUserActionByContractId(history.ContractId, userId);
+                                .GetOtherUserActionByContractId((int)history.ContractId, userId);
                         if (actionHistoryList is not null)
                         {
                             foreach (var actionHistory in actionHistoryList)

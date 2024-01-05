@@ -115,7 +115,7 @@ namespace Coms.Application.Services.Contracts
             {
                 foreach (var action in createAction)
                 {
-                    var contract = await _contractRepository.GetContract(action.ContractId);
+                    var contract = await _contractRepository.GetContract((int)action.ContractId);
                     if (contract is not null)
                     {
                         if (!string.IsNullOrEmpty(contract.Link))
@@ -137,7 +137,7 @@ namespace Coms.Application.Services.Contracts
                         {
                             foreach (var contractFlowDetail in contractFlowDetails)
                             {
-                                var contract = await _contractRepository.GetContract(contractFlowDetail.ContractId);
+                                var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
                                 if (!contract.Status.Equals(DocumentStatus.Deleted))
                                 {
                                     var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
@@ -678,7 +678,7 @@ namespace Coms.Application.Services.Contracts
                     {
                         foreach (var contractFlowDetail in contractFlowDetails)
                         {
-                            var contract = await _contractRepository.GetContract(contractFlowDetail.ContractId);
+                            var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
                             if (!contract.Status.Equals(DocumentStatus.Deleted))
                             {
                                 var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
@@ -814,7 +814,7 @@ namespace Coms.Application.Services.Contracts
                 IList<Contract> contracts = new List<Contract>();
                 foreach (var review in reviews)
                 {
-                    var contract = await _contractRepository.GetContract(review.ContractId);
+                    var contract = await _contractRepository.GetContract((int)review.ContractId);
                     if (!string.IsNullOrEmpty(contract.Link))
                     {
                         contracts.Add(contract);
@@ -993,7 +993,7 @@ namespace Coms.Application.Services.Contracts
                     {
                         foreach (var contractFlowDetail in contractFlowDetails)
                         {
-                            var contract = await _contractRepository.GetContract(contractFlowDetail.ContractId);
+                            var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
                             if (!contract.Status.Equals(DocumentStatus.Deleted))
                             {
                                 var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
