@@ -10,7 +10,9 @@ using System.ComponentModel.DataAnnotations;
 namespace Coms.Api.Controllers
 {
     [Route("api/sign")]
-    [Authorize(Roles = "Manager")]
+    //[Authorize(Roles = "Manager")]
+    [AllowAnonymous]
+
     public class SignController : ApiController
     {
         private readonly ISignService _signService;

@@ -9,7 +9,8 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Coms.Api.Controllers
 {
     [Route("api/document")]
-    [Authorize(Roles = "Manager")]
+    //[Authorize(Roles = "Manager")]
+    [AllowAnonymous]
     public class DocumentController : ApiController
     {
         private readonly IDocumentService _documentService;

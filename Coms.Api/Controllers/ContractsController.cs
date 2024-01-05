@@ -156,7 +156,7 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<PagingResult<ContractResult>> result = _contractService.GetContractForPartner(
                 int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
-                request.ContractName, request.Code, request.IsApproved, request.CurrentPage,
+                request.ContractName, request.Code,request.DocumentStatus, request.IsApproved, request.CurrentPage,
                 request.PageSize).Result;
             return result.Match(
                 result => Ok(result),

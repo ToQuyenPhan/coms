@@ -1,4 +1,5 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
+using Coms.Application.Services.UserFlowDetails;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
@@ -15,13 +16,15 @@ namespace Coms.Application.Services.Signs
         private readonly IContractRepository _contractRepository;
         private readonly IContractAnnexRepository _contractAnnexRepository;
         private readonly ILiquidationRecordRepository _liquidationRecordRepository;
+        private readonly IFlowDetailRepository _flowDetailRepository;
 
         public SignService(IContractFileRepository contractFileRepository,
             IContractAnnexFileRepository contractAnnexFileRepository,
             ILiquidationRecordFileRepository liquidationRecordFileRepository,
             IContractRepository contractRepository,
             IContractAnnexRepository contractAnnexRepository,
-            ILiquidationRecordRepository liquidationRecordRepository)
+            ILiquidationRecordRepository liquidationRecordRepository,
+            IFlowDetailRepository flowDetailRepository)
         {
             _contractFileRepository = contractFileRepository;
             _contractAnnexFileRepository = contractAnnexFileRepository;
@@ -29,6 +32,7 @@ namespace Coms.Application.Services.Signs
             _contractRepository = contractRepository;
             _contractAnnexRepository = contractAnnexRepository;
             _liquidationRecordRepository = liquidationRecordRepository;
+            _flowDetailRepository = flowDetailRepository;
         }
         public async Task<ErrorOr<ResponseModel>> UploadVersion(Guid fileId, byte[] document)
         {
