@@ -6,7 +6,7 @@ namespace Coms.Contracts.Contracts
     {
         public string? ContractName { get; set; }
         public string? Code { get; set; }
-        public int DocumentStatus { get; set; }
+        public int? Version { get; set; }
         public bool IsApproved { get; set; }
     }
 }

@@ -26,7 +26,7 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<PagingResult<ContractResult>> result = _contractService.GetYourContracts(
                 int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
-                request.ContractName, request.CreatorName, request.Status, request.IsYours, request.CurrentPage,
+                request.ContractName, request.Code, request.Version, request.Status, request.IsYours, request.CurrentPage,
                 request.PageSize).Result;
             return result.Match(
                 result => Ok(result),
@@ -142,7 +142,7 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<PagingResult<ContractResult>> result = _contractService.GetManagerContracts(
                 int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
-                request.ContractName, request.CreatorName, request.Status, request.CurrentPage,
+                request.ContractName, request.Code, request.PartnerName, request.Version, request.Status, request.CurrentPage,
                 request.PageSize).Result;
             return result.Match(
                 result => Ok(result),
@@ -156,7 +156,7 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<PagingResult<ContractResult>> result = _contractService.GetContractForPartner(
                 int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
-                request.ContractName, request.Code,request.DocumentStatus, request.IsApproved, request.CurrentPage,
+                request.ContractName, request.Code, request.Version, request.IsApproved, request.CurrentPage,
                 request.PageSize).Result;
             return result.Match(
                 result => Ok(result),
@@ -200,7 +200,7 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<PagingResult<ContractResult>> result = _contractService.GetManagerContractsForSign(
                 int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
-                request.ContractName, request.CreatorName, request.Status, request.CurrentPage,
+                request.ContractName, request.Code, request.Status, request.CurrentPage,
                 request.PageSize).Result;
             return result.Match(
                 result => Ok(result),

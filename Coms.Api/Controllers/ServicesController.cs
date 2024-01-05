@@ -3,6 +3,7 @@ using Coms.Application.Services.Common;
 using Coms.Application.Services.Contracts;
 using Coms.Application.Services.Services;
 using Coms.Contracts.Services;
+using Coms.Domain.Entities;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,19 @@ namespace Coms.Api.Controllers
         public ServicesController(IServiceService serviceService)
         {
             _serviceService = serviceService;
+        }
+
+        [HttpGet]
+        [SwaggerOperation(Summary = "Get active services with filter in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public IActionResult GetActiveServicesWithFilter([FromQuery] ServiceFilterRequest request)
+        {
+            ErrorOr<PagingResult<ServiceResult>> result = _serviceService.GetActiveServicesWithFilter(request.ContractCategoryId, 
+                    request.ServiceName, request.CurrentPage, request.PageSize).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
         }
 
         [HttpGet("active")]
@@ -46,7 +60,7 @@ namespace Coms.Api.Controllers
         }
 
         [HttpGet("get")]
-        [SwaggerOperation(Summary = "Get services by serviceName in Coms")]
+        [SwaggerOperation(Summary = "Get service by id in Coms")]
         [Authorize(Roles = "Staff")]
         public IActionResult GetServiceByServiceId([FromQuery] int serviceId)
         {

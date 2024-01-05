@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="ConvertApi" Version="3.0.14" />
+    <PackageReference Include="EPPlus" Version="6.2.15" />
     <PackageReference Include="Firebase.Auth" Version="1.0.0" />
     <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
     <PackageReference Include="FreeSpire.Doc" Version="11.6.0" />

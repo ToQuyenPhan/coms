@@ -17,6 +17,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return await _genericRepository.FirstOrDefaultAsync(u => u.Username == username, 
                     new System.Linq.Expressions.Expression<Func<User, object>>[] {u => u.Role});
         }
+
         public async Task<User?> GetUser(int id)
         {
             return await _genericRepository.FirstOrDefaultAsync(u => u.Id == id,
@@ -31,6 +32,46 @@ namespace Coms.Infrastructure.Persistence.Repositories
         }
 
         public async Task UpdateUser(User user)
+        {
+            await _genericRepository.UpdateAsync(user);
+        }
+
+        public async Task AddUser(User user)
+        {
+            await _genericRepository.CreateAsync(user);
+        }
+
+        public async Task<User?> GetByEmail(string email)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(u => u.Email.Equals(email),
+                    new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
+        }
+
+        public async Task<User?> GetByPhone(string phone)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(u => u.Phone.Equals(phone),
+                    new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
+        }
+
+        public async Task<User?> GetByOtherEmail(string email, int userId)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(u => u.Email.Equals(email) && u.Id != userId,
+                    new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
+        }
+
+        public async Task<User?> GetByOtherPhone(string phone, int userId)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(u => u.Phone.Equals(phone) && u.Id != userId,
+                    new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
+        }
+
+        public async Task<User?> GetByOtherUsername(string username, int userId)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(u => u.Username.Equals(username) && u.Id != userId,
+                    new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
+        }
+
+        public async Task EditUser(User user)
         {
             await _genericRepository.UpdateAsync(user);
         }

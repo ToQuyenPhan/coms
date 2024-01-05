@@ -33,7 +33,7 @@ namespace Coms.Application.Services.Users
                                 Id = user.Id,
                                 FullName = user.FullName,
                                 Username = user.Username,
-                                Dob = user.Dob,
+                                Dob = user.Dob.ToString(),
                                 Email = user.Email,
                                 Image = user.Image,
                                 Password = user.Password,
@@ -94,7 +94,7 @@ namespace Coms.Application.Services.Users
                         Id = user.Id,
                         FullName = user.FullName,
                         Username = user.Username,
-                        Dob = user.Dob,
+                        Dob = user.Dob.ToString(),
                         Email = user.Email,
                         Image = user.Image,
                         Password = user.Password,
@@ -129,7 +129,7 @@ namespace Coms.Application.Services.Users
                         Id = user.Id,
                         FullName = user.FullName,
                         Username = user.Username,
-                        Dob = user.Dob,
+                        Dob = user.Dob.ToString(),
                         Email = user.Email,
                         Image = user.Image,
                         Password = user.Password,
@@ -143,6 +143,150 @@ namespace Coms.Application.Services.Users
                 {
                     return Error.NotFound("404", "User not found!");
                 }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<UserResult>> AddUser(string fullName, string username, DateTime dob, string image, 
+                string password, int roleId, string email, string position, string phone)
+        {
+            try
+            {
+                var existingUsername = await _userRepository.GetUserByUsername(username);
+                if(existingUsername is not null)
+                {
+                    return Error.Conflict("409", "Username already exists!");
+                }
+                var existingEmail = await _userRepository.GetByEmail(email);
+                if (existingEmail is not null)
+                {
+                    return Error.Conflict("409", "Email already exists!");
+                }
+                var existingPhone = await _userRepository.GetByPhone(phone);
+                if (existingPhone is not null)
+                {
+                    return Error.Conflict("409", "Phone number already exists!");
+                }
+                var user = new User()
+                {
+                    FullName = fullName,
+                    Username = username,
+                    Dob = dob,
+                    Email = email,
+                    Image = image,
+                    Password = password,
+                    Status = (int) UserStatus.Active,
+                    RoleId = roleId,
+                    Position = position,
+                    Phone = phone
+                };
+                await _userRepository.AddUser(user);
+                var result = new UserResult()
+                {
+                    Id = user.Id,
+                    FullName = user.FullName,
+                    Username = user.Username,
+                    Dob = user.Dob.ToString(),
+                    Email = user.Email,
+                    Image = user.Image,
+                    Password = user.Password,
+                    Status = user.Status,
+                    RoleId = user.RoleId,
+                    Phone = user.Phone
+                };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<UserResult>> GetUser(int id)
+        {
+            try
+            {
+                var user = await _userRepository.GetUser(id);
+                if (user != null)
+                {
+                    var result = new UserResult()
+                    {
+                        Id = user.Id,
+                        FullName = user.FullName,
+                        Username = user.Username,
+                        Dob = user.Dob.ToString("yyyy-MM-dd"),
+                        Email = user.Email,
+                        Image = user.Image,
+                        Password = user.Password,
+                        Status = user.Status,
+                        RoleId = user.RoleId,
+                        Role = user.Role.RoleName,
+                        Phone = user.Phone,
+                        Position = user.Position
+                    };
+                    return result;
+                }
+                else
+                {
+                    return Error.NotFound("404", "User not found!");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<UserResult>> EditUser(int userId, string fullName, string username, DateTime dob, string image,
+                string password, int roleId, string email, string position, string phone)
+        {
+            try
+            {
+                var existingUsername = await _userRepository.GetByOtherUsername(username, userId);
+                if (existingUsername is not null)
+                {
+                    return Error.Conflict("409", "Username already exists!");
+                }
+                var existingEmail = await _userRepository.GetByOtherEmail(email, userId);
+                if (existingEmail is not null)
+                {
+                    return Error.Conflict("409", "Email already exists!");
+                }
+                var existingPhone = await _userRepository.GetByOtherPhone(phone, userId);
+                if (existingPhone is not null)
+                {
+                    return Error.Conflict("409", "Phone number already exists!");
+                }
+                var user = await _userRepository.GetUser(userId);
+                user.FullName = fullName;
+                user.Username = username;
+                user.Dob = dob;
+                user.Email = email;
+                user.Image = image;
+                user.Password = password;
+                user.RoleId = roleId;
+                user.Position = position;
+                user.Phone = phone;
+                await _userRepository.UpdateUser(user);
+                var result = new UserResult()
+                {
+                    Id = user.Id,
+                    FullName = user.FullName,
+                    Username = user.Username,
+                    Dob = user.Dob.ToString(),
+                    Email = user.Email,
+                    Image = user.Image,
+                    Password = user.Password,
+                    Status = user.Status,
+                    RoleId = user.RoleId,
+                    Phone = user.Phone,
+                    Position = user.Position
+                };
+                return result;
             }
             catch (Exception ex)
             {
@@ -166,7 +310,7 @@ namespace Coms.Application.Services.Users
                             Id = user.Id,
                             FullName = user.FullName,
                             Username = user.Username,
-                            Dob = user.Dob,
+                            Dob = user.Dob.ToString(),
                             Email = user.Email,
                             Image = user.Image,
                             Password = user.Password,
@@ -202,7 +346,7 @@ namespace Coms.Application.Services.Users
                                 Id = user.Id,
                                 FullName = user.FullName,
                                 Username = user.Username,
-                                Dob = user.Dob,
+                                Dob = user.Dob.ToString(),
                                 Email = user.Email,
                                 Image = user.Image,
                                 Password = user.Password,
@@ -219,40 +363,6 @@ namespace Coms.Application.Services.Users
             catch (Exception ex)
             {
                 return Error.NotFound("Users not found!");
-            }
-        }
-
-        public async Task<ErrorOr<UserResult>> GetUser(int id)
-        {
-            try
-            {
-                var user = await _userRepository.GetUser(id);
-                if (user != null)
-                {
-                    var result = new UserResult()
-                    {
-                        Id = user.Id,
-                        FullName = user.FullName,
-                        Username = user.Username,
-                        Dob = user.Dob,
-                        Email = user.Email,
-                        Image = user.Image,
-                        Password = user.Password,
-                        Status = user.Status,
-                        RoleId = user.RoleId,
-                        Role = user.Role.RoleName
-                    };
-                    return result;
-                }
-                else
-                {
-                    return Error.NotFound("404", "User not found!");
-                }
-                
-            }
-            catch (Exception ex)
-            {
-                return Error.Failure("500", ex.Message);
             }
         }
     }

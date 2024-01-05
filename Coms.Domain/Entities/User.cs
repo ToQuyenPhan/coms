@@ -27,6 +27,10 @@ namespace Coms.Domain.Entities
         public string Password { get; set; } = null!;
 
         [Required]
+        [MaxLength(30)]
+        public string Phone { get; set; } = null!;
+
+        [Required]
         [MaxLength(50)]
         public string Position { get; set; } = null!;
 
