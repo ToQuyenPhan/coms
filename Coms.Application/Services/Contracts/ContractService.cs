@@ -789,7 +789,7 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<PagingResult<ContractResult>>> GetContractForPartner(int partnerId,
-                string name, string code, bool isApproved, int currentPage, int pageSize)
+                string name, string code, int? version, bool isApproved, int currentPage, int pageSize)
         {
             var reviews = await _partnerReviewRepository.GetByPartnerId(partnerId, isApproved);
             if (reviews is not null)
@@ -803,6 +803,13 @@ namespace Coms.Application.Services.Contracts
                 if (!string.IsNullOrEmpty(code))
                 {
                     predicate = predicate.And(c => c.Code.Contains(code.Trim()));
+                }
+                if(version.HasValue)
+                {
+                    if(version > 0)
+                    {
+                        predicate = predicate.And(c => c.Version.Equals(version));
+                    }
                 }
                 IList<Contract> contracts = new List<Contract>();
                 foreach (var review in reviews)
