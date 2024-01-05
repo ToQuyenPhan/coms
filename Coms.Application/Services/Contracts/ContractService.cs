@@ -107,7 +107,7 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<PagingResult<ContractResult>>> GetYourContracts(int userId,
-                string name, string creatorName, int? status, bool isYours, int currentPage, int pageSize)
+                string name, string code, int? version, int? status, bool isYours, int currentPage, int pageSize)
         {
             IList<Contract> contracts = new List<Contract>();
             var createAction = await _actionHistoryRepository.GetCreateActionByUserId(userId);
@@ -156,15 +156,22 @@ namespace Coms.Application.Services.Contracts
             }
             if (contracts.Count() > 0)
             {
-                //if (string.IsNullOrEmpty(creatorName))
-                //{
-                //    creatorName = "";
-                //}
                 var predicate = PredicateBuilder.New<Contract>(true);
                 predicate = predicate.And(c => c.Status != DocumentStatus.Deleted);
                 if (!string.IsNullOrEmpty(name))
                 {
                     predicate = predicate.And(c => c.ContractName.Contains(name.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
+                }
+                if (!string.IsNullOrEmpty(code))
+                {
+                    predicate = predicate.And(c => c.Code.Contains(code.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
+                }
+                if (version is not null)
+                {
+                    if (version >= 0)
+                    {
+                        predicate = predicate.And(c => c.Version.Equals(version));
+                    }
                 }
                 if (status is not null)
                 {
