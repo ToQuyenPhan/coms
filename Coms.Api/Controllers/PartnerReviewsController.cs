@@ -1,4 +1,6 @@
-﻿using Coms.Application.Services.PartnerReviews;
+﻿using Coms.Application.Services.Common;
+using Coms.Application.Services.PartnerReviews;
+using Coms.Contracts.Common.Paging;
 using Coms.Contracts.PartnerReviews;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
@@ -15,6 +17,33 @@ namespace Coms.Api.Controllers
         public PartnerReviewsController(IPartnerReviewService partnerReviewService)
         {
             _partnerReviewService = partnerReviewService;
+        }
+
+        [HttpGet("notifications")]
+        [SwaggerOperation(Summary = "Get partner review notifications in Coms")]
+        [Authorize(Roles = "Staff")]
+        public IActionResult GetNotifications([FromQuery] PagingRequest request)
+        {
+            ErrorOr<PagingResult<NotificationResult>> results = 
+                    _partnerReviewService.GetNotifications(int.Parse(this.User.Claims.First(i => 
+                    i.Type == ClaimTypes.NameIdentifier).Value), request.CurrentPage, request.PageSize).Result;
+            return results.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet("partner-notifications")]
+        [SwaggerOperation(Summary = "Get notifications for partners in Coms")]
+        public IActionResult GetPartnerNotifications([FromQuery] PagingRequest request)
+        {
+            ErrorOr<PagingResult<NotificationResult>> results =
+                    _partnerReviewService.GetPartnerNotifications(int.Parse(this.User.Claims.First(i =>
+                    i.Type == ClaimTypes.NameIdentifier).Value), request.CurrentPage, request.PageSize).Result;
+            return results.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
         }
 
         [HttpPost("add")]
