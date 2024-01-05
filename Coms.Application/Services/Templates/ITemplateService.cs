@@ -16,5 +16,6 @@ namespace Coms.Application.Services.Templates
         Task<ErrorOr<TemplateResult>> GetTemplateInformation(int id);
         Task<ErrorOr<TemplateResult>> ActivateTemplate(int id);
         Task<ErrorOr<TemplateResult>> DeactivateTemplate(int id);
+        ErrorOr<PagingResult<NotificationResult>> GetTemplateNotifications(int currentPage, int pageSize);
     }
 }

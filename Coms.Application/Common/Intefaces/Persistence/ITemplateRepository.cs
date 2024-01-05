@@ -11,5 +11,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task UpdateTemplate(Template template);
         Task<IList<Template>?> GetActivatingTemplates();
         Task<Template?> GetTemplateByContractCategoryIdAndTemplateType(int contractCategoryId, int templateType);
+        IList<Template>? GetAllTemplates();
     }
 }

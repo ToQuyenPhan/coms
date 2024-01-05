@@ -420,6 +420,49 @@ namespace Coms.Application.Services.Templates
             }
         }
 
+        public ErrorOr<PagingResult<NotificationResult>> GetTemplateNotifications(int currentPage, int pageSize)
+        {
+
+            List<NotificationResult> responses = new List<NotificationResult>();
+            var result = _templateRepository.GetAllTemplates();
+            result = result.OrderByDescending(t => t.CreatedDate).ToList();
+            if (result is not null)
+            {
+                foreach (var template in result)
+                {
+                    if (string.IsNullOrEmpty(template.TemplateLink))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        var notificationResult = new NotificationResult()
+                        {
+                            Title = "New Template",
+                            Message = template.User.FullName + " created new template!",
+                            Long = AsTimeAgo(template.CreatedDate),
+                            TemplateId = template.Id
+                        };
+                        responses.Add(notificationResult);
+                    }
+                }
+                var total = result.Count();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    responses = responses.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                            .ToList();
+                }
+                return new
+                    PagingResult<NotificationResult>(responses, total, currentPage,
+                    pageSize);
+            }
+            else
+            {
+                return new PagingResult<NotificationResult>(new List<NotificationResult>(), 0, currentPage,
+                    pageSize);
+            }
+        }
+
         private FormatType GetFormatType(string format)
         {
             if (string.IsNullOrEmpty(format))
