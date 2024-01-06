@@ -82,10 +82,10 @@ namespace Coms.Api.Controllers
 
         [HttpPut]
         [SwaggerOperation(Summary = "Update a service in Coms")]
-        [Authorize(Roles = "Sale Manger")]
-        public IActionResult Update([FromQuery] int serviceId, [FromBody]ServiceFormRequest request)
+        [Authorize(Roles = "Sale Manager")]
+        public IActionResult Update([FromQuery] int id, [FromBody]ServiceFormRequest request)
         {
-            ErrorOr<ServiceResult> result = _serviceService.UpdateService(serviceId,request.ServiceName,request.Description,request.Price,
+            ErrorOr<ServiceResult> result = _serviceService.UpdateService(id,request.ServiceName,request.Description,request.Price,
                     request.ContractCategoryId).Result;
             return result.Match(
                 result => Ok(result),
