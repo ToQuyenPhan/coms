@@ -80,24 +80,25 @@ namespace Coms.Api.Controllers
             );
         }
 
-        [HttpPut("update")]
+        [HttpPut]
         [SwaggerOperation(Summary = "Update a service in Coms")]
         [Authorize(Roles = "Sale Manger")]
         public IActionResult Update([FromQuery] int serviceId, [FromBody]ServiceFormRequest request)
         {
-            ErrorOr<ServiceResult> result = _serviceService.UpdateService(serviceId,request.ServiceName,request.Description,request.Price).Result;
+            ErrorOr<ServiceResult> result = _serviceService.UpdateService(serviceId,request.ServiceName,request.Description,request.Price,
+                    request.ContractCategoryId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
             );
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete]
         [SwaggerOperation(Summary = "Delete a service by serviceId in Coms")]
         [Authorize(Roles = "Sale Manager")]
-        public IActionResult Delete([FromQuery] int serviceId)
+        public IActionResult Delete([FromQuery] int id)
         {
-            ErrorOr<ServiceResult> result = _serviceService.DeleteService(serviceId).Result;
+            ErrorOr<ServiceResult> result = _serviceService.DeleteService(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

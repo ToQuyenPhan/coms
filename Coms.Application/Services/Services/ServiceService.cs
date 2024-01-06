@@ -108,16 +108,18 @@ namespace Coms.Application.Services.Services
             }
         }
 
-        public async Task<ErrorOr<ServiceResult>> UpdateService(int serviceId, string serviceName, string description, double price)
+        public async Task<ErrorOr<ServiceResult>> UpdateService(int serviceId, string serviceName, string description, double price, 
+                int contractCategoryId)
         {
             try
             {
-                if (_serviceRepository.GetService(serviceId).Result is not null)
+                var service = await _serviceRepository.GetService(serviceId);
+                if (service is not null)
                 {
-                    var service = await _serviceRepository.GetService(serviceId);
                     service.ServiceName = serviceName;
                     service.Description = description;
                     service.Price = price;
+                    service.ContractCategoryId = contractCategoryId;
                     await _serviceRepository.UpdateService(service);
                     var result = new ServiceResult
                     {
@@ -126,6 +128,7 @@ namespace Coms.Application.Services.Services
                         Description = service.Description,
                         Price = service.Price,
                         Status = (int)service.Status,
+                        ContractCategoryId = contractCategoryId,
                         StatusString = service.Status.ToString()
                     };
                     return result;
@@ -141,13 +144,13 @@ namespace Coms.Application.Services.Services
             }
         }
 
-        public async Task<ErrorOr<ServiceResult>> DeleteService(int serviceId)
+        public async Task<ErrorOr<ServiceResult>> DeleteService(int id)
         {
             try
             {
-                if (_serviceRepository.GetService(serviceId).Result is not null)
+                var service = await _serviceRepository.GetService(id);
+                if (service is not null)
                 {
-                    var service = await _serviceRepository.GetService(serviceId);
                     service.Status = ServiceStatus.Inactive;
                     await _serviceRepository.UpdateService(service);    
                     var result = new ServiceResult
@@ -157,6 +160,7 @@ namespace Coms.Application.Services.Services
                         Description = service.Description,
                         Price = service.Price,
                         Status = (int)service.Status,
+                        ContractCategoryId = service.ContractCategoryId,
                         StatusString = service.Status.ToString()
                     };
                     return result;
