@@ -4,6 +4,7 @@ using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
 using Firebase.Storage;
+using System.Diagnostics.Contracts;
 
 namespace Coms.Application.Services.Signs
 {
@@ -16,7 +17,8 @@ namespace Coms.Application.Services.Signs
         private readonly IContractRepository _contractRepository;
         private readonly IContractAnnexRepository _contractAnnexRepository;
         private readonly ILiquidationRecordRepository _liquidationRecordRepository;
-        private readonly IFlowDetailRepository _flowDetailRepository;
+        private readonly IContractFlowDetailsRepository _contractFlowDetailsRepository;
+
 
         public SignService(IContractFileRepository contractFileRepository,
             IContractAnnexFileRepository contractAnnexFileRepository,
@@ -24,7 +26,7 @@ namespace Coms.Application.Services.Signs
             IContractRepository contractRepository,
             IContractAnnexRepository contractAnnexRepository,
             ILiquidationRecordRepository liquidationRecordRepository,
-            IFlowDetailRepository flowDetailRepository)
+            IContractFlowDetailsRepository contractFlowDetailsRepository)
         {
             _contractFileRepository = contractFileRepository;
             _contractAnnexFileRepository = contractAnnexFileRepository;
@@ -32,7 +34,7 @@ namespace Coms.Application.Services.Signs
             _contractRepository = contractRepository;
             _contractAnnexRepository = contractAnnexRepository;
             _liquidationRecordRepository = liquidationRecordRepository;
-            _flowDetailRepository = flowDetailRepository;
+            _contractFlowDetailsRepository = contractFlowDetailsRepository;
         }
         public async Task<ErrorOr<ResponseModel>> UploadVersion(Guid fileId, byte[] document)
         {
@@ -58,26 +60,38 @@ namespace Coms.Application.Services.Signs
                             stream.CopyTo(fileStream);
 
                             //update file in firebase
-                            fileStream.Position =0;
+                            fileStream.Position = 0;
                             var task = new FirebaseStorage(Bucket)
                                 .Child("contracts")
                                 .Child(contract.Id + ".pdf")
                                 .PutAsync(fileStream);
                             string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/contracts%2F" + contract.Id
                                 + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
-                            if (contract.Status == DocumentStatus.Signed || contract.Status == DocumentStatus.Completed) 
-                            { 
+                            if (contract.Status == DocumentStatus.Signed || contract.Status == DocumentStatus.Completed)
+                            {
                                 contract.Status = DocumentStatus.Completed;
                             }
-                            else {
+                            else
+                            {
                                 contract.Status = DocumentStatus.Signed;
+                                /*var flowDetails = await _contractFlowDetailsRepository.GetByContractId(contract.Id);
+                                var flowDetail = flowDetails.FirstOrDefault(cfd => cfd.FlowDetail.FlowRole.Equals(FlowRole.Signer));
+                                if (!flowDetail.Status.Equals(FlowDetailStatus.Waiting))
+                                {
+                                    return Error.Conflict("409", "You are already " + flowDetail.Status.ToString().ToLower() + "!");
+                                }
+                                else
+                                {
+                                    flowDetail.Status = FlowDetailStatus.Signed;
+                                }
+                                await _contractFlowDetailsRepository.UpdateContractFlowDetail(flowDetail);*/
                             }
 
                             contract.UpdatedDate = DateTime.Now;
                             contract.Link = link;
                             await _contractRepository.UpdateContract(contract);
                             var downloadUrl = await task;
-                            fileStream.Close();
+                            fileStream.Close();                          
 
                         }
                         return new ResponseModel()
@@ -166,7 +180,7 @@ namespace Coms.Application.Services.Signs
                                 + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
                             var downloadAnnexUrl = await task;
 
-                            if (liquidation.Status == DocumentStatus.Signed|| liquidation.Status == DocumentStatus.Completed)
+                            if (liquidation.Status == DocumentStatus.Signed || liquidation.Status == DocumentStatus.Completed)
                             {
                                 liquidation.Status = DocumentStatus.Completed;
 

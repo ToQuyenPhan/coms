@@ -789,7 +789,7 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<PagingResult<ContractResult>>> GetContractForPartner(int partnerId,
-                string name, string code, int? version, bool isApproved, int currentPage, int pageSize)
+                string name, string code, int? version, int documentStatus, bool isApproved, int currentPage, int pageSize)
         {
             var reviews = await _partnerReviewRepository.GetByPartnerId(partnerId, isApproved);
             if (reviews is not null)
