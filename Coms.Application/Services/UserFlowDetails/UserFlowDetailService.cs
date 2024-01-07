@@ -2,7 +2,6 @@
 using Coms.Application.Services.Common;
 using Coms.Domain.Enum;
 using ErrorOr;
-using static SkiaSharp.HarfBuzz.SKShaper;
 
 namespace Coms.Application.Services.UserFlowDetails
 {
@@ -10,12 +9,18 @@ namespace Coms.Application.Services.UserFlowDetails
     {
         private readonly IContractFlowDetailsRepository _userFlowDetailsRepository;
         private readonly IFlowDetailRepository _flowDetailRepository;
+        private readonly IActionHistoryRepository _actionHistoryRepository;
+        private readonly IPartnerReviewRepository _partnerReviewRepository;
 
         public UserFlowDetailService(IContractFlowDetailsRepository userFlowDetailsRepository,
-                IFlowDetailRepository flowDetailRepository)
+                IFlowDetailRepository flowDetailRepository,
+                IActionHistoryRepository actionHistoryRepository,
+                IPartnerReviewRepository partnerReviewRepository)
         {
             _userFlowDetailsRepository = userFlowDetailsRepository;
             _flowDetailRepository = flowDetailRepository;
+            _actionHistoryRepository = actionHistoryRepository;
+            _partnerReviewRepository = partnerReviewRepository;
         }
 
         public async Task<ErrorOr<PagingResult<UserFlowDetailResult>>> GetContractFlowDetails(int contractId,
@@ -60,16 +65,60 @@ namespace Coms.Application.Services.UserFlowDetails
 
         public async Task<ErrorOr<PagingResult<NotificationResult>>> GetNotifications(int userId, int currentPage, int pageSize)
         {
+            IList<NotificationResult> results = new List<NotificationResult>();
+            var createActions = await _actionHistoryRepository.GetCreateActionByUserId(userId);
+            if (createActions is not null)
+            {
+                
+                foreach (var action in createActions)
+                {
+                    if (action.Contract.Status.Equals(DocumentStatus.Deleted))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        var partnerReview = await _partnerReviewRepository.GetByContractId((int)action.ContractId);
+                        if (partnerReview.IsApproved)
+                        {
+                            var notificationResult = new NotificationResult()
+                            {
+                                Title = "Partner Approved!",
+                                Message = partnerReview.Partner.CompanyName + " approved your contract.",
+                                Time = partnerReview.ReviewAt,
+                                Long = AsTimeAgo(partnerReview.ReviewAt),
+                                ContractId = partnerReview.ContractId,
+                                Type = "Partner Review"
+                            };
+                            results.Add(notificationResult);
+                        }
+                        else
+                        {
+                            if (partnerReview.Status.Equals(PartnerReviewStatus.Inactive))
+                            {
+                                var notificationResult = new NotificationResult()
+                                {
+                                    Title = "Partner Rejected!",
+                                    Message = partnerReview.Partner.CompanyName + " rejected your contract.",
+                                    Time = partnerReview.ReviewAt,
+                                    Long = AsTimeAgo(partnerReview.ReviewAt),
+                                    ContractId = partnerReview.ContractId,
+                                    Type = "Partner Review"
+                                };
+                                results.Add(notificationResult);
+                            }
+                        }
+                    }
+                }
+            }
             var flowDetails = await _flowDetailRepository.GetUserFlowDetailsByUserId(userId);
             if (flowDetails is not null)
             {
-                IList<NotificationResult> results = new List<NotificationResult>();
                 foreach (var flowDetail in flowDetails)
                 {
                     var contractFlowDetails = await _userFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);
                     if(contractFlowDetails is not null)
                     {
-                        contractFlowDetails = contractFlowDetails.OrderByDescending(cfd => cfd.Contract.CreatedDate).ToList();
                         foreach (var contractFlowDetail in contractFlowDetails)
                         {
                             if (contractFlowDetail.Contract.Status.Equals(DocumentStatus.Deleted))
@@ -82,8 +131,10 @@ namespace Coms.Application.Services.UserFlowDetails
                                 {
                                     Title = "New Contract",
                                     Message = "You have a new contract to ",
+                                    Time = contractFlowDetail.Contract.CreatedDate,
                                     Long = AsTimeAgo(contractFlowDetail.Contract.CreatedDate),
                                     ContractId = contractFlowDetail.ContractId,
+                                    Type = "Approve"
                                 };
                                 if (flowDetail.FlowRole.Equals(FlowRole.Approver))
                                 {
@@ -98,7 +149,11 @@ namespace Coms.Application.Services.UserFlowDetails
                         }
                     }
                 }
+            }
+            if(results.Count() > 0)
+            {
                 int total = results.Count();
+                results = results.OrderByDescending(nr => nr.Time).ToList();
                 if (currentPage > 0 && pageSize > 0)
                 {
                     results = results.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();

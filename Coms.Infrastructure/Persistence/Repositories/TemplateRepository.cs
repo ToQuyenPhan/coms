@@ -56,6 +56,13 @@ namespace Coms.Infrastructure.Persistence.Repositories
                 && t.Status.Equals(TemplateStatus.Activating) && t.TemplateType.Equals((Domain.Enum.TemplateType) templateType), null);
         }
 
+        public IList<Template>? GetAllTemplates()
+        {
+            var list = _genericRepository.GetAllWithIncludes(new System.Linq.Expressions.Expression<Func<Template, object>>[]
+                    {t => t.ContractCategory, t => t.User});
+            return (list.Count() > 0) ? list : null;
+        }
+
         private Expression<Func<Template, bool>> BuildExpression(string templateName, 
                 int? contractCategoryId, int? templateType, int? status, string email)
         {

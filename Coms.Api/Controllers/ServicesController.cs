@@ -1,14 +1,10 @@
-﻿using Coms.Application.Services.Accesses;
-using Coms.Application.Services.Common;
-using Coms.Application.Services.Contracts;
+﻿using Coms.Application.Services.Common;
 using Coms.Application.Services.Services;
 using Coms.Contracts.Services;
-using Coms.Domain.Entities;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Security.Claims;
 
 namespace Coms.Api.Controllers
 {
@@ -72,36 +68,37 @@ namespace Coms.Api.Controllers
         }
 
         [Authorize(Roles = "Sale Manager")]
-        [HttpPost("add")]
+        [HttpPost]
         [SwaggerOperation(Summary = "Add a service in Coms")]
         public IActionResult Add([FromBody]ServiceFormRequest request)
         {
             ErrorOr<ServiceResult> result =
-                _serviceService.AddService(request.ServiceName,request.Description, request.Price ).Result;
+                _serviceService.AddService(request.ServiceName,request.Description, request.Price, request.ContractCategoryId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
             );
         }
 
-        [HttpPut("update")]
+        [HttpPut]
         [SwaggerOperation(Summary = "Update a service in Coms")]
-        [Authorize(Roles = "Sale Manger")]
-        public IActionResult Update([FromQuery] int serviceId, [FromBody]ServiceFormRequest request)
+        [Authorize(Roles = "Sale Manager")]
+        public IActionResult Update([FromQuery] int id, [FromBody]ServiceFormRequest request)
         {
-            ErrorOr<ServiceResult> result = _serviceService.UpdateService(serviceId,request.ServiceName,request.Description,request.Price).Result;
+            ErrorOr<ServiceResult> result = _serviceService.UpdateService(id,request.ServiceName,request.Description,request.Price,
+                    request.ContractCategoryId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
             );
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete]
         [SwaggerOperation(Summary = "Delete a service by serviceId in Coms")]
         [Authorize(Roles = "Sale Manager")]
-        public IActionResult Delete([FromQuery] int serviceId)
+        public IActionResult Delete([FromQuery] int id)
         {
-            ErrorOr<ServiceResult> result = _serviceService.DeleteService(serviceId).Result;
+            ErrorOr<ServiceResult> result = _serviceService.DeleteService(id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
