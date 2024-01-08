@@ -24,7 +24,8 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public async Task<IList<ActionHistory>?> GetCommentActionByContractId(int contractId, int userId)
         {
             var list = await _genericRepository.WhereAsync(ah => ah.ContractId.Equals(contractId) &&
-                ah.ActionType.Equals(ActionType.Commented) && !ah.UserId.Equals(userId) && !ah.Contract.Status.Equals(DocumentStatus.Deleted), 
+                ah.ActionType.Equals(ActionType.Commented) && !ah.UserId.Equals(userId) 
+                && !ah.Contract.Status.Equals(DocumentStatus.Deleted) && !ah.Contract.Status.Equals(DocumentStatus.Edited), 
                 new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User, ah => ah.Contract });
             return (list.Count() > 0) ? list : null;
         }
@@ -69,6 +70,14 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public async Task UpdateActionHistory(ActionHistory actionHistory)
         {
             await _genericRepository.UpdateAsync(actionHistory);
+        }
+
+        public async Task<IList<ActionHistory>?> GetByContractId(int contractId)
+        {
+            var list = await _genericRepository.WhereAsync(ah => ah.ContractId.Equals(contractId),
+                    new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[]
+                    { ah => ah.Contract, ah => ah.User});
+            return (list.Count() > 0) ? list : null;
         }
     }
 
