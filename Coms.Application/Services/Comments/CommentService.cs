@@ -40,7 +40,7 @@ namespace Coms.Application.Services.Comments
                 foreach (var action in createActions)
                 {
                     var commentHistoryList = await _actionHistoryRepository
-                            .GetCommentActionByContractId(action.ContractId, userId);
+                            .GetCommentActionByContractId((int)action.ContractId, userId);
                     if (commentHistoryList is not null)
                     {
                         foreach (var commentHistory in commentHistoryList)
@@ -67,11 +67,11 @@ namespace Coms.Application.Services.Comments
                                 ActionHistoryId = comment.ActionHistoryId,
                                 ReplyId = comment.ReplyId,
                                 Status = (int)comment.Status,
-                                StatusString = comment.Status.ToString()
+                                StatusString = comment.Status.ToString(),
+                                Long = AsTimeAgo(comment.ActionHistory.CreatedAt),
+                                CreatedAt = comment.ActionHistory.CreatedAt.ToString()
                             };
-                            commentResult.Long = AsTimeAgo(comment.ActionHistory.CreatedAt);
-                            commentResult.CreatedAt = comment.ActionHistory.CreatedAt.ToString();
-                            var user = await _userRepository.GetUser((int)comment.ActionHistory.UserId);
+                            User? user = await _userRepository.GetUser((int)comment.ActionHistory.UserId);
                             commentResult.UserId = user.Id;
                             commentResult.FullName = user.FullName;
                             comments.Add(commentResult);
@@ -145,18 +145,18 @@ namespace Coms.Application.Services.Comments
                             ActionHistoryId = comment.ActionHistoryId,
                             ReplyId = comment.ReplyId,
                             Status = (int)comment.Status,
-                            StatusString = comment.Status.ToString()
+                            StatusString = comment.Status.ToString(),
+                            Long = AsTimeAgo(commentHistory.CreatedAt),
+                            CreatedAt = commentHistory.CreatedAt.ToString(),
+                            UserId = commentHistory.User.Id,
+                            FullName = commentHistory.User.FullName
                         };
-                        commentResult.Long = AsTimeAgo(commentHistory.CreatedAt);
-                        commentResult.CreatedAt = commentHistory.CreatedAt.ToString();
-                        commentResult.UserId = commentHistory.User.Id;
-                        commentResult.FullName = commentHistory.User.FullName;
                         if (commentHistory.User.Image is not null)
                         {
                             commentResult.UserImage = commentHistory.User.Image;
                         }
                         var userFlowDetails = 
-                            await _userFlowDetailsRepository.GetByContractId(commentHistory.ContractId);
+                            await _userFlowDetailsRepository.GetByContractId((int)commentHistory.ContractId);
                         if(userFlowDetails is not null)
                         {
                             int numberOfRole = 0;
@@ -208,7 +208,7 @@ namespace Coms.Application.Services.Comments
                 {
                     return Error.Conflict("409", "Comment is inactive!");
                 }
-                var contract = await _contractRepository.GetContract(comment.ActionHistory.ContractId);
+                var contract = await _contractRepository.GetContract((int)comment.ActionHistory.ContractId);
                 if(contract is not null)
                 {
                     if (contract.Status.Equals(DocumentStatus.Deleted))
@@ -235,19 +235,19 @@ namespace Coms.Application.Services.Comments
             }
         }
 
-        public async Task<ErrorOr<CommentResult>> LeaveComment(int userId, int contractId, string content, 
-                int? replyId)
+        public async Task<ErrorOr<CommentResult>> LeaveComment(int userId, int contractId, string content,
+        int? replyId)
         {
             try
             {
-                var contract = await _contractRepository.GetContract(contractId);
-                if(contract is not null)
+                Contract? contract = await _contractRepository.GetContract(contractId);
+                if (contract is not null)
                 {
                     if (contract.Status.Equals(DocumentStatus.Deleted))
                     {
                         return Error.Conflict("409", "Contract no longer exist!");
                     }
-                    var actionHistory = new ActionHistory()
+                    ActionHistory actionHistory = new()
                     {
                         ActionType = ActionType.Commented,
                         CreatedAt = DateTime.Now,
@@ -255,7 +255,7 @@ namespace Coms.Application.Services.Comments
                         ContractId = contractId
                     };
                     await _actionHistoryRepository.AddActionHistory(actionHistory);
-                    var comment = new Comment()
+                    Comment comment = new()
                     {
                         Content = content,
                         Status = CommentStatus.Active,
@@ -265,15 +265,21 @@ namespace Coms.Application.Services.Comments
                     {
                         comment.ReplyId = replyId;
                     }
+                    ActionHistory actionHistorycreated = await _actionHistoryRepository.GetActionHistoryById(actionHistory.Id);
                     await _commentRepository.AddComment(comment);
-                    var commentResult = new CommentResult()
+                    CommentResult commentResult = new()
                     {
                         Id = comment.Id,
                         Content = comment.Content,
                         ActionHistoryId = comment.ActionHistoryId,
                         ReplyId = comment.ReplyId,
                         Status = (int)comment.Status,
-                        StatusString = comment.Status.ToString()
+                        StatusString = comment.Status.ToString(),
+                        UserId = (int)actionHistorycreated.UserId,
+                        FullName = actionHistorycreated.User.FullName,
+                        UserImage = actionHistorycreated.User.Image,
+                        CreatedAt = actionHistorycreated.CreatedAt.ToString(),
+                        Long = AsTimeAgo(actionHistorycreated.CreatedAt)
                     };
                     return commentResult;
                 }
@@ -281,7 +287,8 @@ namespace Coms.Application.Services.Comments
                 {
                     return Error.NotFound("404", "Contract is not found!");
                 }
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }
@@ -322,7 +329,7 @@ namespace Coms.Application.Services.Comments
         {
             try
             {
-                var comment = await _commentRepository.GetComment(id);
+                Comment? comment = await _commentRepository.GetComment(id);
                 if (comment is not null)
                 {
                     //var actionHistory = await _actionHistoryRepository.GetActionHistoryById((int)comment.ActionHistoryId); 
@@ -330,14 +337,20 @@ namespace Coms.Application.Services.Comments
                     //await _actionHistoryRepository.UpdateActionHistory(actionHistory);
                     comment.Content = content;
                     await _commentRepository.UpdateComment(comment);
-                    var commentResult = new CommentResult()
+                    ActionHistory actionHistory = await _actionHistoryRepository.GetActionHistoryById(comment.ActionHistory.Id);
+                    CommentResult commentResult = new()
                     {
                         Id = comment.Id,
                         Content = comment.Content,
                         ActionHistoryId = comment.ActionHistoryId,
                         ReplyId = comment.ReplyId,
                         Status = (int)comment.Status,
-                        StatusString = comment.Status.ToString()
+                        StatusString = comment.Status.ToString(),
+                        CreatedAt = comment.ActionHistory.CreatedAt.ToString(),
+                        FullName = actionHistory.User.FullName,
+                        UserId = (int)actionHistory.UserId,
+                        UserImage = actionHistory.User.Image,
+                        Long = AsTimeAgo(actionHistory.CreatedAt),
                     };
                     return commentResult;
                 }

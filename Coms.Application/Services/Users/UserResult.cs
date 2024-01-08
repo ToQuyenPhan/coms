@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Coms.Application.Services.Users
+﻿namespace Coms.Application.Services.Users
 {
     public class UserResult
     {
@@ -15,9 +8,11 @@ namespace Coms.Application.Services.Users
         public string Username { get; set; }
         public string Password { get; set; }
         public string? Image { get; set; }
-        public DateTime Dob { get; set; }
+        public string Dob { get; set; }
         public int Status { get; set; }
         public int RoleId { get; set; }
         public string Role { get; set; }
+        public string Phone {  get; set; }
+        public string Position {  get; set; }
     }
 }

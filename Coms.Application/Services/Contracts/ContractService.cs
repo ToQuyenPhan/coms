@@ -107,7 +107,7 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<PagingResult<ContractResult>>> GetYourContracts(int userId,
-                string name, string creatorName, int? status, bool isYours, int currentPage, int pageSize)
+                string name, string code, int? version, int? status, bool isYours, int currentPage, int pageSize)
         {
             IList<Contract> contracts = new List<Contract>();
             var createAction = await _actionHistoryRepository.GetCreateActionByUserId(userId);
@@ -115,7 +115,7 @@ namespace Coms.Application.Services.Contracts
             {
                 foreach (var action in createAction)
                 {
-                    var contract = await _contractRepository.GetContract(action.ContractId);
+                    var contract = await _contractRepository.GetContract((int)action.ContractId);
                     if (contract is not null)
                     {
                         if (!string.IsNullOrEmpty(contract.Link))
@@ -137,7 +137,7 @@ namespace Coms.Application.Services.Contracts
                         {
                             foreach (var contractFlowDetail in contractFlowDetails)
                             {
-                                var contract = await _contractRepository.GetContract(contractFlowDetail.ContractId);
+                                var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
                                 if (!contract.Status.Equals(DocumentStatus.Deleted))
                                 {
                                     var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
@@ -156,15 +156,22 @@ namespace Coms.Application.Services.Contracts
             }
             if (contracts.Count() > 0)
             {
-                //if (string.IsNullOrEmpty(creatorName))
-                //{
-                //    creatorName = "";
-                //}
                 var predicate = PredicateBuilder.New<Contract>(true);
                 predicate = predicate.And(c => c.Status != DocumentStatus.Deleted);
                 if (!string.IsNullOrEmpty(name))
                 {
                     predicate = predicate.And(c => c.ContractName.Contains(name.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
+                }
+                if (!string.IsNullOrEmpty(code))
+                {
+                    predicate = predicate.And(c => c.Code.Contains(code.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
+                }
+                if (version is not null)
+                {
+                    if (version > 0)
+                    {
+                        predicate = predicate.And(c => c.Version.Equals(version));
+                    }
                 }
                 if (status is not null)
                 {
@@ -444,12 +451,12 @@ namespace Coms.Application.Services.Contracts
 
         public async Task<ErrorOr<int>> AddContract(string[] names, string[] values, int contractCategoryId,
                 int serviceId, DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate,
-                int partnerId)
+                int partnerId, int templatetype)
         {
             try
             {
                 var namesAndValues = names.Zip(values, (n, v) => new { Name = n, Value = v });
-                var template = await _templateRepository.GetTemplateByContractCategoryId(contractCategoryId);
+                var template = await _templateRepository.GetTemplateByContractCategoryIdAndTemplateType(contractCategoryId, templatetype);
                 if (template is not null)
                 {
                     string contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts");
@@ -495,7 +502,15 @@ namespace Coms.Application.Services.Contracts
                         }
                         if (nav.Name.Equals("Contract Code"))
                         {
-                            contract.Code = nav.Value;
+                            var existingCode = await _contractRepository.GetByContractCode(nav.Value);
+                            if (existingCode is null)
+                            {
+                                contract.Code = nav.Value;
+                            }
+                            else
+                            {
+                                return Error.Conflict("409", "The contract is already exist!");
+                            }
                         }
                     }
                     await _contractRepository.AddContract(contract);
@@ -603,11 +618,13 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
-        public async Task<ErrorOr<MemoryStream>> PreviewContract(string[] names, string[] values, int contractCategoryId)
+        public async Task<ErrorOr<MemoryStream>> PreviewContract(string[] names, string[] values, int contractCategoryId,
+                int templateType)
         {
             try
             {
-                var template = await _templateRepository.GetTemplateByContractCategoryId(contractCategoryId);
+                var template = await _templateRepository.GetTemplateByContractCategoryIdAndTemplateType(contractCategoryId,
+                        templateType);
                 if (template is not null)
                 {
                     string templateFilePath = Path.Combine(Environment.CurrentDirectory, "Templates", template.Id + ".docx");
@@ -648,7 +665,7 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<PagingResult<ContractResult>>> GetManagerContracts(int userId,
-                string name, string creatorName, int? status, int currentPage, int pageSize)
+                string name, string code, string partnerName, int? version, int? status, int currentPage, int pageSize)
         {
             IList<Contract> contracts = new List<Contract>();
             var flowDetails = await _flowDetailRepository.GetUserFlowDetailsByUserId(userId);
@@ -661,7 +678,7 @@ namespace Coms.Application.Services.Contracts
                     {
                         foreach (var contractFlowDetail in contractFlowDetails)
                         {
-                            var contract = await _contractRepository.GetContract(contractFlowDetail.ContractId);
+                            var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
                             if (!contract.Status.Equals(DocumentStatus.Deleted))
                             {
                                 var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
@@ -679,15 +696,19 @@ namespace Coms.Application.Services.Contracts
             }
             if (contracts.Count() > 0)
             {
-                //if (string.IsNullOrEmpty(creatorName))
-                //{
-                //    creatorName = "";
-                //}
                 var predicate = PredicateBuilder.New<Contract>(true);
                 predicate = predicate.And(c => c.Status != DocumentStatus.Deleted);
                 if (!string.IsNullOrEmpty(name))
                 {
-                    predicate = predicate.And(c => c.ContractName.ToUpper().Contains(name.ToUpper().Trim()));
+                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim(), StringComparison.CurrentCultureIgnoreCase));
+                }
+                if (!string.IsNullOrEmpty(code))
+                {
+                    predicate = predicate.And(c => c.Code.Contains(code.Trim(), StringComparison.CurrentCultureIgnoreCase));
+                }
+                if (string.IsNullOrEmpty(partnerName))
+                {
+                    partnerName = "";
                 }
                 if (status is not null)
                 {
@@ -696,14 +717,15 @@ namespace Coms.Application.Services.Contracts
                         predicate = predicate.And(c => c.Status.Equals((DocumentStatus)status));
                     }
                 }
+                if (version is not null)
+                {
+                    if (version > 0)
+                    {
+                        predicate = predicate.And(c => c.Version.Equals(version));
+                    }
+                }
                 IList<Contract> filteredList = contracts.Where(predicate).OrderByDescending(c => c.CreatedDate)
                         .ToList();
-                var total = filteredList.Count();
-                if (currentPage > 0 && pageSize > 0)
-                {
-                    filteredList = filteredList.Skip((currentPage - 1) * pageSize).Take(pageSize)
-                            .ToList();
-                }
                 IList<ContractResult> responses = new List<ContractResult>();
                 foreach (var contract in filteredList)
                 {
@@ -741,7 +763,20 @@ namespace Coms.Application.Services.Contracts
                         contractResult.PartnerId = partner.Partner.Id;
                         contractResult.PartnerName = partner.Partner.CompanyName;
                     }
-                    responses.Add(contractResult);
+                    if (contractResult.PartnerName.Contains(partnerName.Trim(), StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        responses.Add(contractResult);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                var total = responses.Count();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    responses = responses.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                            .ToList();
                 }
                 return new
                     PagingResult<ContractResult>(responses, total, currentPage, pageSize);
@@ -754,7 +789,7 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<PagingResult<ContractResult>>> GetContractForPartner(int partnerId,
-                string name, string code, bool isApproved, int currentPage, int pageSize)
+                string name, string code, int? version, bool isApproved, int currentPage, int pageSize)
         {
             var reviews = await _partnerReviewRepository.GetByPartnerId(partnerId, isApproved);
             if (reviews is not null)
@@ -769,10 +804,17 @@ namespace Coms.Application.Services.Contracts
                 {
                     predicate = predicate.And(c => c.Code.Contains(code.Trim()));
                 }
+                if(version.HasValue)
+                {
+                    if(version > 0)
+                    {
+                        predicate = predicate.And(c => c.Version.Equals(version));
+                    }
+                }
                 IList<Contract> contracts = new List<Contract>();
                 foreach (var review in reviews)
                 {
-                    var contract = await _contractRepository.GetContract(review.ContractId);
+                    var contract = await _contractRepository.GetContract((int)review.ContractId);
                     if (!string.IsNullOrEmpty(contract.Link))
                     {
                         contracts.Add(contract);
@@ -951,7 +993,7 @@ namespace Coms.Application.Services.Contracts
                     {
                         foreach (var contractFlowDetail in contractFlowDetails)
                         {
-                            var contract = await _contractRepository.GetContract(contractFlowDetail.ContractId);
+                            var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
                             if (!contract.Status.Equals(DocumentStatus.Deleted))
                             {
                                 var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
@@ -1039,6 +1081,186 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
+        public async Task<ErrorOr<ContractResult>> GetPartnerAndService(int id)
+        {
+            try
+            {
+                var contract = await _contractRepository.GetContract(id);
+                if (contract is not null)
+                {
+                    var partnerReview = await _partnerReviewRepository.GetByContractId(id);
+                    var contractCost = await _contractCostRepository.GetByContractId(id);
+                    var contractResult = new ContractResult
+                    {
+                        Id = contract.Id,
+                        ContractName = contract.ContractName,
+                        Version = contract.Version,
+                        CreatedDate = contract.CreatedDate,
+                        CreatedDateString = contract.CreatedDate.Date.ToString(),
+                        EffectiveDate = contract.EffectiveDate,
+                        EffectiveDateString = contract.EffectiveDate.ToString("yyyy-MM-dd"),
+                        Status = (int)contract.Status,
+                        StatusString = contract.Status.ToString(),
+                        TemplateID = contract.TemplateId,
+                        Code = contract.Code,
+                        Link = contract.Link,
+                        PartnerId = partnerReview.PartnerId,
+                        PartnerName = partnerReview.Partner.CompanyName,
+                        ServiceId = contractCost.ServiceId,
+                        ServiceName = contractCost.Service.ServiceName,
+                        SendDateString = partnerReview.SendDate.ToString("yyyy-MM-dd"),
+                        ReviewDateString = partnerReview.ReviewAt.ToString("yyyy-MM-dd")
+                    };
+                    if (contract.UpdatedDate is not null)
+                    {
+                        contractResult.UpdatedDate = contract.UpdatedDate;
+                        contractResult.UpdatedDateString = contract.UpdatedDate.ToString();
+                    }
+                    var template = await _templateRepository.GetTemplate(contract.TemplateId);
+                    contractResult.ContractCategoryId = template.ContractCategoryId;
+                    contractResult.ContractCategory = template.ContractCategory.CategoryName;
+                    return contractResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Contract is not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<int>> EditContract(int contractId, string[] names, string[] values, int serviceId, 
+                DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate, int partnerId)
+        {
+            try
+            {
+                var namesAndValues = names.Zip(values, (n, v) => new { Name = n, Value = v });
+                var oldContract = await _contractRepository.GetContract(contractId);
+                int version = 1;
+                string templateFilePath = Path.Combine(Environment.CurrentDirectory, "Templates", oldContract.TemplateId + ".docx");
+                //Opens the template document
+                FileStream fileStreamPath = new FileStream(templateFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(fileStreamPath, Syncfusion.DocIO.FormatType.Automatic);
+                //Performs the mail merge
+                document.MailMerge.Execute(names, values);
+                //Instantiation of DocIORenderer for Word to PDF conversion
+                DocIORenderer render = new DocIORenderer();
+                //Sets Chart rendering Options.
+                render.Settings.ChartRenderingOptions.ImageFormat = Syncfusion.OfficeChart.ExportImageFormat.Jpeg;
+                //Converts Word document into PDF document
+                PdfDocument pdfDocument = render.ConvertToPDF(document);
+                //Releases all resources used by the Word document and DocIO Renderer objects
+                render.Dispose();
+                document.Dispose();
+                //Saves the Word document to MemoryStream
+                MemoryStream stream = new MemoryStream();
+                pdfDocument.Save(stream);
+                fileStreamPath.Close();
+                byte[] byteInfo = stream.ToArray();
+                stream.Write(byteInfo, 0, byteInfo.Length);
+                stream.Position = 0;
+                var contract = new Contract
+                {
+                    Code = oldContract.Code,
+                    TemplateId = oldContract.TemplateId,
+                    Link = "",
+                    CreatedDate = oldContract.CreatedDate,
+                    EffectiveDate = effectiveDate,
+                    Status = (DocumentStatus)status
+                };
+                foreach (var nav in namesAndValues)
+                {
+                    if (nav.Name.Equals("Contract Title"))
+                    {
+                        contract.ContractName = nav.Value;
+                    }
+                    if (nav.Name.Equals("Contract Code"))
+                    {
+                        var existingCode = await _contractRepository.GetByContractCode(nav.Value);
+                        version = existingCode.Count() + 1;
+                    }
+                }
+                contract.Version = version;
+                await _contractRepository.AddContract(contract);
+                Guid UUID = new Guid();
+                var contractFile = new ContractFile()
+                {
+                    UUID = UUID,
+                    FileData = stream.ToArray(),
+                    UploadedDate = DateTime.Now,
+                    ContractId = contract.Id,
+                    FileSize = stream.ToArray().Length,
+                };
+                await _contractFileRepository.Add(contractFile);
+                string contractFilePath = Path.Combine(Environment.CurrentDirectory, "Contracts", contract.Id + ".pdf");
+                FileStream fileStream = new FileStream(contractFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                pdfDocument.Save(fileStream);
+                //Closes the Word document
+                pdfDocument.Close();
+                fileStream.Close();
+                List<ContractField> contractFields = new List<ContractField>();
+                foreach (var nav in namesAndValues)
+                {
+                    var contractField = new ContractField()
+                    {
+                        FieldName = nav.Name,
+                        Content = nav.Value,
+                        ContractId = contract.Id,
+                    };
+                    contractFields.Add(contractField);
+                }
+                await _contractFieldRepository.AddRangeContractField(contractFields);
+                var contractCost = new ContractCost()
+                {
+                    ServiceId = serviceId,
+                    ContractId = contract.Id
+                };
+                await _contractCostRepository.AddContractCost(contractCost);
+                var partnerReview = new PartnerReview()
+                {
+                    PartnerId = partnerId,
+                    UserId = userId,
+                    ContractId = contract.Id,
+                    SendDate = sendDate,
+                    ReviewAt = reviewDate,
+                    IsApproved = false,
+                    Status = PartnerReviewStatus.Active
+                };
+                await _partnerReviewRepository.AddPartnerReview(partnerReview);
+                var template = await _templateRepository.GetTemplate(oldContract.TemplateId);
+                var flow = await _flowRepository.GetByContractCategoryId(template.ContractCategoryId);
+                var flowDetails = await _flowDetailRepository.GetByFlowId(flow.Id);
+                List<Contract_FlowDetail> contractFlowDetails = new List<Contract_FlowDetail>();
+                foreach (var flowDetail in flowDetails)
+                {
+                    var contractFlowDetail = new Contract_FlowDetail()
+                    {
+                        FlowDetailId = flowDetail.Id,
+                        ContractId = contract.Id,
+                        Status = FlowDetailStatus.Waiting
+                    };
+                    contractFlowDetails.Add(contractFlowDetail);
+                }
+                await _contractFlowDetailsRepository.AddRangeContractFlowDetails(contractFlowDetails);
+                var actionHistory = new ActionHistory()
+                {
+                    ActionType = ActionType.Created,
+                    CreatedAt = DateTime.Now,
+                    UserId = userId,
+                    ContractId = contract.Id
+                };
+                await _actionHistoryRepository.AddActionHistory(actionHistory);
+                return contract.Id;
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
         private async Task SendEmail(int contractId)
         {
             var systemSettings = await _systemSettingsRepository.GetSystemSettings();
@@ -1047,15 +1269,15 @@ namespace Coms.Application.Services.Contracts
             SmtpClient smtp = new SmtpClient();
             message.From = new MailAddress(systemSettings.Email);
             message.To.Add(new MailAddress(partnerReview.Partner.Email));
-            string bodyMessage = "You have a new contract to approve! Here is your code to sign in into our system: " + 
-                partnerReview.Partner.Code;
+            string bodyMessage = "You have a new contract to approve! Here is your code to sign in into our system: " +
+                partnerReview.Partner.Code + ".";
             message.Subject = "Approve New Contract";
             message.Body = bodyMessage;
             smtp.Port = 587;
             smtp.Host = "smtp.gmail.com";
             smtp.EnableSsl = true;
             smtp.UseDefaultCredentials = false;
-            smtp.Credentials = new NetworkCredential(systemSettings.Email, "nkxh eosw gypq pkji");
+            smtp.Credentials = new NetworkCredential(systemSettings.Email, "hibz dgyu xnww dnvx");
             smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtp.Send(message);
         }

@@ -10,6 +10,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<Template?> GetTemplate(int id);
         Task UpdateTemplate(Template template);
         Task<IList<Template>?> GetActivatingTemplates();
-        Task<Template?> GetTemplateByContractCategoryId(int contractCategoryId);
+        Task<Template?> GetTemplateByContractCategoryIdAndTemplateType(int contractCategoryId, int templateType);
+        IList<Template>? GetAllTemplates();
     }
 }

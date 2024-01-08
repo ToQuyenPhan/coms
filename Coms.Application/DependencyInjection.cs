@@ -21,6 +21,8 @@ using Coms.Application.Services.Attachments;
 using Coms.Application.Services.PartnerComments;
 using Coms.Application.Services.Documents;
 using Coms.Application.Services.Signs;
+using Coms.Application.Services.ContractAnnexes;
+using Coms.Application.Services.ContractFields;
 using Coms.Application.Services.Flows;
 using Coms.Application.Services.FlowDetails;
 
@@ -53,6 +55,8 @@ namespace Coms.Application
             services.AddScoped<IPartnerCommentService, PartnerCommentService>();
             services.AddScoped<IDocumentService, DocumentService>();
             services.AddScoped<ISignService, SignService>();
+            services.AddScoped<IContractAnnexesService, ContractAnnexesService>();
+            services.AddScoped<IContractFieldService, ContractFieldService>();
             services.AddScoped<IFlowDetailService, FlowDetailService>();
             services.AddScoped<IFlowService, FlowService>();
             return services;

@@ -1,4 +1,5 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
+using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
@@ -76,7 +77,7 @@ namespace Coms.Application.Services.Services
             }
         }
 
-        public async Task<ErrorOr<ServiceResult>> AddService(string serviceName, string description, double price)
+        public async Task<ErrorOr<ServiceResult>> AddService(string serviceName, string description, double price, int contractCategoryId)
         {
             try
             {
@@ -85,21 +86,21 @@ namespace Coms.Application.Services.Services
                     ServiceName = serviceName,
                     Description = description,
                     Price = price,
+                    ContractCategoryId = contractCategoryId,
                     Status =ServiceStatus.Active
                 };
                 await _serviceRepository.AddService(service);
-                var created = _serviceRepository.GetService(service.Id).Result;
                 var result = new ServiceResult
                 {
                     Id = service.Id,
                     ServiceName = service.ServiceName,
                     Description = service.Description,
                     Price = service.Price,
+                    ContractCategoryId = service.ContractCategoryId,
                     Status = (int)service.Status,
                     StatusString = service.Status.ToString()
                 };
                 return result;
-
             }
             catch (Exception ex)
             {
@@ -107,16 +108,18 @@ namespace Coms.Application.Services.Services
             }
         }
 
-        public async Task<ErrorOr<ServiceResult>> UpdateService(int serviceId, string serviceName, string description, double price)
+        public async Task<ErrorOr<ServiceResult>> UpdateService(int serviceId, string serviceName, string description, double price, 
+                int contractCategoryId)
         {
             try
             {
-                if (_serviceRepository.GetService(serviceId).Result is not null)
+                var service = await _serviceRepository.GetService(serviceId);
+                if (service is not null)
                 {
-                    var service = await _serviceRepository.GetService(serviceId);
                     service.ServiceName = serviceName;
                     service.Description = description;
                     service.Price = price;
+                    service.ContractCategoryId = contractCategoryId;
                     await _serviceRepository.UpdateService(service);
                     var result = new ServiceResult
                     {
@@ -125,6 +128,7 @@ namespace Coms.Application.Services.Services
                         Description = service.Description,
                         Price = service.Price,
                         Status = (int)service.Status,
+                        ContractCategoryId = contractCategoryId,
                         StatusString = service.Status.ToString()
                     };
                     return result;
@@ -140,13 +144,13 @@ namespace Coms.Application.Services.Services
             }
         }
 
-        public async Task<ErrorOr<ServiceResult>> DeleteService(int serviceId)
+        public async Task<ErrorOr<ServiceResult>> DeleteService(int id)
         {
             try
             {
-                if (_serviceRepository.GetService(serviceId).Result is not null)
+                var service = await _serviceRepository.GetService(id);
+                if (service is not null)
                 {
-                    var service = await _serviceRepository.GetService(serviceId);
                     service.Status = ServiceStatus.Inactive;
                     await _serviceRepository.UpdateService(service);    
                     var result = new ServiceResult
@@ -156,6 +160,7 @@ namespace Coms.Application.Services.Services
                         Description = service.Description,
                         Price = service.Price,
                         Status = (int)service.Status,
+                        ContractCategoryId = service.ContractCategoryId,
                         StatusString = service.Status.ToString()
                     };
                     return result;
@@ -201,6 +206,57 @@ namespace Coms.Application.Services.Services
                 else
                 {
                     return Error.NotFound("404", "Service not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<PagingResult<ServiceResult>>> GetActiveServicesWithFilter(int? contractCategoryId, string serviceName, 
+                int currentPage, int pageSize)
+        {
+            try
+            {
+                var services = await _serviceRepository.GetServices();
+                if (services is not null)
+                {
+                    IList<ServiceResult> results = new List<ServiceResult>();
+                    foreach (var service in services)
+                    {
+                        var result = new ServiceResult
+                        {
+                            Id = service.Id,
+                            ServiceName = service.ServiceName,
+                            Description = service.Description,
+                            Price = service.Price,
+                            Status = (int)service.Status,
+                            StatusString = service.Status.ToString(),
+                            ContractCategoryId = service.ContractCategoryId,
+                            ContractCategoryName = service.ContractCategory.CategoryName
+                        };
+                        results.Add(result);
+                    }
+                    if (contractCategoryId.HasValue)
+                    {
+                        results = results.Where(s => s.ContractCategoryId.Equals(contractCategoryId.Value)).ToList();
+                    }
+                    if (!string.IsNullOrEmpty(serviceName))
+                    {
+                        results = results.Where(s => s.ServiceName.Contains(serviceName, StringComparison.CurrentCultureIgnoreCase))
+                                .ToList();
+                    }
+                    int total = results.Count();
+                    if (currentPage > 0 && pageSize > 0)
+                    {
+                        results = results.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+                    }
+                    return new PagingResult<ServiceResult>(results, total, currentPage, pageSize);
+                }
+                else
+                {
+                    return new PagingResult<ServiceResult>(new List<ServiceResult>(), 0, currentPage, pageSize);
                 }
             }
             catch (Exception ex)

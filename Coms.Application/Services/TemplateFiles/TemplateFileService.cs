@@ -74,6 +74,16 @@ namespace Coms.Application.Services.TemplateFiles
                 }
                 if(fieldNames.Count() > 0)
                 {
+                    var contractTitle = fieldNames.FirstOrDefault(fn => fn.Equals("Contract Title"));
+                    if (contractTitle is null)
+                    {
+                        return Error.Conflict("409", "Contract Title not found");
+                    }
+                    var contractCode = fieldNames.FirstOrDefault(fn => fn.Equals("Contract Code"));
+                    if(contractCode is null)
+                    {
+                        return Error.Conflict("409", "Contract Code not found");
+                    }
                     List<TemplateField> templateFields = new List<TemplateField>();
                     foreach (var fieldName in fieldNames)
                     {
@@ -151,6 +161,7 @@ namespace Coms.Application.Services.TemplateFiles
                 if (templateFile is not null)
                 {
                     string filePath = Path.Combine(Environment.CurrentDirectory, "Templates", templateId + ".docx");
+                    File.WriteAllBytes(filePath, document);
                     Spire.Doc.Document checkingDocument = new Spire.Doc.Document();
                     checkingDocument.LoadFromFile(filePath);
                     string[] mailMergeFieldNames = checkingDocument.MailMerge.GetMergeFieldNames();

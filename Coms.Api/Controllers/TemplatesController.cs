@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Services.Common;
 using Coms.Application.Services.Templates;
+using Coms.Contracts.Common.Paging;
 using Coms.Contracts.Templates;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +28,19 @@ namespace Coms.Api.Controllers
             ErrorOr<PagingResult<TemplateResult>> result =
                 _templateService.GetTemplates(request.TemplateName, request.ContractCategoryId, 
                     request.TemplateTypeId, request.Status, request.Creator, request.CurrentPage, request.PageSize).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet("notifications")]
+        [SwaggerOperation(Summary = "Get all template notifications in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public IActionResult GetTemplateNotifications([FromQuery] PagingRequest request)
+        {
+            ErrorOr<PagingResult<NotificationResult>> result = _templateService.GetTemplateNotifications(request.CurrentPage, 
+                    request.PageSize);
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

@@ -19,7 +19,13 @@ namespace Coms.Domain.Entities
         public int? UserId { get; set; }
         public virtual User? User { get; set; }
 
-        public int ContractId { get; set; }
+        public int? ContractId { get; set; }
         public virtual Contract? Contract { get; set; }
+
+        public int? ContractAnnexId { get; set; }
+        public virtual ContractAnnex? ContractAnnex { get; set; }
+
+        public int? LiquidationRecordId { get; set; }
+        public virtual LiquidationRecord? LiquidationRecord { get; set;}
     }
 }

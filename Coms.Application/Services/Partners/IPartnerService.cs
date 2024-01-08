@@ -7,11 +7,15 @@ namespace Coms.Application.Services.Partners
     {
         ErrorOr<IList<PartnerResult>> GetActivePartners();
         Task<ErrorOr<PartnerResult>> GetPartner(int id);
-        ErrorOr<PagingResult<PartnerResult>> GetPartners(int? partnerId, string pepresentative, string companyName, 
-                int? status, int currentPage, int pageSize);
-        Task<ErrorOr<PartnerResult>> AddPartnerAsync(AddPartnerResult partner);
+        //get all partners
+        ErrorOr<PagingResult<PartnerResult>> GetPartners(int? partnerId, string pepresentative, string companyName, int? status, int currentPage, int pageSize);
+        //add partner
+        Task<ErrorOr<PartnerResult>> AddPartnerAsync(string? image, string? representative, string? representativePosition, string? email, string? code, string? phone, string? address, string? companyName, string? taxCode);
+        //delete partner by id
         Task<ErrorOr<PartnerResult>> DeletePartner(int id);
-        Task<ErrorOr<PartnerResult>> UpdatePartner(int id, AddPartnerResult partner);
+        //update partner
+        Task<ErrorOr<PartnerResult>> UpdatePartner(int id, string? image, string? representative, string? representativePosition, string? email, string? code, string? phone, string? address, string? companyName, string? taxCode);
+        //update partner status
         Task<ErrorOr<PartnerResult>> UpdatePartnerStatus(int id);
     }
 }

@@ -3,6 +3,8 @@ using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 
 namespace Coms.Application.Services.ActionHistories
 {
@@ -25,7 +27,7 @@ namespace Coms.Application.Services.ActionHistories
                 foreach (var history in createHistories)
                 {
                     var actionHistoryList = await _actionHistoryRepository
-                            .GetOtherUserActionByContractId(history.ContractId, userId);
+                            .GetOtherUserActionByContractId((int)history.ContractId, userId);
                     if (actionHistoryList is not null)
                     {
                         foreach (var actionHistory in actionHistoryList)
@@ -50,7 +52,7 @@ namespace Coms.Application.Services.ActionHistories
                     var actionHistoryResult = new ActionHistoryResult()
                     {
                         Id = actionHistory.Id,
-                        ActionType = (int) actionHistory.ActionType,
+                        ActionType = (int)actionHistory.ActionType,
                         ActionTypeString = actionHistory.ActionType.ToString(),
                         CreatedAt = actionHistory.CreatedAt,
                         CreatedAtString = actionHistory.CreatedAt.ToString("dd/MM/yyyy"),
@@ -63,7 +65,7 @@ namespace Coms.Application.Services.ActionHistories
                     actionHistoryResults.Add(actionHistoryResult);
                 }
                 actionHistoryResults = actionHistoryResults.OrderByDescending(ah => ah.CreatedAt).ToList();
-                if(currentPage > 0 && pageSize > 0)
+                if (currentPage > 0 && pageSize > 0)
                 {
                     actionHistoryResults = actionHistoryResults.Skip((currentPage - 1) * pageSize).Take(pageSize)
                             .ToList();
@@ -105,6 +107,76 @@ namespace Coms.Application.Services.ActionHistories
                 };
                 return IActionHistoryResult;
 
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<MemoryStream>> ExportActionHistories(int userId)
+        {
+            try
+            {
+                var createHistories = await _actionHistoryRepository.GetCreateActionByUserId(userId);
+                if (createHistories is not null)
+                {
+                    IList<ActionHistory> actionHistories = new List<ActionHistory>();
+                    foreach (var history in createHistories)
+                    {
+                        var actionHistoryList = await _actionHistoryRepository
+                                .GetOtherUserActionByContractId((int)history.ContractId, userId);
+                        if (actionHistoryList is not null)
+                        {
+                            foreach (var actionHistory in actionHistoryList)
+                            {
+                                if (actionHistory.Contract.Status.Equals(DocumentStatus.Deleted))
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    if (!actionHistories.Contains(actionHistory))
+                                    {
+                                        actionHistories.Add(actionHistory);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    ExcelPackage excel = new ExcelPackage();
+                    var workSheet = excel.Workbook.Worksheets.Add("Sheet1");
+                    workSheet.Row(1).Height = 20;
+                    workSheet.Row(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    workSheet.Row(1).Style.Font.Bold = true;
+                    workSheet.Cells[1, 1].Value = "S.No";
+                    workSheet.Cells[1, 2].Value = "Full Name";
+                    workSheet.Cells[1, 3].Value = "Action Type";
+                    workSheet.Cells[1, 4].Value = "Contract Name";
+                    workSheet.Cells[1, 5].Value = "Created At";
+                    int recordIndex = 2;
+                    foreach (var actionHistory in actionHistories)
+                    {
+                        workSheet.Cells[recordIndex, 1].Value = (recordIndex - 1).ToString();
+                        workSheet.Cells[recordIndex, 2].Value = actionHistory.User.FullName;
+                        workSheet.Cells[recordIndex, 3].Value = actionHistory.ActionType.ToString();
+                        workSheet.Cells[recordIndex, 4].Value = actionHistory.Contract.ContractName;
+                        workSheet.Cells[recordIndex, 5].Value = actionHistory.CreatedAt.ToString("dd/MM/yyyy hh:mm:ss");
+                        recordIndex++;
+                    }
+                    workSheet.Column(2).AutoFit();
+                    workSheet.Column(3).AutoFit();
+                    workSheet.Column(4).AutoFit();
+                    workSheet.Column(5).AutoFit();
+                    var memoryStream = new MemoryStream();
+                    excel.SaveAs(memoryStream);
+                    memoryStream.Position = 0;
+                    return memoryStream;
+                }
+                else
+                {
+                    return Error.Conflict("409", "Not found any actions to exports!");
+                }
             }
             catch (Exception ex)
             {

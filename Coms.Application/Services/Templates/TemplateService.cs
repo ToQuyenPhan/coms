@@ -11,7 +11,6 @@ namespace Coms.Application.Services.Templates
     {
         private readonly ITemplateRepository _templateRepository;
         private readonly IContractCategoryRepository _contractCategoryRepository;
-        private readonly ITemplateTypeRepository _templateTypeRepository;
         private readonly ITemplateFileRepository _templateFileRepository;
 
         public TemplateService(ITemplateRepository templateRepository,
@@ -21,7 +20,6 @@ namespace Coms.Application.Services.Templates
         {
             _templateRepository = templateRepository;
             _contractCategoryRepository = contractCategoryRepository;
-            _templateTypeRepository = templateTypeRepository;
             _templateFileRepository = templateFileRepository;
         }
 
@@ -45,8 +43,7 @@ namespace Coms.Application.Services.Templates
                         CreatedDateString = template.CreatedDate.ToString(),
                         ContractCategoryId = template.ContractCategoryId,
                         ContractCategoryName = template.ContractCategory.CategoryName,
-                        TemplateTypeId = template.TemplateTypeId,
-                        TemplateTypeName = template.TemplateType.Name,
+                        TemplateType = (int)template.TemplateType,
                         TemplateLink = template.TemplateLink,
                         Status = (int)template.Status,
                         StatusString = template.Status.ToString(),
@@ -54,6 +51,21 @@ namespace Coms.Application.Services.Templates
                         UserName = template.User.Username,
                         Email = template.User.Email
                     };
+                    if (template.TemplateType.Equals(Domain.Enum.TemplateType.ContractAnnex))
+                    {
+                        templateResult.TemplateTypeString = "Contract Annex";
+                    }
+                    else
+                    {
+                        if (template.TemplateType.Equals(Domain.Enum.TemplateType.LiquidationRecord))
+                        {
+                            templateResult.TemplateTypeString = "Liquidation Record";
+                        }
+                        else
+                        {
+                            templateResult.TemplateTypeString = template.TemplateType.ToString();
+                        }
+                    }
                     responses.Add(templateResult);
                 }
                 var total = result.Count();
@@ -84,7 +96,7 @@ namespace Coms.Application.Services.Templates
                     TemplateName = name,
                     Description = description,
                     ContractCategoryId = category,
-                    TemplateTypeId = type,
+                    TemplateType = (Domain.Enum.TemplateType)type,
                     TemplateLink = "",
                     CreatedDate = DateTime.Now,
                     Status = (TemplateStatus)status,
@@ -101,8 +113,8 @@ namespace Coms.Application.Services.Templates
                     CreatedDateString = createdTemplate.CreatedDate.ToString(),
                     ContractCategoryId = createdTemplate.ContractCategory.Id,
                     ContractCategoryName = createdTemplate.ContractCategory.CategoryName,
-                    TemplateTypeId = createdTemplate.TemplateType.Id,
-                    TemplateTypeName = createdTemplate.TemplateType.Name,
+                    TemplateType = (int)createdTemplate.TemplateType,
+                    TemplateTypeString = createdTemplate.TemplateType.ToString(),
                     TemplateLink = createdTemplate.TemplateLink,
                     Status = (int)createdTemplate.Status,
                     StatusString = createdTemplate.Status.ToString(),
@@ -136,8 +148,8 @@ namespace Coms.Application.Services.Templates
                         CreatedDateString = template.CreatedDate.ToString(),
                         ContractCategoryId = template.ContractCategoryId,
                         ContractCategoryName = template.ContractCategory.CategoryName,
-                        TemplateTypeId = template.TemplateTypeId,
-                        TemplateTypeName = template.TemplateType.Name,
+                        TemplateType = (int)template.TemplateType,
+                        TemplateTypeString = template.TemplateType.ToString(),
                         TemplateLink = template.TemplateLink,
                         Status = (int)template.Status,
                         StatusString = template.Status.ToString(),
@@ -211,15 +223,10 @@ namespace Coms.Application.Services.Templates
                     {
                         template.ContractCategory = contractCategory;
                     }
-                    var templateType = await _templateTypeRepository.GetTemplateTypeById(type);
-                    if (templateType is not null)
-                    {
-                        template.TemplateType = templateType;
-                    }
+                    template.TemplateType = (Domain.Enum.TemplateType)type;
                     template.TemplateName = name;
                     template.Description = description;
                     template.ContractCategoryId = category;
-                    template.TemplateTypeId = type;
                     template.UpdatedDate = DateTime.Now;
                     template.Status = (TemplateStatus)status;
                     await _templateRepository.UpdateTemplate(template);
@@ -232,8 +239,8 @@ namespace Coms.Application.Services.Templates
                         CreatedDateString = template.CreatedDate.ToString(),
                         ContractCategoryId = template.ContractCategory.Id,
                         ContractCategoryName = template.ContractCategory.CategoryName,
-                        TemplateTypeId = template.TemplateType.Id,
-                        TemplateTypeName = template.TemplateType.Name,
+                        TemplateType = (int)template.TemplateType,
+                        TemplateTypeString = template.TemplateType.ToString(),
                         TemplateLink = template.TemplateLink,
                         Status = (int)template.Status,
                         StatusString = template.Status.ToString(),
@@ -271,8 +278,7 @@ namespace Coms.Application.Services.Templates
                             CultureInfo.CreateSpecificCulture("en-US")),
                         ContractCategoryId = template.ContractCategory.Id,
                         ContractCategoryName = template.ContractCategory.CategoryName,
-                        TemplateTypeId = template.TemplateType.Id,
-                        TemplateTypeName = template.TemplateType.Name,
+                        TemplateType = (int)template.TemplateType,
                         TemplateLink = template.TemplateLink,
                         Status = (int)template.Status,
                         StatusString = template.Status.ToString(),
@@ -281,6 +287,21 @@ namespace Coms.Application.Services.Templates
                         Email = template.User.Email,
                         UserImage = template.User.Image
                     };
+                    if (template.TemplateType.Equals(Domain.Enum.TemplateType.ContractAnnex))
+                    {
+                        templateResult.TemplateTypeString = "Contract Annex";
+                    }
+                    else
+                    {
+                        if (template.TemplateType.Equals(Domain.Enum.TemplateType.LiquidationRecord))
+                        {
+                            templateResult.TemplateTypeString = "Liquidation Record";
+                        }
+                        else
+                        {
+                            templateResult.TemplateTypeString = template.TemplateType.ToString();
+                        }
+                    }
                     if (template.UpdatedDate is not null)
                     {
                         templateResult.UpdatedDate = template.UpdatedDate;
@@ -307,7 +328,7 @@ namespace Coms.Application.Services.Templates
                 if (template is not null)
                 {
                     var activatingTemplate = await _templateRepository.GetTemplates(string.Empty,
-                        template.ContractCategoryId, 0, (int)TemplateStatus.Activating, string.Empty);
+                        template.ContractCategoryId, (int)template.TemplateType, (int)TemplateStatus.Activating, string.Empty);
                     if (activatingTemplate is not null)
                     {
                         return Error.Conflict("409", "The contract category already has a activating " +
@@ -326,8 +347,8 @@ namespace Coms.Application.Services.Templates
                             CreatedDateString = template.CreatedDate.ToString(),
                             ContractCategoryId = template.ContractCategory.Id,
                             ContractCategoryName = template.ContractCategory.CategoryName,
-                            TemplateTypeId = template.TemplateType.Id,
-                            TemplateTypeName = template.TemplateType.Name,
+                            TemplateType = (int)template.TemplateType,
+                            TemplateTypeString = template.TemplateType.ToString(),
                             TemplateLink = template.TemplateLink,
                             Status = (int)template.Status,
                             StatusString = template.Status.ToString(),
@@ -372,8 +393,8 @@ namespace Coms.Application.Services.Templates
                         CreatedDateString = template.CreatedDate.ToString(),
                         ContractCategoryId = template.ContractCategory.Id,
                         ContractCategoryName = template.ContractCategory.CategoryName,
-                        TemplateTypeId = template.TemplateType.Id,
-                        TemplateTypeName = template.TemplateType.Name,
+                        TemplateType = (int)template.TemplateType,
+                        TemplateTypeString = template.TemplateType.ToString(),
                         TemplateLink = template.TemplateLink,
                         Status = (int)template.Status,
                         StatusString = template.Status.ToString(),
@@ -396,6 +417,49 @@ namespace Coms.Application.Services.Templates
             catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
+            }
+        }
+
+        public ErrorOr<PagingResult<NotificationResult>> GetTemplateNotifications(int currentPage, int pageSize)
+        {
+
+            List<NotificationResult> responses = new List<NotificationResult>();
+            var result = _templateRepository.GetAllTemplates();
+            result = result.OrderByDescending(t => t.CreatedDate).ToList();
+            if (result is not null)
+            {
+                foreach (var template in result)
+                {
+                    if (string.IsNullOrEmpty(template.TemplateLink))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        var notificationResult = new NotificationResult()
+                        {
+                            Title = "New Template",
+                            Message = template.User.FullName + " created new template!",
+                            Long = AsTimeAgo(template.CreatedDate),
+                            TemplateId = template.Id
+                        };
+                        responses.Add(notificationResult);
+                    }
+                }
+                var total = result.Count();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    responses = responses.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                            .ToList();
+                }
+                return new
+                    PagingResult<NotificationResult>(responses, total, currentPage,
+                    pageSize);
+            }
+            else
+            {
+                return new PagingResult<NotificationResult>(new List<NotificationResult>(), 0, currentPage,
+                    pageSize);
             }
         }
 

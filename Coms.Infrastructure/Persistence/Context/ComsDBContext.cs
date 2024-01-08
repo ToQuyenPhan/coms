@@ -46,6 +46,8 @@ namespace Coms.Infrastructure.Persistence.Context
         public DbSet<Contract_FlowDetail> UserFlowDetails { get; set; }
         public DbSet<ContractField> ContractFields { get; set; }
         public DbSet<SystemSettings> SystemSettings { get; set; }
+        public DbSet<ContractAnnexAttachment> ContractAnnexAttachments { get; set; }
+        public DbSet<LiquidationRecordAttachment> LiquidationRecordAttachments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -21,6 +21,11 @@ namespace Coms.Infrastructure.Persistence.Repositories
             return _entities.ToList();
         }
 
+        public IList<T> GetAllWithIncludes(Expression<Func<T, object>>[]? includes)
+        {
+            return AsQueryableWithIncludes(includes).AsNoTracking().ToList();
+        }
+
         public virtual async Task CreateAsync(T entity)
         {
             await _entities.AddAsync(entity);

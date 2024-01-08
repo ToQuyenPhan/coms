@@ -115,43 +115,37 @@ namespace Coms.Application.Services.Partners
             }
         }
 
-        public async Task<ErrorOr<PartnerResult>> AddPartnerAsync(AddPartnerResult partner)
-        {
 
-            //foreach (var item in partner) for check all field is null if null return error.notfound
-            foreach (System.Reflection.PropertyInfo item in partner.GetType().GetProperties())
-            {
-                if (item.GetValue(partner) is null || item.GetValue(partner).Equals("string"))
-                {
-                    return Error.NotFound("404", "Value input is null");
-                }
-            }
+        //add partner
+        public async Task<ErrorOr<PartnerResult>> AddPartnerAsync(string? image, string? representative, string? representativePosition, string? email, string? code, string? phone, string? address, string? companyName, string? taxCode)
+        {
             //check email is exist
-            if (_partnerRepository.GetPartnerByEmail(partner.Email).Result is not null)
+            if (_partnerRepository.GetPartnerByEmail(email).Result is not null)
             {
                 return Error.NotFound("404", "Email is exist!");
             }
             //check code is exist
-            if (_partnerRepository.GetPartnerByCode(partner.Code).Result is not null)
+            if (_partnerRepository.GetPartnerByCode(code).Result is not null)
             {
                 return Error.NotFound("404", "Code is exist!");
             }
+
             Partner newPartner = new()
             {
                 Id = 0,
-                Address = partner.Address,
-                Code = partner.Code,
-                CompanyName = partner.CompanyName,
-                Email = partner.Email,
-                Image = partner.Image,
-                Phone = partner.Phone,
-                Representative = partner.Representative,
-                RepresentativePosition = partner.RepresentativePosition,
-                TaxCode = partner.TaxCode,
+                Address = address,
+                Code = code,
+                CompanyName = companyName,
+                Email = email,
+                Image = image,
+                Phone = phone,
+                Representative = representative,
+                RepresentativePosition = representativePosition,
+                TaxCode = taxCode,
                 Status = (PartnerStatus)(int)PartnerStatus.Active
             };
             await _partnerRepository.AddPartner(newPartner);
-            Partner respone = await _partnerRepository.GetPartnerByEmail(partner.Email);
+            Partner respone = await _partnerRepository.GetPartnerByEmail(email);
             if (respone != null)
             {
                 PartnerResult response = new()
@@ -177,6 +171,7 @@ namespace Coms.Application.Services.Partners
             }
         }
 
+        //delete partner by id
         public async Task<ErrorOr<PartnerResult>> DeletePartner(int id)
         {
             Partner? partner = _partnerRepository.GetPartner(id).Result;
@@ -208,30 +203,32 @@ namespace Coms.Application.Services.Partners
             }
         }
 
-        public async Task<ErrorOr<PartnerResult>> UpdatePartner(int id, AddPartnerResult partner)
+        //update partner with string? image, string? representative, string? representativePosition, string? email, string? code, string? phone, string? address, string? companyName, string? taxCode not use addPartnerRequest
+        public async Task<ErrorOr<PartnerResult>> UpdatePartner(int id, string? image, string? representative, string? representativePosition, string? email, string? code, string? phone, string? address, string? companyName, string? taxCode)
         {
-            if (_partnerRepository.GetPartnerByEmail(partner.Email).Result is not null && _partnerRepository.GetPartnerByEmail(partner.Email).Result.Id != id)
+            //check email is exist
+            if (_partnerRepository.GetPartnerByEmail(email).Result is not null && _partnerRepository.GetPartnerByEmail(email).Result.Id != id)
             {
                 return Error.NotFound("404", "Email is exist!");
             }
-            if (_partnerRepository.GetPartnerByCode(partner.Code).Result is not null && _partnerRepository.GetPartnerByCode(partner.Code).Result.Id != id)
+            //check code is exist
+            if (_partnerRepository.GetPartnerByCode(code).Result is not null && _partnerRepository.GetPartnerByCode(code).Result.Id != id)
             {
                 return Error.NotFound("404", "Code is exist!");
             }
 
-
             Partner? partnerUpdate = _partnerRepository.GetPartner(id).Result;
             if (partnerUpdate is not null)
             {
-                partnerUpdate.Address = partner.Address;
-                partnerUpdate.Code = partner.Code;
-                partnerUpdate.CompanyName = partner.CompanyName;
-                partnerUpdate.Email = partner.Email;
-                partnerUpdate.Image = partner.Image;
-                partnerUpdate.Phone = partner.Phone;
-                partnerUpdate.Representative = partner.Representative;
-                partnerUpdate.RepresentativePosition = partner.RepresentativePosition;
-                partnerUpdate.TaxCode = partner.TaxCode;
+                partnerUpdate.Address = address;
+                partnerUpdate.Code = code;
+                partnerUpdate.CompanyName = companyName;
+                partnerUpdate.Email = email;
+                partnerUpdate.Image = image;
+                partnerUpdate.Phone = phone;
+                partnerUpdate.Representative = representative;
+                partnerUpdate.RepresentativePosition = representativePosition;
+                partnerUpdate.TaxCode = taxCode;
                 await _partnerRepository.UpdatePartner(partnerUpdate);
                 partnerUpdate = _partnerRepository.GetPartner(id).Result;
                 PartnerResult response = new()
@@ -257,6 +254,7 @@ namespace Coms.Application.Services.Partners
             }
         }
 
+        //update partner status check status if active change to inactive and vice versa
         public async Task<ErrorOr<PartnerResult>> UpdatePartnerStatus(int id)
         {
             Partner? partner = _partnerRepository.GetPartner(id).Result;

@@ -49,18 +49,28 @@ namespace Coms.Infrastructure.Migrations
                     b.Property<int>("ActionType")
                         .HasColumnType("int");
 
-                    b.Property<int>("ContractId")
+                    b.Property<int?>("ContractAnnexId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ContractId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("LiquidationRecordId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ContractAnnexId");
+
                     b.HasIndex("ContractId");
+
+                    b.HasIndex("LiquidationRecordId");
 
                     b.HasIndex("UserId");
 
@@ -200,10 +210,16 @@ namespace Coms.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("ContractId")
+                    b.Property<int?>("ContractAnnexId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ContractId")
                         .HasColumnType("int");
 
                     b.Property<int>("FlowDetailId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LiquidationRecordId")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
@@ -211,9 +227,13 @@ namespace Coms.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ContractAnnexId");
+
                     b.HasIndex("ContractId");
 
                     b.HasIndex("FlowDetailId");
+
+                    b.HasIndex("LiquidationRecordId");
 
                     b.ToTable("UserFlowDetails");
                 });
@@ -258,6 +278,42 @@ namespace Coms.Infrastructure.Migrations
                     b.HasIndex("ContractId");
 
                     b.ToTable("ContractAnnexes");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexAttachment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("ContractAnnexId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractAnnexId");
+
+                    b.ToTable("ContractAnnexAttachments");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexCost", b =>
@@ -525,6 +581,42 @@ namespace Coms.Infrastructure.Migrations
                     b.ToTable("LiquidationRecords");
                 });
 
+            modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecordAttachment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LiquidationRecordId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UploadDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LiquidationRecordId");
+
+                    b.ToTable("LiquidationRecordAttachments");
+                });
+
             modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecordFile", b =>
                 {
                     b.Property<Guid>("UUID")
@@ -666,11 +758,17 @@ namespace Coms.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("ContractId")
+                    b.Property<int?>("ContractAnnexId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ContractId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("LiquidationRecordId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("PartnerId")
                         .HasColumnType("int");
@@ -689,7 +787,11 @@ namespace Coms.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ContractAnnexId");
+
                     b.HasIndex("ContractId");
+
+                    b.HasIndex("LiquidationRecordId");
 
                     b.HasIndex("PartnerId");
 
@@ -706,12 +808,22 @@ namespace Coms.Infrastructure.Migrations
                     b.Property<int?>("ContractId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ContractAnnexId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("LiquidationRecordId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("SignedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("PartnerId", "ContractId");
 
+                    b.HasIndex("ContractAnnexId");
+
                     b.HasIndex("ContractId");
+
+                    b.HasIndex("LiquidationRecordId");
 
                     b.ToTable("PartnerSigns");
                 });
@@ -931,7 +1043,7 @@ namespace Coms.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TemplateTypeId")
+                    b.Property<int>("TemplateType")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -943,8 +1055,6 @@ namespace Coms.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ContractCategoryId");
-
-                    b.HasIndex("TemplateTypeId");
 
                     b.HasIndex("UserId");
 
@@ -1101,6 +1211,11 @@ namespace Coms.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<string>("Position")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -1126,17 +1241,27 @@ namespace Coms.Infrastructure.Migrations
 
             modelBuilder.Entity("Coms.Domain.Entities.ActionHistory", b =>
                 {
+                    b.HasOne("Coms.Domain.Entities.ContractAnnex", "ContractAnnex")
+                        .WithMany()
+                        .HasForeignKey("ContractAnnexId");
+
                     b.HasOne("Coms.Domain.Entities.Contract", "Contract")
                         .WithMany("ActionHistories")
-                        .HasForeignKey("ContractId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ContractId");
+
+                    b.HasOne("Coms.Domain.Entities.LiquidationRecord", "LiquidationRecord")
+                        .WithMany()
+                        .HasForeignKey("LiquidationRecordId");
 
                     b.HasOne("Coms.Domain.Entities.User", "User")
                         .WithMany("ActionHistories")
                         .HasForeignKey("UserId");
 
                     b.Navigation("Contract");
+
+                    b.Navigation("ContractAnnex");
+
+                    b.Navigation("LiquidationRecord");
 
                     b.Navigation("User");
                 });
@@ -1185,11 +1310,13 @@ namespace Coms.Infrastructure.Migrations
 
             modelBuilder.Entity("Coms.Domain.Entities.Contract_FlowDetail", b =>
                 {
+                    b.HasOne("Coms.Domain.Entities.ContractAnnex", "ContractAnnex")
+                        .WithMany()
+                        .HasForeignKey("ContractAnnexId");
+
                     b.HasOne("Coms.Domain.Entities.Contract", "Contract")
                         .WithMany("UserFlowDetails")
-                        .HasForeignKey("ContractId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ContractId");
 
                     b.HasOne("Coms.Domain.Entities.FlowDetail", "FlowDetail")
                         .WithMany("ContractFlowDetails")
@@ -1197,9 +1324,17 @@ namespace Coms.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Coms.Domain.Entities.LiquidationRecord", "LiquidationRecord")
+                        .WithMany()
+                        .HasForeignKey("LiquidationRecordId");
+
                     b.Navigation("Contract");
 
+                    b.Navigation("ContractAnnex");
+
                     b.Navigation("FlowDetail");
+
+                    b.Navigation("LiquidationRecord");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.ContractAnnex", b =>
@@ -1209,6 +1344,17 @@ namespace Coms.Infrastructure.Migrations
                         .HasForeignKey("ContractId");
 
                     b.Navigation("Contract");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexAttachment", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.ContractAnnex", "ContractAnnex")
+                        .WithMany()
+                        .HasForeignKey("ContractAnnexId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ContractAnnex");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexCost", b =>
@@ -1335,6 +1481,17 @@ namespace Coms.Infrastructure.Migrations
                     b.Navigation("Contract");
                 });
 
+            modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecordAttachment", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.LiquidationRecord", "LiquidationRecord")
+                        .WithMany()
+                        .HasForeignKey("LiquidationRecordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LiquidationRecord");
+                });
+
             modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecordFile", b =>
                 {
                     b.HasOne("Coms.Domain.Entities.LiquidationRecord", "LiquidationRecord")
@@ -1368,11 +1525,17 @@ namespace Coms.Infrastructure.Migrations
 
             modelBuilder.Entity("Coms.Domain.Entities.PartnerReview", b =>
                 {
+                    b.HasOne("Coms.Domain.Entities.ContractAnnex", "ContractAnnex")
+                        .WithMany()
+                        .HasForeignKey("ContractAnnexId");
+
                     b.HasOne("Coms.Domain.Entities.Contract", "Contract")
                         .WithMany()
-                        .HasForeignKey("ContractId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ContractId");
+
+                    b.HasOne("Coms.Domain.Entities.LiquidationRecord", "LiquidationRecord")
+                        .WithMany()
+                        .HasForeignKey("LiquidationRecordId");
 
                     b.HasOne("Coms.Domain.Entities.Partner", "Partner")
                         .WithMany()
@@ -1384,6 +1547,10 @@ namespace Coms.Infrastructure.Migrations
 
                     b.Navigation("Contract");
 
+                    b.Navigation("ContractAnnex");
+
+                    b.Navigation("LiquidationRecord");
+
                     b.Navigation("Partner");
 
                     b.Navigation("User");
@@ -1391,11 +1558,19 @@ namespace Coms.Infrastructure.Migrations
 
             modelBuilder.Entity("Coms.Domain.Entities.PartnerSign", b =>
                 {
+                    b.HasOne("Coms.Domain.Entities.ContractAnnex", "ContractAnnex")
+                        .WithMany()
+                        .HasForeignKey("ContractAnnexId");
+
                     b.HasOne("Coms.Domain.Entities.Contract", "Contract")
                         .WithMany()
                         .HasForeignKey("ContractId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Coms.Domain.Entities.LiquidationRecord", "LiquidationRecord")
+                        .WithMany()
+                        .HasForeignKey("LiquidationRecordId");
 
                     b.HasOne("Coms.Domain.Entities.Partner", "Partner")
                         .WithMany()
@@ -1404,6 +1579,10 @@ namespace Coms.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Contract");
+
+                    b.Navigation("ContractAnnex");
+
+                    b.Navigation("LiquidationRecord");
 
                     b.Navigation("Partner");
                 });
@@ -1451,19 +1630,11 @@ namespace Coms.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Coms.Domain.Entities.TemplateType", "TemplateType")
-                        .WithMany()
-                        .HasForeignKey("TemplateTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Coms.Domain.Entities.User", "User")
                         .WithMany("Templates")
                         .HasForeignKey("UserId");
 
                     b.Navigation("ContractCategory");
-
-                    b.Navigation("TemplateType");
 
                     b.Navigation("User");
                 });
