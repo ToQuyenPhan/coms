@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
+using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
 using static SkiaSharp.HarfBuzz.SKShaper;
@@ -141,6 +142,33 @@ namespace Coms.Application.Services.UserFlowDetails
                     }
                 }
             };
+        }
+        public async Task<ErrorOr<UserFlowDetailResult>> AddContractFlowDetail(int status, int flowDetailId, int contractId)
+        {
+            try
+            {
+                var contractFlowDetail = new Contract_FlowDetail
+                {
+                    Status = (FlowDetailStatus)status,
+                    FlowDetailId = flowDetailId,
+                    ContractId = contractId,
+
+                };
+                await _userFlowDetailsRepository.AddContractFlowDetail(contractFlowDetail);
+                var flowDetailResult = new UserFlowDetailResult()
+                {
+                    Id = contractFlowDetail.Id,
+                    Status = (int)contractFlowDetail.Status,
+                    ContractId = contractFlowDetail.ContractId,
+                    FlowDetailId = contractFlowDetail.FlowDetailId,
+                };
+                return flowDetailResult;
+
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
         }
     }
 }

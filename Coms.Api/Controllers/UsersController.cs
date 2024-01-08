@@ -19,7 +19,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet("gets")]
         [SwaggerOperation(Summary = "Get all users in Coms")]
-        [Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Staff, Sale Manager, Manager")]
         public IActionResult GetUsers()
         {
             ErrorOr<IList<UserResult>> result = _userService.GetUsers().Result;
@@ -31,7 +31,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet("getManagers")]
         [SwaggerOperation(Summary = "Get all Manager in Coms")]
-        [Authorize(Roles = "Staff")]
+        [Authorize(Roles = "Staff, Sale Manager, Manager")]
         public IActionResult GetManagers()
         {
             ErrorOr<IList<UserResult>> result = _userService.GetManagers().Result;

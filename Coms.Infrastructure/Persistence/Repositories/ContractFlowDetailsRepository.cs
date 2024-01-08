@@ -52,5 +52,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
                 { ufd => ufd.FlowDetail });
             return (list.Count() > 0) ? list : null;
         }
+        public async Task AddContractFlowDetail(Contract_FlowDetail contractFlowDetail)
+        {
+            await _genericRepository.CreateAsync(contractFlowDetail);
+        }
     }
 }

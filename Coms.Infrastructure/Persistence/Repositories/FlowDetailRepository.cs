@@ -45,5 +45,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
                 new System.Linq.Expressions.Expression<Func<FlowDetail, object>>[] { fd => fd.User, fd => fd.Flow });
             return (list.Count() > 0) ? list : null;
         }
+        public async Task AddFlowDetail(FlowDetail flowDetail)
+        {
+            await _genericRepository.CreateAsync(flowDetail);
+        }
     }
 }

@@ -20,5 +20,17 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     f.ContractCategoryId.Equals(contractCategoryId) && 
                     f.Status.Equals(CommonStatus.Active));
         }
+        public async Task AddFlow(Flow flow)
+        {
+            await _genericRepository.CreateAsync(flow);
+        }
+
+        public async Task<Flow?> GetFlowById(int flowId)
+        {
+            return await
+                     _genericRepository.FirstOrDefaultAsync(f =>
+                     f.Id.Equals(flowId) &&
+                     f.Status.Equals(CommonStatus.Active));
+        }
     }
 }

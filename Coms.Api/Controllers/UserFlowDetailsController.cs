@@ -47,5 +47,17 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+        [Authorize(Roles = "Sale Manager")]
+        [HttpPost("add")]
+        [SwaggerOperation(Summary = "Add a contract Flow Detail in Coms")]
+        public IActionResult AddContractFlowDetail([FromBody] UserFlowDetailFormRequest request)
+        {
+            ErrorOr<UserFlowDetailResult> result =
+                _userFlowDetailService.AddContractFlowDetail(request.Status, request.FlowDetailId, request.ContractId).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }
