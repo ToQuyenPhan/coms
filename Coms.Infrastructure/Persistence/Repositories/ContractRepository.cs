@@ -1,6 +1,7 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
+using Microsoft.EntityFrameworkCore;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {

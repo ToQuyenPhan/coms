@@ -18,6 +18,8 @@ namespace Coms.Application.Services.Signs
         private readonly IContractAnnexRepository _contractAnnexRepository;
         private readonly ILiquidationRecordRepository _liquidationRecordRepository;
         private readonly IContractFlowDetailsRepository _contractFlowDetailsRepository;
+        private readonly IPartnerReviewRepository _partnerReviewRepository;
+        private readonly IPartnerSignRepository _partnerSignRepository;
 
 
         public SignService(IContractFileRepository contractFileRepository,
@@ -26,7 +28,9 @@ namespace Coms.Application.Services.Signs
             IContractRepository contractRepository,
             IContractAnnexRepository contractAnnexRepository,
             ILiquidationRecordRepository liquidationRecordRepository,
-            IContractFlowDetailsRepository contractFlowDetailsRepository)
+            IContractFlowDetailsRepository contractFlowDetailsRepository,
+            IPartnerReviewRepository partnerReviewRepository,
+            IPartnerSignRepository partnerSignRepository)
         {
             _contractFileRepository = contractFileRepository;
             _contractAnnexFileRepository = contractAnnexFileRepository;
@@ -35,6 +39,8 @@ namespace Coms.Application.Services.Signs
             _contractAnnexRepository = contractAnnexRepository;
             _liquidationRecordRepository = liquidationRecordRepository;
             _contractFlowDetailsRepository = contractFlowDetailsRepository;
+            _partnerReviewRepository = partnerReviewRepository;
+            _partnerSignRepository = partnerSignRepository;
         }
         public async Task<ErrorOr<ResponseModel>> UploadVersion(Guid fileId, byte[] document)
         {
@@ -67,32 +73,41 @@ namespace Coms.Application.Services.Signs
                                 .PutAsync(fileStream);
                             string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/contracts%2F" + contract.Id
                                 + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
-                            if (contract.Status == DocumentStatus.Signed || contract.Status == DocumentStatus.Completed)
+                            var downloadUrl = await task;
+                            fileStream.Close();
+
+                            if (contract.Status == DocumentStatus.Signed)
                             {
+                                var partnerReview = await _partnerReviewRepository.GetByContractId(contract.Id);
+                                var partnerSign = new PartnerSign()
+                                {
+                                    ContractId = contract.Id,
+                                    SignedAt = DateTime.Now,
+                                    PartnerId = partnerReview.PartnerId
+                                };
+                                await _partnerSignRepository.AddPartnerSign(partnerSign);
                                 contract.Status = DocumentStatus.Completed;
+                                contract.UpdatedDate = DateTime.Now;
+                                contract.Link = link;
                             }
                             else
                             {
-                                contract.Status = DocumentStatus.Signed;
-                                /*var flowDetails = await _contractFlowDetailsRepository.GetByContractId(contract.Id);
+                                var flowDetails = await _contractFlowDetailsRepository.GetByContractIdForSign(contractFile.ContractId);
                                 var flowDetail = flowDetails.FirstOrDefault(cfd => cfd.FlowDetail.FlowRole.Equals(FlowRole.Signer));
-                                if (!flowDetail.Status.Equals(FlowDetailStatus.Waiting))
+                                if (flowDetail.Status.Equals(FlowDetailStatus.Signed))
                                 {
                                     return Error.Conflict("409", "You are already " + flowDetail.Status.ToString().ToLower() + "!");
                                 }
                                 else
                                 {
                                     flowDetail.Status = FlowDetailStatus.Signed;
+                                    await _contractFlowDetailsRepository.UpdateContractFlowDetail(flowDetail);
+                                    contract.Status = DocumentStatus.Signed;
+                                    contract.UpdatedDate = DateTime.Now;
+                                    contract.Link = link;
                                 }
-                                await _contractFlowDetailsRepository.UpdateContractFlowDetail(flowDetail);*/
                             }
-
-                            contract.UpdatedDate = DateTime.Now;
-                            contract.Link = link;
                             await _contractRepository.UpdateContract(contract);
-                            var downloadUrl = await task;
-                            fileStream.Close();                          
-
                         }
                         return new ResponseModel()
                         {
@@ -127,23 +142,41 @@ namespace Coms.Application.Services.Signs
                                 .PutAsync(fileStream);
                             string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/contractAnnexes%2F" + contractAnnex.Id
                                 + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
-                            var downloadUrl = await task;
-
-                            if (contractAnnex.Status == DocumentStatus.Signed || contractAnnex.Status == DocumentStatus.Completed)
-                            {
-                                contractAnnex.Status = DocumentStatus.Completed;
-                            }
-                            else
-                            {
-                                contractAnnex.Status = DocumentStatus.Signed;
-                            }
-
-                            contractAnnex.UpdatedDate = DateTime.Now;
-                            contractAnnex.Link = link;
-                            await _contractAnnexRepository.UpdateContractAnnexes(contractAnnex);
                             var downloadAnnexUrl = await task;
                             fileStream.Close();
 
+                            if (contractAnnex.Status == DocumentStatus.Signed)
+                            {
+                                var partnerReview = await _partnerReviewRepository.GetByContractAnnexId(contractAnnex.Id);
+                                var partnerSign = new PartnerSign()
+                                {
+                                    ContractAnnexId = contractAnnex.Id,
+                                    SignedAt = DateTime.Now,
+                                    PartnerId = partnerReview.PartnerId
+                                };
+                                await _partnerSignRepository.AddPartnerSign(partnerSign);
+                                contractAnnex.Status = DocumentStatus.Completed;
+                                contractAnnex.UpdatedDate = DateTime.Now;
+                                contractAnnex.Link = link;
+                            }
+                            else
+                            {
+                                var flowDetails = await _contractFlowDetailsRepository.GetByContractAnnexIdForSign(contractAnnex.Id);
+                                var flowDetail = flowDetails.FirstOrDefault(cfd => cfd.FlowDetail.FlowRole.Equals(FlowRole.Signer));
+                                if (flowDetail.Status.Equals(FlowDetailStatus.Signed))
+                                {
+                                    return Error.Conflict("409", "You are already " + flowDetail.Status.ToString().ToLower() + "!");
+                                }
+                                else
+                                {
+                                    flowDetail.Status = FlowDetailStatus.Signed;
+                                }
+                                await _contractFlowDetailsRepository.UpdateContractFlowDetail(flowDetail);
+                                contractAnnex.Status = DocumentStatus.Signed;
+                                contractAnnex.UpdatedDate = DateTime.Now;
+                                contractAnnex.Link = link;
+                            }
+                            await _contractAnnexRepository.UpdateContractAnnexes(contractAnnex);
                         }
                         return new ResponseModel()
                         {
@@ -178,12 +211,22 @@ namespace Coms.Application.Services.Signs
                                 .PutAsync(fileStream);
                             string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/liquidationRecords%2F" + liquidation.Id
                                 + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
-                            var downloadAnnexUrl = await task;
+                            var downloadLiquidationUrl = await task;
+                            fileStream.Close();
 
-                            if (liquidation.Status == DocumentStatus.Signed || liquidation.Status == DocumentStatus.Completed)
+                            if (liquidation.Status == DocumentStatus.Signed)
                             {
+                                var partnerReview = await _partnerReviewRepository.GetByContractAnnexId(liquidation.Id);
+                                var partnerSign = new PartnerSign()
+                                {
+                                    LiquidationRecordId = liquidation.Id,
+                                    SignedAt = DateTime.Now,
+                                    PartnerId = partnerReview.PartnerId
+                                };
+                                await _partnerSignRepository.AddPartnerSign(partnerSign);
                                 liquidation.Status = DocumentStatus.Completed;
-
+                                liquidation.UpdatedDate = DateTime.Now;
+                                liquidation.Link = link;
                                 var contract = await _contractRepository.GetContract(liquidation.ContractId);
                                 if (contract != null)
                                 {
@@ -198,13 +241,22 @@ namespace Coms.Application.Services.Signs
                             }
                             else
                             {
+                                var flowDetails = await _contractFlowDetailsRepository.GetByLiquidationRecordForSign(liquidation.Id);
+                                var flowDetail = flowDetails.FirstOrDefault(cfd => cfd.FlowDetail.FlowRole.Equals(FlowRole.Signer));
+                                if (flowDetail.Status.Equals(FlowDetailStatus.Signed))
+                                {
+                                    return Error.Conflict("409", "You are already " + flowDetail.Status.ToString().ToLower() + "!");
+                                }
+                                else
+                                {
+                                    flowDetail.Status = FlowDetailStatus.Signed;
+                                }
+                                await _contractFlowDetailsRepository.UpdateContractFlowDetail(flowDetail);
                                 liquidation.Status = DocumentStatus.Signed;
+                                liquidation.UpdatedDate = DateTime.Now;
+                                liquidation.Link = link;
                             }
-                            liquidation.UpdatedDate = DateTime.Now;
-                            liquidation.Link = link;
                             await _liquidationRecordRepository.UpdateLiquidationRecord(liquidation);
-                            fileStream.Close();
-
                         }
                         return new ResponseModel()
                         {
