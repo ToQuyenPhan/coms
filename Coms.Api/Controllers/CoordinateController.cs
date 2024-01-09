@@ -1,5 +1,4 @@
-﻿using Coms.Application.Services.Accesses;
-using Coms.Application.Services.Coordinates;
+﻿using Coms.Application.Services.Coordinates;
 using Coms.Contracts.Coordinates;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
