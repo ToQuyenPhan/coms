@@ -5,7 +5,7 @@ namespace Coms.Application.Services.Contracts
 {
     public interface IContractService
     {
-        Task<ErrorOr<ContractResult>> DeleteContract(int id);
+        Task<ErrorOr<ContractResult>> DeleteContract(int userId, int id);
         Task<ErrorOr<PagingResult<ContractResult>>> GetYourContracts(int userId,
                 string name, string code, int? version, int? status, bool isYours, int currentPage, int pageSize);
         Task<ErrorOr<int>> AddContract(string[] names, string[] values, int contractCategoryId,

@@ -48,11 +48,12 @@ namespace Coms.Api.Controllers
         }
 
         [HttpDelete]
-        [SwaggerOperation(Summary = "Get your contracts in Coms")]
+        [SwaggerOperation(Summary = "Delete a contract in Coms")]
         [Authorize(Roles = "Staff, Manager")]
         public IActionResult Delete([FromQuery] int id)
         {
-            ErrorOr<ContractResult> result = _contractService.DeleteContract(id).Result;
+            ErrorOr<ContractResult> result = _contractService.DeleteContract(
+                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), id).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

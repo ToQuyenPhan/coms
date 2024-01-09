@@ -6,7 +6,6 @@ using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.IO;
 using System.Security.Claims;
 
 namespace Coms.Api.Controllers
@@ -20,6 +19,18 @@ namespace Coms.Api.Controllers
         public ActionHistoriesController(IActionHistoryService actionHistoryService)
         {
             _actionHistoryService = actionHistoryService;
+        }
+
+        [HttpGet("contract")]
+        [SwaggerOperation(Summary = "Get action history by contract id in Coms")]
+        public IActionResult GetActionHistoryByContractId([FromQuery] int contractId, [FromQuery] PagingRequest request)
+        {
+            ErrorOr<PagingResult<ActionHistoryResult>> result = _actionHistoryService.GetActionHistoryByContractId(contractId, request.CurrentPage,
+                    request.PageSize).Result;
+            return result.Match(
+                               result => Ok(result),
+                                              errors => Problem(errors)
+                                                         );
         }
 
         [HttpGet("recent")]
@@ -63,18 +74,6 @@ namespace Coms.Api.Controllers
                 result => Ok(result),
                 errors => Problem(errors)
             );
-        }
-
-        //add get action history by contract id
-        [HttpGet("contractId")]
-        [SwaggerOperation(Summary = "Get action history by contract id in Coms")]
-        public IActionResult GetActionHistoryByContractId([FromQuery] int contractId)
-        {
-            ErrorOr<IList<ActionHistoryResult>> result = _actionHistoryService.GetActionHistoryByContractId(contractId).Result;
-            return result.Match(
-                               result => Ok(result),
-                                              errors => Problem(errors)
-                                                         );
         }
     }
 }

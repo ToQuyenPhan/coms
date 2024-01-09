@@ -10,6 +10,7 @@
         Signed,
         Finalized,
         Liquidated,
-        Waiting
+        Waiting,
+        Edited
     }
 }
