@@ -4,6 +4,7 @@ using Coms.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coms.Infrastructure.Migrations
 {
     [DbContext(typeof(ComsDBContext))]
-    partial class ComsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240109140224_DeleteTables")]
+    partial class DeleteTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -945,6 +947,24 @@ namespace Coms.Infrastructure.Migrations
                     b.ToTable("Templates");
                 });
 
+            modelBuilder.Entity("Coms.Domain.Entities.TemplateContent", b =>
+                {
+                    b.Property<int>("ContractId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TemplateFieldId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ContractId", "TemplateFieldId");
+
+                    b.HasIndex("TemplateFieldId");
+
+                    b.ToTable("TemplateContents");
+                });
+
             modelBuilder.Entity("Coms.Domain.Entities.TemplateField", b =>
                 {
                     b.Property<int>("Id")
@@ -1011,6 +1031,24 @@ namespace Coms.Infrastructure.Migrations
                     b.HasIndex("TemplateId");
 
                     b.ToTable("TemplateFiles");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.TemplateType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TemplateTypes");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.User", b =>
@@ -1411,6 +1449,25 @@ namespace Coms.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Coms.Domain.Entities.TemplateContent", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.Contract", "Contract")
+                        .WithMany()
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Coms.Domain.Entities.TemplateField", "TemplateField")
+                        .WithMany("TemplateContents")
+                        .HasForeignKey("TemplateFieldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Contract");
+
+                    b.Navigation("TemplateField");
+                });
+
             modelBuilder.Entity("Coms.Domain.Entities.TemplateField", b =>
                 {
                     b.HasOne("Coms.Domain.Entities.Template", "Template")
@@ -1497,6 +1554,11 @@ namespace Coms.Infrastructure.Migrations
                     b.Navigation("Contracts");
 
                     b.Navigation("TemplateFields");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.TemplateField", b =>
+                {
+                    b.Navigation("TemplateContents");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.User", b =>

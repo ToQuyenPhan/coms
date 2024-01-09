@@ -29,6 +29,5 @@ namespace Coms.Domain.Entities
         [Required]
         public int ContractId { get; set; }
         public Contract? Contract { get; set; }
-        public virtual ICollection<LiquidationRecordTerm>? LiquidationRecordTerms { get; set; }
     }
 }

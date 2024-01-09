@@ -28,11 +28,8 @@ namespace Coms.Infrastructure
             });
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IContractCategoryRepository, ContractCategoryRepository>();
-            services.AddScoped<ITemplateTypeRepository, TemplateTypeRepository>();
             services.AddScoped<ITemplateRepository, TemplateRepository>();
             services.AddScoped<IContractRepository, ContractRepository>();
-            services.AddScoped<IAccessRepository, AccessRepository>();
-            services.AddScoped<IUserAccessRepository, UserAccessRepository>();
             services.AddScoped<IPartnerReviewRepository, PartnerReviewRepository>();
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<IActionHistoryRepository, ActionHistoryRepository>();
@@ -43,7 +40,6 @@ namespace Coms.Infrastructure
             services.AddScoped<IServiceRepository, ServiceRepository>();
             services.AddScoped<IContractFileRepository, ContractFileRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IAproveWorkflowRepository, AproveWorkflowRepository>();
             services.AddScoped<ITemplateFieldRepository, TemplateFieldRepository>();
             services.AddScoped<IContractFlowDetailsRepository, ContractFlowDetailsRepository>();
             services.AddScoped<IFlowDetailRepository, FlowDetailRepository>();
@@ -52,7 +48,6 @@ namespace Coms.Infrastructure
             services.AddScoped<IFlowRepository, FlowRepository>();
             services.AddScoped<IPartnerCommentRepository, PartnerCommentRepository>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            //add attachment repository
             services.AddScoped<IAttachmentRepository, AttachmentRepository>();
             services.AddScoped<ILiquidationRecordRepository, LiquidationRecordRepository>();
             services.AddScoped<ILiquidationRecordFileRepository, LiquidationRecordFileRepository>();

@@ -43,6 +43,5 @@ namespace Coms.Domain.Entities
         public virtual ICollection<Attachment>? Attachments { get; set; }
         public virtual ICollection<ContractAnnex>? ContractAnnexes { get; set; }
         public virtual ICollection<ContractCost>? ContractCosts { get; set; }
-        public virtual ICollection<ContractTerm>? ContractTerms { get; set; }
     }
 }
