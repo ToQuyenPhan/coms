@@ -43,7 +43,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _dbContext.Attach(updated).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
         }
-
+        
         public async Task UpdateRangeAsync(IList<T> entities)
         {
             _dbContext.UpdateRange(entities);

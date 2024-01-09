@@ -20,6 +20,7 @@ using Coms.Application.Services.Documents;
 using Coms.Application.Services.Signs;
 using Coms.Application.Services.ContractAnnexes;
 using Coms.Application.Services.ContractFields;
+using Coms.Application.Services.Coordinates;
 
 namespace Coms.Application
 {
@@ -49,6 +50,7 @@ namespace Coms.Application
             services.AddScoped<ISignService, SignService>();
             services.AddScoped<IContractAnnexesService, ContractAnnexesService>();
             services.AddScoped<IContractFieldService, ContractFieldService>();
+            services.AddScoped<ICoordinateService, CoordinateService>();
             return services;
         }
     }
