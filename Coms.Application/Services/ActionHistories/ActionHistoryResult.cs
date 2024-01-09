@@ -13,5 +13,6 @@
 
         public int? ContractId { get; set; }
         public string ContractName { get; set; }
+        public string? ContractCode {  get; set; }
     }
 }

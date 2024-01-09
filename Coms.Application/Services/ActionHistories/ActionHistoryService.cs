@@ -11,10 +11,12 @@ namespace Coms.Application.Services.ActionHistories
     public class ActionHistoryService : IActionHistoryService
     {
         private readonly IActionHistoryRepository _actionHistoryRepository;
+        private readonly IContractRepository _contractRepository;
 
-        public ActionHistoryService(IActionHistoryRepository actionHistoryRepository)
+        public ActionHistoryService(IActionHistoryRepository actionHistoryRepository, IContractRepository contractRepository)
         {
             _actionHistoryRepository = actionHistoryRepository;
+            _contractRepository = contractRepository;
         }
 
         public async Task<ErrorOr<PagingResult<ActionHistoryResult>>> GetRecentActivities(int userId, int currentPage,
@@ -32,7 +34,8 @@ namespace Coms.Application.Services.ActionHistories
                     {
                         foreach (var actionHistory in actionHistoryList)
                         {
-                            if (actionHistory.Contract.Status.Equals(DocumentStatus.Deleted))
+                            if (actionHistory.Contract.Status.Equals(DocumentStatus.Deleted) || 
+                                    actionHistory.Contract.Status.Equals(DocumentStatus.Edited))
                             {
                                 continue;
                             }
@@ -60,7 +63,8 @@ namespace Coms.Application.Services.ActionHistories
                         FullName = actionHistory.User.FullName,
                         UserImage = actionHistory.User.Image,
                         ContractId = actionHistory.ContractId,
-                        ContractName = actionHistory.Contract.ContractName
+                        ContractName = actionHistory.Contract.ContractName,
+                        ContractCode = actionHistory.Contract.Code,
                     };
                     actionHistoryResults.Add(actionHistoryResult);
                 }
@@ -130,7 +134,8 @@ namespace Coms.Application.Services.ActionHistories
                         {
                             foreach (var actionHistory in actionHistoryList)
                             {
-                                if (actionHistory.Contract.Status.Equals(DocumentStatus.Deleted))
+                                if (actionHistory.Contract.Status.Equals(DocumentStatus.Deleted) || 
+                                        actionHistory.Contract.Status.Equals(DocumentStatus.Edited))
                                 {
                                     continue;
                                 }
@@ -184,39 +189,89 @@ namespace Coms.Application.Services.ActionHistories
             }
         }
 
-        //add get action history by contract id
-        public async Task<ErrorOr<IList<ActionHistoryResult>>> GetActionHistoryByContractId(int contractId)
+        public async Task<ErrorOr<PagingResult<ActionHistoryResult>>> GetActionHistoryByContractId(int contractId, int currentPage, 
+                int pageSize)
         {
             try
             {
-                IList<ActionHistory> actionHistories = new List<ActionHistory>();
-                //actionHistories = _actionHistoryRepository.GetCreateActionByContractId(contractId).Result;
-                var results = new List<ActionHistoryResult>();
-                //if (actionHistories != null)
-                //{
-                //    foreach (var actionHistory in actionHistories)
-                //    {
-                //        var result = new ActionHistoryResult()
-                //        {
-                //            Id = actionHistory.Id,
-                //            ActionType = (int)actionHistory.ActionType,
-                //            ActionTypeString = actionHistory.ActionType.ToString(),
-                //            CreatedAt = actionHistory.CreatedAt,
-                //            CreatedAtString = actionHistory.CreatedAt.ToString("dd/MM/yyyy"),
-                //            UserId = actionHistory.UserId,
-                //            FullName = actionHistory.User.FullName,
-                //            UserImage = actionHistory.User.Image,
-                //            ContractId = actionHistory.ContractId,
-                //            ContractName = actionHistory.Contract.ContractName
-                //        };
-                //        results.Add(result);
-                //    }
-                //}
-                return results;
+                var contract = await _contractRepository.GetContract(contractId);
+                if (contract is not null)
+                {
+                    var contracts = await _contractRepository.GetByContractCode(contract.Code);
+                    if (contracts is not null)
+                    {
+                        IList<ActionHistoryResult> results = new List<ActionHistoryResult>();
+                        foreach (var everyContract in contracts)
+                        {
+                            if(!everyContract.Status.Equals(DocumentStatus.Deleted))
+                            {
+                                var actionHistories = await _actionHistoryRepository.GetByContractId(everyContract.Id);
+                                foreach (var actionHistory in actionHistories)
+                                {
+                                    if (actionHistory.ActionType.Equals(ActionType.Created))
+                                    {
+                                        if (actionHistory.Contract.Version.Equals(1))
+                                        {
+                                            var result = new ActionHistoryResult()
+                                            {
+                                                Id = actionHistory.Id,
+                                                ActionType = (int)actionHistory.ActionType,
+                                                ActionTypeString = actionHistory.ActionType.ToString(),
+                                                CreatedAt = actionHistory.CreatedAt,
+                                                CreatedAtString = actionHistory.CreatedAt.ToString("dd/MM/yyyy hh:mm:ss"),
+                                                UserId = actionHistory.UserId,
+                                                FullName = actionHistory.User.FullName,
+                                                UserImage = actionHistory.User.Image,
+                                                ContractId = actionHistory.ContractId,
+                                                ContractName = actionHistory.Contract.ContractName,
+                                                ContractCode = actionHistory.Contract.Code
+                                            };
+                                            results.Add(result);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        var result = new ActionHistoryResult()
+                                        {
+                                            Id = actionHistory.Id,
+                                            ActionType = (int)actionHistory.ActionType,
+                                            ActionTypeString = actionHistory.ActionType.ToString(),
+                                            CreatedAt = actionHistory.CreatedAt,
+                                            CreatedAtString = actionHistory.CreatedAt.ToString("dd/MM/yyyy hh:mm:ss"),
+                                            UserId = actionHistory.UserId,
+                                            FullName = actionHistory.User.FullName,
+                                            UserImage = actionHistory.User.Image,
+                                            ContractId = actionHistory.ContractId,
+                                            ContractName = actionHistory.Contract.ContractName,
+                                            ContractCode = actionHistory.Contract.Code
+                                        };
+                                        results.Add(result);
+                                    }
+                                }
+                            }
+                        }
+                        results = results.OrderBy(x => x.CreatedAt).ToList();
+                        int total = results.Count();
+                        if (currentPage > 0 && pageSize > 0)
+                        {
+                            results = results.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                                    .ToList();
+                        }
+                        return new PagingResult<ActionHistoryResult>(results, total, currentPage, pageSize);
+                    }
+                    else
+                    {
+                        return new PagingResult<ActionHistoryResult>(new List<ActionHistoryResult>(), 0, currentPage, pageSize);
+                    }
+                }
+                else
+                {
+                    return Error.NotFound("404", "Contract not found!");
+                }
             }
             catch (Exception ex)
             {
-                return Error.NotFound("Action histories not found!");
+                return Error.Failure("500", ex.Message);
             }
         }
     }

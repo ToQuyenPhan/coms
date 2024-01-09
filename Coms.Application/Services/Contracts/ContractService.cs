@@ -15,16 +15,11 @@ namespace Coms.Application.Services.Contracts
     public class ContractService : IContractService
     {
         private string Bucket = "coms-64e4a.appspot.com";
-        private readonly IAccessRepository _accessRepository;
-        private readonly IUserAccessRepository _userAccessRepository;
         private readonly IPartnerReviewRepository _partnerReviewRepository;
         private readonly IContractRepository _contractRepository;
         private readonly IActionHistoryRepository _actionHistoryRepository;
         private readonly ITemplateRepository _templateRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IPartnerRepository _partnerRepository;
         private readonly IContractCostRepository _contractCostRepository;
-        private readonly IAproveWorkflowRepository _aproveWorkflowRepository;
         private readonly IContractFlowDetailsRepository _contractFlowDetailsRepository;
         private readonly IFlowDetailRepository _flowDetailRepository;
         private readonly IContractFieldRepository _contractFieldRepository;
@@ -32,16 +27,11 @@ namespace Coms.Application.Services.Contracts
         private readonly IContractFileRepository _contractFileRepository;
         private readonly ISystemSettingsRepository _systemSettingsRepository;
 
-        public ContractService(IAccessRepository accessRepository,
-                IUserAccessRepository userAccessRepository,
-                IPartnerReviewRepository partnerReviewRepository,
+        public ContractService(IPartnerReviewRepository partnerReviewRepository,
                 IContractRepository contractRepository,
                 IActionHistoryRepository actionHistoryRepository,
                 ITemplateRepository templateRepository,
-                IUserRepository userRepository,
-                IPartnerRepository partnerRepository,
                 IContractCostRepository contractCostRepository,
-                IAproveWorkflowRepository aproveWorkflowRepository,
                 IContractFlowDetailsRepository contractFlowDetailsRepository,
                 IFlowDetailRepository flowDetailRepository,
                 IContractFieldRepository contractFieldRepository,
@@ -49,16 +39,11 @@ namespace Coms.Application.Services.Contracts
                 IContractFileRepository contractFileRepository,
                 ISystemSettingsRepository systemSettingsRepository)
         {
-            _accessRepository = accessRepository;
-            _userAccessRepository = userAccessRepository;
             _partnerReviewRepository = partnerReviewRepository;
             _templateRepository = templateRepository;
-            _userRepository = userRepository;
-            _partnerRepository = partnerRepository;
             _contractCostRepository = contractCostRepository;
             _actionHistoryRepository = actionHistoryRepository;
             _contractRepository = contractRepository;
-            _aproveWorkflowRepository = aproveWorkflowRepository;
             _contractFlowDetailsRepository = contractFlowDetailsRepository;
             _flowDetailRepository = flowDetailRepository;
             _contractFieldRepository = contractFieldRepository;
@@ -67,7 +52,7 @@ namespace Coms.Application.Services.Contracts
             _systemSettingsRepository = systemSettingsRepository;
         }
 
-        public async Task<ErrorOr<ContractResult>> DeleteContract(int id)
+        public async Task<ErrorOr<ContractResult>> DeleteContract(int userId, int id)
         {
             try
             {
@@ -76,6 +61,14 @@ namespace Coms.Application.Services.Contracts
                 {
                     contract.Status = DocumentStatus.Deleted;
                     await _contractRepository.UpdateContract(contract);
+                    var actionHistory = new ActionHistory()
+                    {
+                        ActionType = ActionType.Deleted,
+                        CreatedAt = DateTime.Now,
+                        UserId = userId,
+                        ContractId = id
+                    };
+                    await _actionHistoryRepository.AddActionHistory(actionHistory);
                     var contractResult = new ContractResult
                     {
                         Id = contract.Id,
@@ -138,7 +131,7 @@ namespace Coms.Application.Services.Contracts
                             foreach (var contractFlowDetail in contractFlowDetails)
                             {
                                 var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
-                                if (!contract.Status.Equals(DocumentStatus.Deleted))
+                                if (!contract.Status.Equals(DocumentStatus.Deleted) && !contract.Status.Equals(DocumentStatus.Edited))
                                 {
                                     var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
                                     if (existedContract is null)
@@ -157,7 +150,7 @@ namespace Coms.Application.Services.Contracts
             if (contracts.Count() > 0)
             {
                 var predicate = PredicateBuilder.New<Contract>(true);
-                predicate = predicate.And(c => c.Status != DocumentStatus.Deleted);
+                predicate = predicate.And(c => c.Status != DocumentStatus.Deleted && c.Status != DocumentStatus.Edited);
                 if (!string.IsNullOrEmpty(name))
                 {
                     predicate = predicate.And(c => c.ContractName.Contains(name.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
@@ -251,7 +244,7 @@ namespace Coms.Application.Services.Contracts
                 {
                     switch ((int)actionHistory.Contract.Status)
                     {
-                        case 2:
+                        case 8:
                             drafts.Add(actionHistory.Contract);
                             break;
                         case 3:
@@ -272,10 +265,10 @@ namespace Coms.Application.Services.Contracts
                     var generalReportResult = new GeneralReportResult()
                     {
                         Total = drafts.Count(),
-                        Status = (int)DocumentStatus.Draft,
-                        StatusString = DocumentStatus.Draft.ToString(),
+                        Status = (int)DocumentStatus.Waiting,
+                        StatusString = DocumentStatus.Waiting.ToString(),
                         Percent = (drafts.Count() * 100 / actionHistories.Count()),
-                        Title = "Draft Contracts"
+                        Title = "Waiting Contracts"
                     };
                     responses.Add(generalReportResult);
                 }
@@ -284,10 +277,10 @@ namespace Coms.Application.Services.Contracts
                     var generalReportResult = new GeneralReportResult()
                     {
                         Total = 0,
-                        Status = (int)DocumentStatus.Draft,
-                        StatusString = DocumentStatus.Draft.ToString(),
+                        Status = (int)DocumentStatus.Waiting,
+                        StatusString = DocumentStatus.Waiting.ToString(),
                         Percent = 0,
-                        Title = "Draft Contracts"
+                        Title = "Waiting Contracts"
                     };
                     responses.Add(generalReportResult);
                 }
@@ -370,10 +363,10 @@ namespace Coms.Application.Services.Contracts
                 var draftReport = new GeneralReportResult()
                 {
                     Total = 0,
-                    Status = (int)DocumentStatus.Draft,
-                    StatusString = DocumentStatus.Draft.ToString(),
+                    Status = (int)DocumentStatus.Waiting,
+                    StatusString = DocumentStatus.Waiting.ToString(),
                     Percent = 0,
-                    Title = "Draft Contracts"
+                    Title = "Waiting Contracts"
                 };
                 var approvedReport = new GeneralReportResult()
                 {
@@ -679,7 +672,7 @@ namespace Coms.Application.Services.Contracts
                         foreach (var contractFlowDetail in contractFlowDetails)
                         {
                             var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
-                            if (!contract.Status.Equals(DocumentStatus.Deleted))
+                            if (!contract.Status.Equals(DocumentStatus.Deleted) && !contract.Status.Equals(DocumentStatus.Edited))
                             {
                                 var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
                                 if (existedContract is null)
@@ -697,7 +690,7 @@ namespace Coms.Application.Services.Contracts
             if (contracts.Count() > 0)
             {
                 var predicate = PredicateBuilder.New<Contract>(true);
-                predicate = predicate.And(c => c.Status != DocumentStatus.Deleted);
+                predicate = predicate.And(c => c.Status != DocumentStatus.Deleted && c.Status != DocumentStatus.Edited);
                 if (!string.IsNullOrEmpty(name))
                 {
                     predicate = predicate.And(c => c.ContractName.Contains(name.Trim(), StringComparison.CurrentCultureIgnoreCase));
@@ -1137,8 +1130,20 @@ namespace Coms.Application.Services.Contracts
         {
             try
             {
+                DateTime updateTime = DateTime.Now;
+                var editHistory = new ActionHistory()
+                {
+                    ActionType = ActionType.Updated,
+                    CreatedAt = updateTime,
+                    UserId = userId,
+                    ContractId = contractId
+                };
+                await _actionHistoryRepository.AddActionHistory(editHistory);
                 var namesAndValues = names.Zip(values, (n, v) => new { Name = n, Value = v });
                 var oldContract = await _contractRepository.GetContract(contractId);
+                oldContract.Status = DocumentStatus.Edited;
+                oldContract.UpdatedDate = updateTime;
+                await _contractRepository.UpdateContract(oldContract);
                 int version = 1;
                 string templateFilePath = Path.Combine(Environment.CurrentDirectory, "Templates", oldContract.TemplateId + ".docx");
                 //Opens the template document
@@ -1168,6 +1173,7 @@ namespace Coms.Application.Services.Contracts
                     TemplateId = oldContract.TemplateId,
                     Link = "",
                     CreatedDate = oldContract.CreatedDate,
+                    UpdatedDate = updateTime,
                     EffectiveDate = effectiveDate,
                     Status = (DocumentStatus)status
                 };
