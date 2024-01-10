@@ -35,7 +35,6 @@ namespace Coms.Domain.Entities
         public int? UserId { get; set; }
         public virtual User? User { get; set; }
         public virtual ICollection<Contract>? Contracts { get; set; }
-        public virtual ICollection<TemplateTerm>? TemplateTerms { get; set; }
         public virtual ICollection<TemplateField>? TemplateFields { get; set; }
     }
 }

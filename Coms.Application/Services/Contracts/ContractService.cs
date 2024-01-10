@@ -782,13 +782,13 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<PagingResult<ContractResult>>> GetContractForPartner(int partnerId,
-                string name, string code, int? version, bool isApproved, int currentPage, int pageSize)
+                string name, string code, int? version, int documentStatus, bool isApproved, int currentPage, int pageSize)
         {
             var reviews = await _partnerReviewRepository.GetByPartnerId(partnerId, isApproved);
             if (reviews is not null)
             {
                 var predicate = PredicateBuilder.New<Contract>(true);
-                predicate = predicate.And(c => c.Status == DocumentStatus.Approved);
+                predicate = predicate.And(c => c.Status == (DocumentStatus)documentStatus);
                 if (!string.IsNullOrEmpty(name))
                 {
                     predicate = predicate.And(c => c.ContractName.Contains(name.Trim(), System.StringComparison.CurrentCultureIgnoreCase));

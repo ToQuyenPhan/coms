@@ -25,6 +25,5 @@ namespace Coms.Domain.Entities
         public int? TemplateId { get; set; }
 
         public virtual Template? Template { get; set; }
-        public virtual ICollection<TemplateContent>? TemplateContents { get; set; }
     }
 }

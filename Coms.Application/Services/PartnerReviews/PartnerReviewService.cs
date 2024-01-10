@@ -3,7 +3,6 @@ using Coms.Application.Services.Common;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
-using static SkiaSharp.HarfBuzz.SKShaper;
 
 namespace Coms.Application.Services.PartnerReviews
 {

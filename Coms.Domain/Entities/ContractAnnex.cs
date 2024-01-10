@@ -32,7 +32,6 @@ namespace Coms.Domain.Entities
 
         public int? ContractId { get; set; }
         public virtual Contract? Contract { get; set; }
-        public virtual ICollection<ContractAnnexTerm>? ContractAnnexTerms { get; set; }
         public virtual ICollection<ContractAnnexCost>? ContractAnnexCosts { get; set; }
     }
 }

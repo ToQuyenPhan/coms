@@ -9,5 +9,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task AddPartnerReview(PartnerReview partnerReview);
         Task<IList<PartnerReview>?> GetByPartnerId(int partnerId, bool isApproved);
         Task UpdatePartnerPreview(PartnerReview partnerReview);
+        Task<PartnerReview?> GetByContractAnnexId(int contractAnnexId);
+        Task<PartnerReview?> GetByLiquidationRecordId(int liquidationRecordId);
     }
 }

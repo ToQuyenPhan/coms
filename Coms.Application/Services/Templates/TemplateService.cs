@@ -15,7 +15,6 @@ namespace Coms.Application.Services.Templates
 
         public TemplateService(ITemplateRepository templateRepository,
                 IContractCategoryRepository contractCategoryRepository,
-                ITemplateTypeRepository templateTypeRepository,
                 ITemplateFileRepository templateFileRepository)
         {
             _templateRepository = templateRepository;
