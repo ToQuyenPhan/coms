@@ -16,7 +16,8 @@ namespace Coms.Contracts.UserFlowDetails
         public int FlowDetailId { get; set; }
         [Required]
         public int ContractId { get; set; }
-        //[Required]
-        //public int FlowDetailId { get; set; }
+        public int LiquidationRecordId { get; set; }
+        public int ContractAnnexId { get; set; }
+
     }
 }

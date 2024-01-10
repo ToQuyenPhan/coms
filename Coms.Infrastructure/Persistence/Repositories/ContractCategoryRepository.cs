@@ -13,6 +13,15 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
+        public async Task CreateContractCategory(ContractCategory contractCategory)
+        {
+            await _genericRepository.CreateAsync(contractCategory);
+        }
+        public async Task<ContractCategory?> GetCategoryByName(string categoryName)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(c => c.CategoryName.Equals(categoryName), null);
+        }
+
         public async Task<IList<ContractCategory>?> GetActiveContractCategories()
         {
             var list = await _genericRepository.WhereAsync(

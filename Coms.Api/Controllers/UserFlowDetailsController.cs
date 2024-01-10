@@ -53,7 +53,7 @@ namespace Coms.Api.Controllers
         public IActionResult AddContractFlowDetail([FromBody] UserFlowDetailFormRequest request)
         {
             ErrorOr<UserFlowDetailResult> result =
-                _userFlowDetailService.AddContractFlowDetail(request.Status, request.FlowDetailId, request.ContractId).Result;
+                _userFlowDetailService.AddContractFlowDetail(request.Status, request.FlowDetailId, request.ContractId, request.LiquidationRecordId, request.ContractAnnexId).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

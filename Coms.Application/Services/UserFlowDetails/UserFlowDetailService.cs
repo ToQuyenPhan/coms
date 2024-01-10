@@ -198,7 +198,7 @@ namespace Coms.Application.Services.UserFlowDetails
                 }
             };
         }
-        public async Task<ErrorOr<UserFlowDetailResult>> AddContractFlowDetail(int status, int flowDetailId, int contractId)
+        public async Task<ErrorOr<UserFlowDetailResult>> AddContractFlowDetail(int status, int flowDetailId, int contractId, int liquidationRecordId, int contractAnnexId)
         {
             try
             {
@@ -207,6 +207,8 @@ namespace Coms.Application.Services.UserFlowDetails
                     Status = (FlowDetailStatus)status,
                     FlowDetailId = flowDetailId,
                     ContractId = contractId,
+                    LiquidationRecordId = liquidationRecordId,
+                    ContractAnnexId = contractAnnexId
 
                 };
                 await _userFlowDetailsRepository.AddContractFlowDetail(contractFlowDetail);
@@ -214,8 +216,11 @@ namespace Coms.Application.Services.UserFlowDetails
                 {
                     Id = contractFlowDetail.Id,
                     Status = (int)contractFlowDetail.Status,
+                    StatusString = contractFlowDetail.Status.ToString(),
                     ContractId = contractFlowDetail.ContractId,
+                    UserId = (int)contractFlowDetail.FlowDetail.UserId,
                     FlowDetailId = contractFlowDetail.FlowDetailId,
+                    FlowRole = contractFlowDetail.FlowDetail.FlowRole.ToString(),
                 };
                 return flowDetailResult;
 
