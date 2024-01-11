@@ -125,7 +125,8 @@ namespace Coms.Application.Services.FlowDetails
                         Id = flowDetail.Id,
                         FlowRole = flowDetail.FlowRole,
                         Order = flowDetail.Order,
-                        FlowID = flowDetail.FlowID
+                        FlowID = flowDetail.FlowID,
+                        UserID = (int)flowDetail.UserId
                     };
                     return result;
                 }
@@ -133,6 +134,74 @@ namespace Coms.Application.Services.FlowDetails
                 {
                     return Error.NotFound("Flow Detail is not found!");
                 }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+        public async Task<ErrorOr<IList<FlowDetailResult>>> GetFlowDetailByFlowId(int flowId)
+        {
+            try
+            {
+                IList<FlowDetail> List = new List<FlowDetail>();
+
+
+                List = (IList<FlowDetail>)_flowDetailRepository.GetByFlowId(flowId).Result;
+                
+                var results = new List<FlowDetailResult>();
+                if (List != null)
+                {
+                    foreach (var flowDetail in List)
+                    {
+                        var result = new FlowDetailResult()
+                        {
+                            Id = flowDetail.Id,
+                            FlowRole = flowDetail.FlowRole,
+                            Order = flowDetail.Order,
+                            FlowID = flowDetail.FlowID,
+                            UserID = (int)flowDetail.UserId
+                        };
+                        results.Add(result);
+                    }
+                }
+                return results;
+            }
+            catch (Exception ex)
+            {
+                return Error.NotFound("Flow not found!");
+            }
+        }
+
+        public async Task<ErrorOr<FlowDetailResult>> UpdateFlowDetail(int id, FlowRole flowRole, int order, int flowId, int userId)
+        {
+            try
+            {
+                var user = await _userRepository.GetUser(userId);
+                if (user is not null && user.Id == id)
+                {
+                    return Error.NotFound("404", "User is exist!");
+                }
+
+                FlowDetail flowDetailUpdate = _flowDetailRepository.GetFlowDetail(id).Result;
+                {
+                    flowDetailUpdate.FlowRole = flowRole;
+                    flowDetailUpdate.Order = order;
+                    flowDetailUpdate.FlowID = flowId;
+                    flowDetailUpdate.UserId = userId;                };
+
+                await _flowDetailRepository.UpdateFlowDetail(flowDetailUpdate);
+                flowDetailUpdate = _flowDetailRepository.GetFlowDetail(id).Result;
+                FlowDetailResult response = new ()
+                {
+                    Id = flowDetailUpdate.Id,
+                    FlowRole = flowDetailUpdate.FlowRole,
+                    Order = flowDetailUpdate.Order,
+                    FlowID = flowDetailUpdate.FlowID,
+                    UserID = (int)flowDetailUpdate.UserId
+                };
+
+                return response;
             }
             catch (Exception ex)
             {

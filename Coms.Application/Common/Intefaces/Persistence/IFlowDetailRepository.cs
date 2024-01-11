@@ -10,5 +10,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<IList<FlowDetail>?> GetByFlowId(int flowId);
         Task<IList<FlowDetail>?> GetUserFlowDetailsSignerByUserId(int userId);
         Task AddFlowDetail(FlowDetail flowDetail);
+        Task UpdateFlowDetail(FlowDetail flowDetail);
+
     }
 }

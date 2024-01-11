@@ -49,5 +49,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             await _genericRepository.CreateAsync(flowDetail);
         }
+
+        public async Task UpdateFlowDetail(FlowDetail flowDetail)
+        {
+            await _genericRepository.UpdateAsync(flowDetail);
+        }
     }
 }

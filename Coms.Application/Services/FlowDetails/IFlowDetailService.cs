@@ -13,6 +13,8 @@ namespace Coms.Application.Services.FlowDetails
     public interface IFlowDetailService
     {   
         Task<ErrorOr<FlowDetailResult>> AddFlowDetail(FlowRole flowRole, int order, int flowId, int userId);
-        Task<ErrorOr<FlowDetailResult>> GetFlowDetail(int id);
+        Task<ErrorOr<FlowDetailResult>> GetFlowDetail(int id); 
+        Task<ErrorOr<IList<FlowDetailResult>>> GetFlowDetailByFlowId(int flowId);
+        Task<ErrorOr<FlowDetailResult>> UpdateFlowDetail(int id, FlowRole flowRole, int order, int flowId, int userId);
     }
 }
