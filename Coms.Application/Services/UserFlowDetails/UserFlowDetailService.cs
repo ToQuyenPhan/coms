@@ -64,6 +64,47 @@ namespace Coms.Application.Services.UserFlowDetails
             }
         }
 
+        //get contract annex flow details
+        public async Task<ErrorOr<PagingResult<UserFlowDetailResult>>> GetContractAnnexFlowDetails(int contractAnnexId,
+                           int currentPage, int pageSize)
+        {
+            var contractFlowDetails = await _userFlowDetailsRepository.GetByContractAnnexId(contractAnnexId);
+            if (contractFlowDetails is not null)
+            {
+                IList<UserFlowDetailResult> results = new List<UserFlowDetailResult>();
+                foreach (var contractFlowDetail in contractFlowDetails)
+                {
+                    var flowDetailResult = new UserFlowDetailResult()
+                    {
+                        Id = contractFlowDetail.Id,
+                        Status = (int)contractFlowDetail.Status,
+                        StatusString = contractFlowDetail.Status.ToString(),
+                        ContractAnnexId = contractFlowDetail.ContractAnnexId,
+                        UserId = (int)contractFlowDetail.FlowDetail.UserId,
+                        FlowDetailId = contractFlowDetail.FlowDetailId,
+                        FlowRole = contractFlowDetail.FlowDetail.FlowRole.ToString(),
+                    };
+                    var flowDetail = await _flowDetailRepository.GetFlowDetail(contractFlowDetail.FlowDetailId);
+                    flowDetailResult.FullName = flowDetail.User.FullName;
+                    if (flowDetail.User.Image is not null)
+                    {
+                        flowDetailResult.UserImage = flowDetail.User.Image;
+                    }
+                    results.Add(flowDetailResult);
+                }
+                int total = results.Count();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    results = results.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+                }
+                return new PagingResult<UserFlowDetailResult>(results, total, currentPage, pageSize);
+            }
+            else
+            {
+                return Error.NotFound("404", "Not found any flow details!");
+            }
+        }
+
         public async Task<ErrorOr<PagingResult<NotificationResult>>> GetNotifications(int userId, int currentPage, int pageSize)
         {
             IList<NotificationResult> results = new List<NotificationResult>();

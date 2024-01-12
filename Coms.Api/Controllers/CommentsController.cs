@@ -97,5 +97,31 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        #region ContractAnnex
+        //get all comments of a contract annex
+        [HttpGet("annex")]
+        [SwaggerOperation(Summary = "Get all comments of a contract annex in Coms")]
+        public IActionResult GetContractAnnexComments([FromQuery] int contractAnnexId, [FromQuery] PagingRequest request)
+        {
+            ErrorOr<PagingResult<CommentResult>> result =
+                _commentService.GetContractAnnexComments(contractAnnexId, request.CurrentPage, request.PageSize).Result;
+            return result.Match(result => Ok(result), errors => Problem(errors));
+        }
+        //leave comment of contract annex
+        [HttpPost("annex")]
+        [SwaggerOperation(Summary = "Leave a comment of a contract annex in Coms")]
+        public IActionResult LeaveContractAnnexComment([FromBody] ContractAnnexCommentFormRequest request)
+        {
+            ErrorOr<CommentResult> result = _commentService.LeaveContractAnnexComment(
+                                   int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.ContractAnnexId,
+                                                      request.Content, request.ReplyId).Result;
+            return result.Match(
+                               result => Ok(result),
+                                              errors => Problem(errors)
+                                                         );
+        }
+
+        #endregion
     }
 }
