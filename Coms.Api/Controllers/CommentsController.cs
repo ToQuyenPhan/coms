@@ -23,7 +23,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet("all")]
         [SwaggerOperation(Summary = "Get all comments of your contracts in Coms")]
-        public IActionResult GetYourContracts([FromQuery] PagingRequest request)
+        public IActionResult GetComments([FromQuery] PagingRequest request)
         {
             ErrorOr<PagingResult<CommentResult>> result =
                 _commentService.GetAllComments(int.Parse(this.User.Claims.First(i => i.Type ==
