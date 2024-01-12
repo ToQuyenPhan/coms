@@ -7,5 +7,6 @@ namespace Coms.Application.Services.PartnerComments
     {
         Task<ErrorOr<PartnerCommentResult>> GetPartnerComment(int contractId);
         Task<ErrorOr<PartnerCommentResult>> AddPartnerComment(int contractId, string content);
+        Task<ErrorOr<PartnerCommentResult>> GetPartnerCommentByContractAnnexId(int contractAnnexId);
     }
 }

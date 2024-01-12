@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 namespace Coms.Api.Controllers
 {
@@ -19,36 +20,64 @@ namespace Coms.Api.Controllers
             _contractAnnexesService = contractAnnexesService;
         }
 
-        //[HttpGet("yours")]
-        //[SwaggerOperation(Summary = "Get your contracts in Coms")]
-        //[Authorize(Roles = "Staff, Manager")]
-        //public IActionResult GetYourContracts([FromQuery] YourContractsFilterRequest request)
-        //{
-        //    ErrorOr<PagingResult<ContractResult>> result = _contractService.GetYourContracts(
-        //        int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
-        //        request.ContractName, request.CreatorName, request.Status, request.CurrentPage,
-        //        request.PageSize).Result;
-        //    return result.Match(
-        //        result => Ok(result),
-        //        errors => Problem(errors)
-        //    );
-        //}
-
-        //add get all contractannex
-        [HttpGet("all")]
-        [SwaggerOperation(summary: "Get all contract annexes in Coms")]
+        //get your contract annexes
+        [HttpGet("yours")]
+        [SwaggerOperation(summary: "Get your contract annexes in Coms")]
         [Authorize(Roles = "Staff, Manager")]
-        public IActionResult GetAllContractAnnexes([FromQuery] ContractAnnexesFilterRequest request)
+        public IActionResult GetYourContractAnnexes([FromQuery] ContractAnnexesFilterRequest request)
         {
             try
             {
-                ErrorOr<PagingResult<ContractAnnexesResult>> result = _contractAnnexesService.GetContractAnnexes(
-                               request.ContractAnnexName, request.Status, request.CurrentPage,
-                                              request.PageSize).Result;
+                ErrorOr<PagingResult<ContractAnnexesResult>> result = _contractAnnexesService.GetYourContractAnnexes(
+                                                  int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
+                                                  request.ContractAnnexName, request.Status, request.IsYours, request.CurrentPage,
+                                                  request.PageSize).Result;
                 return result.Match(
                     result => Ok(result),
                     errors => Problem(errors)
-                );
+                    );
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+
+        }
+        //get author contract annexes
+        [HttpGet("author")]
+        [SwaggerOperation(summary: "Check contract annex author in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult IsAuthor([FromQuery] int contractAnnexId)
+        {
+            try
+            {
+                ErrorOr<AuthorResult> result = _contractAnnexesService.IsAuthor(int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), contractAnnexId).Result;
+                return result.Match(
+                                       result => Ok(result),
+                                                          errors => Problem(errors)
+                                                                             );
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+
+        }
+        //get manager contract annexes
+        [HttpGet("manager")]
+        [SwaggerOperation(summary: "Get manager contract annexes in Coms")]
+        [Authorize(Roles = "Manager")]
+        public IActionResult GetManagerContractAnnexes([FromQuery] ContractAnnexesFilterRequest request)
+        {
+            try
+            {
+                ErrorOr<PagingResult<ContractAnnexesResult>> result = _contractAnnexesService.GetManagerContractAnnexes(
+                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
+                    request.ContractAnnexName, (int)request.Status, request.CurrentPage, request.PageSize).Result;
+                return result.Match(
+                    result => Ok(result),
+                    errors => Problem(errors)
+                    );
             }
             catch (Exception e)
             {
@@ -67,7 +96,7 @@ namespace Coms.Api.Controllers
             {
                 ErrorOr<PagingResult<ContractAnnexesResult>> result = _contractAnnexesService.GetContractAnnexesByContractId(
                                                   contractId, request.ContractAnnexName, request.Status, request.CurrentPage,
-                                                                                               request.PageSize).Result;
+                                                  request.PageSize).Result;
                 return result.Match(
                     result => Ok(result),
                     errors => Problem(errors)
@@ -121,6 +150,54 @@ namespace Coms.Api.Controllers
             }
 
         }
+        
+
+        //approve or reject contract annex
+        [HttpPut("approveOrReject")]
+        [SwaggerOperation(summary: "Approve or reject a contract annex by manager in Coms")]
+        [Authorize(Roles = "Manager")]
+        public IActionResult ApproveContractAnnex([FromQuery] int id, bool isApproved)
+        {
+            try
+            {
+                ErrorOr<ContractAnnexesResult> result = _contractAnnexesService
+                        .ApproveContractAnnex(id, int.Parse(this.User.Claims.First(i => 
+                        i.Type == ClaimTypes.NameIdentifier).Value), isApproved).Result;
+                return result.Match(
+                                       result => Ok(result),
+                                       errors => Problem(errors)
+                                       );
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+
+        }
+
+        //manage sign contract annex
+        //[HttpPut("manager/sign")]
+        //[SwaggerOperation(summary: "Manager sign a contract annex in Coms")]
+        //[Authorize(Roles = "Manager")]
+        //public IActionResult ManagerSignContractAnnex([FromQuery] int id)
+        //{
+        //    try
+        //    {
+        //        ErrorOr<ContractAnnexesResult> result = _contractAnnexesService
+        //                .ManagerSignContractAnnex(id, int.Parse(this.User.Claims.First(i =>
+        //                                                              i.Type == ClaimTypes.NameIdentifier).Value)).Result;
+        //        return result.Match(
+        //                                                  result => Ok(result),
+        //                                                                                                           errors => Problem(errors)
+        //                                                                                                                                                                                   );
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return Problem(e.Message);
+        //    }
+
+        //}
+       
 
     }
 }

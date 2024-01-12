@@ -9,6 +9,8 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<IList<Contract_FlowDetail>?> GetByContractId(int contractId);
         Task AddRangeContractFlowDetails(List<Contract_FlowDetail> contractFlowDetails);
         Task UpdateContractFlowDetail(Contract_FlowDetail contractFlowDetail);
+        //get contract annex flow detail by flow detail id
+        Task<IList<Contract_FlowDetail>?> GetContractAnnexByFlowDetailId(int flowDetailId);
         Task<IList<Contract_FlowDetail>?> GetApproversByContractId(int contractId);
         Task AddContractFlowDetail(Contract_FlowDetail contractFlowDetail);
         Task<IList<Contract_FlowDetail>?> GetByContractAnnexId(int contractAnnexId);
@@ -16,5 +18,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<IList<Contract_FlowDetail>?> GetByContractIdForSign(int contractId);
         Task<IList<Contract_FlowDetail>?> GetByContractAnnexIdForSign(int contractAnnexId);
         Task<IList<Contract_FlowDetail>?> GetByLiquidationRecordForSign(int liquidationRecordId);
+        Task<IList<Contract_FlowDetail>?> GetApproversByContractAnnexId(int contractAnnexId);
+        Task UpdateContractAnnexFlowDetail(Contract_FlowDetail contractFlowDetail);
     }
 }

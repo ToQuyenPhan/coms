@@ -9,6 +9,7 @@
         public string FullName { get; set; } = string.Empty;
         public string UserImage { get; set; } = string.Empty;
         public int? ContractId { get; set; }
+        public int? ContractAnnexId { get; set; }
         public int FlowDetailId { get; set; }
         public string FlowRole { get; set; } = string.Empty;
     }
