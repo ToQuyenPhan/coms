@@ -6,5 +6,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
     {
         Task<IList<ContractCategory>?> GetActiveContractCategories();
         Task<ContractCategory?> GetActiveContractCategoryById(int id);
+        Task CreateContractCategory(ContractCategory contractCategory);
+        Task<ContractCategory?> GetCategoryByName(string categoryName);
     }
 }

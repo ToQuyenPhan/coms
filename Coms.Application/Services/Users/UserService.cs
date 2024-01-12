@@ -15,13 +15,13 @@ namespace Coms.Application.Services.Users
             _userRepository = userRepository;
         }
 
-        public async Task<ErrorOr<PagingResult<UserResult>>> GetUsers(string fullName, string email, int? roleId, int? status, 
+        public async Task<ErrorOr<PagingResult<UserResult>>> GetUsers(string fullName, string email, int? roleId, int? status,
                 int currentPage, int pageSize)
         {
             try
             {
                 var users = _userRepository.GetUsers();
-                if(users is not null)
+                if (users is not null)
                 {
                     var results = new List<UserResult>();
                     if (users != null)
@@ -54,7 +54,7 @@ namespace Coms.Application.Services.Users
                         results = results.Where(u => u.Email.Contains(email.Trim(), StringComparison.CurrentCultureIgnoreCase))
                                 .ToList();
                     }
-                    if(roleId.HasValue)
+                    if (roleId.HasValue)
                     {
                         results = results.Where(u => u.RoleId.Equals(roleId)).ToList();
                     }
@@ -150,13 +150,13 @@ namespace Coms.Application.Services.Users
             }
         }
 
-        public async Task<ErrorOr<UserResult>> AddUser(string fullName, string username, DateTime dob, string image, 
+        public async Task<ErrorOr<UserResult>> AddUser(string fullName, string username, DateTime dob, string image,
                 string password, int roleId, string email, string position, string phone)
         {
             try
             {
                 var existingUsername = await _userRepository.GetUserByUsername(username);
-                if(existingUsername is not null)
+                if (existingUsername is not null)
                 {
                     return Error.Conflict("409", "Username already exists!");
                 }
@@ -178,7 +178,7 @@ namespace Coms.Application.Services.Users
                     Email = email,
                     Image = image,
                     Password = password,
-                    Status = (int) UserStatus.Active,
+                    Status = (int)UserStatus.Active,
                     RoleId = roleId,
                     Position = position,
                     Phone = phone
@@ -299,7 +299,7 @@ namespace Coms.Application.Services.Users
             try
             {
                 IList<User> users = new List<User>();
-                //users = _userRepository.GetManagers().Result;
+                users = _userRepository.GetManagers().Result;
                 var results = new List<UserResult>();
                 if (users != null)
                 {
@@ -340,7 +340,8 @@ namespace Coms.Application.Services.Users
                 {
                     foreach (var user in users)
                     {
-                        if(user.Id != userId) {
+                        if (user.Id != userId)
+                        {
                             var result = new UserResult()
                             {
                                 Id = user.Id,
@@ -355,7 +356,7 @@ namespace Coms.Application.Services.Users
                                 Role = user.Role.RoleName
                             };
                             results.Add(result);
-                        }                     
+                        }
                     }
                 }
                 return results;

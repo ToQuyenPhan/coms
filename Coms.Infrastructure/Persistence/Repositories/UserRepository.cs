@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Domain.Entities;
+using Coms.Domain.Enum;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
@@ -14,8 +15,8 @@ namespace Coms.Infrastructure.Persistence.Repositories
 
         public async Task<User?> GetUserByUsername(string username)
         {
-            return await _genericRepository.FirstOrDefaultAsync(u => u.Username == username, 
-                    new System.Linq.Expressions.Expression<Func<User, object>>[] {u => u.Role});
+            return await _genericRepository.FirstOrDefaultAsync(u => u.Username == username,
+                    new System.Linq.Expressions.Expression<Func<User, object>>[] { u => u.Role });
         }
 
         public async Task<User?> GetUser(int id)
@@ -26,7 +27,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
 
         public IList<User>? GetUsers()
         {
-            var list = _genericRepository.GetAllWithIncludes(new System.Linq.Expressions.Expression<Func<User, object>>[] { 
+            var list = _genericRepository.GetAllWithIncludes(new System.Linq.Expressions.Expression<Func<User, object>>[] {
                     u => u.Role });
             return (list.Count() > 0) ? list : null;
         }
@@ -76,14 +77,14 @@ namespace Coms.Infrastructure.Persistence.Repositories
             await _genericRepository.UpdateAsync(user);
         }
 
-        //public async Task<IList<User>> GetManagers()
-        //{
-        //    var list = await _genericRepository.WhereAsync(a => a.RoleId == 2
-        //        && a.Status == (int)UserStatus.Active,
-        //       new System.Linq.Expressions.Expression<Func<User, object>>[] {
-        //            a => a.UserAccesses,a=> a.Templates,a=>a.ActionHistories, a=> a.Role});
-        //    return (list.Count() > 0) ? list : null;
-        //}
+        public async Task<IList<User>> GetManagers()
+        {
+            var list = await _genericRepository.WhereAsync(a => a.RoleId == 2
+                && a.Status == (int)UserStatus.Active,
+               new System.Linq.Expressions.Expression<Func<User, object>>[] {
+                    a=> a.Templates,a=>a.ActionHistories, a=> a.Role});
+            return (list.Count() > 0) ? list : null;
+        }
 
         //public async Task<IList<User>> GetStaffs()
         //{

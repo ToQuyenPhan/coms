@@ -21,10 +21,10 @@ namespace Coms.Api.Controllers
 
         [HttpGet]
         [SwaggerOperation(Summary = "Get all users in Coms")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Sale Manager, Manager")]
         public IActionResult GetUsers([FromQuery] UserFilterRequest request)
         {
-            ErrorOr<PagingResult<UserResult>> results = _userService.GetUsers(request.Fullname, request.Email, request.RoleId, 
+            ErrorOr<PagingResult<UserResult>> results = _userService.GetUsers(request.Fullname, request.Email, request.RoleId,
                     request.Status, request.CurrentPage, request.PageSize).Result;
             return results.Match(
                 result => Ok(result),
@@ -58,7 +58,6 @@ namespace Coms.Api.Controllers
 
         [HttpGet("getManagers")]
         [SwaggerOperation(Summary = "Get all Manager in Coms")]
-        [Authorize(Roles = "Staff")]
         public IActionResult GetManagers()
         {
             ErrorOr<IList<UserResult>> result = _userService.GetManagers().Result;
@@ -86,7 +85,7 @@ namespace Coms.Api.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult ActiveUser([FromBody] UserFormRequest request)
         {
-            ErrorOr<UserResult> result = _userService.AddUser(request.FullName, request.Username, request.Dob, request.Image, 
+            ErrorOr<UserResult> result = _userService.AddUser(request.FullName, request.Username, request.Dob, request.Image,
                     request.Password, request.RoleId, request.Email, request.Position, request.Phone).Result;
             return result.Match(
                 result => Ok(result),

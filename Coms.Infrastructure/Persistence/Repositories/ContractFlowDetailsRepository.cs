@@ -87,5 +87,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
             , new System.Linq.Expressions.Expression<Func<Contract_FlowDetail, object>>[] { ufd => ufd.FlowDetail });
             return (list.Count() > 0) ? list : null;
         }
+        public async Task AddContractFlowDetail(Contract_FlowDetail contractFlowDetail)
+        {
+            await _genericRepository.CreateAsync(contractFlowDetail);
+        }
     }
 }

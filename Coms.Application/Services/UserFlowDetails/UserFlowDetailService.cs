@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
+using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
 
@@ -196,6 +197,38 @@ namespace Coms.Application.Services.UserFlowDetails
                     }
                 }
             };
+        }
+        public async Task<ErrorOr<UserFlowDetailResult>> AddContractFlowDetail(int status, int flowDetailId, int contractId, int liquidationRecordId, int contractAnnexId)
+        {
+            try
+            {
+                var contractFlowDetail = new Contract_FlowDetail
+                {
+                    Status = (FlowDetailStatus)status,
+                    FlowDetailId = flowDetailId,
+                    ContractId = contractId,
+                    LiquidationRecordId = liquidationRecordId,
+                    ContractAnnexId = contractAnnexId
+
+                };
+                await _userFlowDetailsRepository.AddContractFlowDetail(contractFlowDetail);
+                var flowDetailResult = new UserFlowDetailResult()
+                {
+                    Id = contractFlowDetail.Id,
+                    Status = (int)contractFlowDetail.Status,
+                    StatusString = contractFlowDetail.Status.ToString(),
+                    ContractId = contractFlowDetail.ContractId,
+                    UserId = (int)contractFlowDetail.FlowDetail.UserId,
+                    FlowDetailId = contractFlowDetail.FlowDetailId,
+                    FlowRole = contractFlowDetail.FlowDetail.FlowRole.ToString(),
+                };
+                return flowDetailResult;
+
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
         }
     }
 }

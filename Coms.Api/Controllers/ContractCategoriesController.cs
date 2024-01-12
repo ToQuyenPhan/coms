@@ -1,4 +1,7 @@
 ﻿using Coms.Application.Services.ContractCategories;
+using Coms.Application.Services.FlowDetails;
+using Coms.Contracts.ContractCategories;
+using Coms.Contracts.FlowDetails;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -39,6 +42,18 @@ namespace Coms.Api.Controllers
                                result => Ok(result),
                                               errors => Problem(errors)
                                                          );
+        }
+        [Authorize(Roles = "Sale Manager")]
+        [HttpPost("add")]
+        [SwaggerOperation(Summary = "Create a contract category in Coms")]
+        public IActionResult CreateCategory([FromBody] ContractCategoryFormRequest request)
+        {
+            ErrorOr<ContractCategoryResult> result =
+                _contractCategoryService.CreateContractCategory(request.ContractCategoryName, request.Status).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
         }
     }
 }
