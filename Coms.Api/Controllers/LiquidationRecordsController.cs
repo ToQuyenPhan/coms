@@ -103,5 +103,24 @@ namespace Coms.Api.Controllers
             }
 
         }
+        [HttpDelete("id")]
+        [SwaggerOperation(summary: "Delete Liquidation Record by LiquidationRecordId in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult DeleteLiquidationRecorddd([FromQuery][Required] int id)
+        {
+            try
+            {
+                ErrorOr<LiquidationRecordsResult> result = _liquidationRecordsService.DeleteLiquidationRecords(id).Result;
+                return result.Match(
+                    result => Ok(result),
+                    errors => Problem(errors)
+                );
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+
+        }
     }
 }
