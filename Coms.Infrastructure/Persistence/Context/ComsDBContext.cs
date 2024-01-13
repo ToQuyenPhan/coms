@@ -37,6 +37,8 @@ namespace Coms.Infrastructure.Persistence.Context
         public DbSet<SystemSettings> SystemSettings { get; set; }
         public DbSet<ContractAnnexAttachment> ContractAnnexAttachments { get; set; }
         public DbSet<LiquidationRecordAttachment> LiquidationRecordAttachments { get; set; }
+        public DbSet<ContractAnnexField> ContractAnnexFields { get; set; }
+        public DbSet<LiquidationRecordField> LiquidationRecordFields {  get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

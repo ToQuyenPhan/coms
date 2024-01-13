@@ -30,6 +30,8 @@ namespace Coms.Domain.Entities
         [Required]
         public string Link { get; set; }
 
+        public int? TemplateId { get; set; }
+
         public int? ContractId { get; set; }
         public virtual Contract? Contract { get; set; }
         public virtual ICollection<ContractAnnexCost>? ContractAnnexCosts { get; set; }
