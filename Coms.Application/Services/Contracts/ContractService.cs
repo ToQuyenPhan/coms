@@ -671,15 +671,18 @@ namespace Coms.Application.Services.Contracts
                     {
                         foreach (var contractFlowDetail in contractFlowDetails)
                         {
-                            var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
-                            if (!contract.Status.Equals(DocumentStatus.Deleted) && !contract.Status.Equals(DocumentStatus.Edited))
+                            if (contractFlowDetail.Status.Equals(FlowDetailStatus.Waiting))
                             {
-                                var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
-                                if (existedContract is null)
+                                var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
+                                if (!contract.Status.Equals(DocumentStatus.Deleted) && !contract.Status.Equals(DocumentStatus.Edited))
                                 {
-                                    if (!string.IsNullOrEmpty(contract.Link))
+                                    var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
+                                    if (existedContract is null)
                                     {
-                                        contracts.Add(contract);
+                                        if (!string.IsNullOrEmpty(contract.Link))
+                                        {
+                                            contracts.Add(contract);
+                                        }
                                     }
                                 }
                             }
