@@ -55,6 +55,7 @@ namespace Coms.Infrastructure
             services.AddScoped<IContractAnnexRepository, ContractAnnexRepository>();
             services.AddScoped<IPartnerSignRepository, PartnerSignRepository>();
 			services.AddScoped<IContractAnnexAttachmentRepository, ContractAnnexAttachmentRepository>();
+            services.AddScoped<IScheduleRepository, ScheduleRepository>();
             return services;
         }
 

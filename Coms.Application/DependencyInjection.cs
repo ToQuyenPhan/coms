@@ -24,6 +24,7 @@ using Coms.Application.Services.Coordinates;
 using Coms.Application.Services.Flows;
 using Coms.Application.Services.FlowDetails;
 using Coms.Application.Services.LiquidationRecords;
+using Coms.Application.Services.Schedules;
 
 namespace Coms.Application
 {
@@ -57,6 +58,7 @@ namespace Coms.Application
             services.AddScoped<IFlowDetailService, FlowDetailService>();
             services.AddScoped<IFlowService, FlowService>();
             services.AddScoped<ILiquidationRecordsService, LiquidationRecordsService>();
+            services.AddScoped<IScheduleService, ScheduleService>();
             return services;
         }
     }

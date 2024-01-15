@@ -14,10 +14,11 @@ namespace Coms.Contracts.Contracts
         public DateTime EffectiveDate { get; set; }
 
         [DataType(DataType.Date)]
-        public DateTime SendDate { get; set; }
+        public DateTime ApproveDate { get; set; }
 
         [DataType(DataType.Date)]
-        public DateTime ReviewDate { get; set; }
+        public DateTime SignDate { get; set; }
+
         public int Status {  get; set; }
         public int? TemplateType {  get; set; }
     }

@@ -9,12 +9,8 @@ namespace Coms.Domain.Entities
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-
-        [Required]
-        public DateTime SendDate { get; set; }
-
-        [Required]
-        public DateTime ReviewAt { get; set; }
+        public DateTime? SendDate { get; set; }
+        public DateTime? ReviewAt { get; set; }
 
         [Required]
         public bool IsApproved { get; set; }

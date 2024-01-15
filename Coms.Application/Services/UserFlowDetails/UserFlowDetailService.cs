@@ -127,8 +127,8 @@ namespace Coms.Application.Services.UserFlowDetails
                             {
                                 Title = "Partner Approved!",
                                 Message = partnerReview.Partner.CompanyName + " approved your contract.",
-                                Time = partnerReview.ReviewAt,
-                                Long = AsTimeAgo(partnerReview.ReviewAt),
+                                Time = (DateTime)partnerReview.ReviewAt,
+                                Long = AsTimeAgo((DateTime)partnerReview.ReviewAt),
                                 ContractId = partnerReview.ContractId,
                                 Type = "Partner Review"
                             };
@@ -142,8 +142,8 @@ namespace Coms.Application.Services.UserFlowDetails
                                 {
                                     Title = "Partner Rejected!",
                                     Message = partnerReview.Partner.CompanyName + " rejected your contract.",
-                                    Time = partnerReview.ReviewAt,
-                                    Long = AsTimeAgo(partnerReview.ReviewAt),
+                                    Time = (DateTime)partnerReview.ReviewAt,
+                                    Long = AsTimeAgo((DateTime)partnerReview.ReviewAt),
                                     ContractId = partnerReview.ContractId,
                                     Type = "Partner Review"
                                 };

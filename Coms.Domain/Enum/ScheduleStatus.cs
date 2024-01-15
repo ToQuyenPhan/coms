@@ -3,8 +3,6 @@
     public enum ScheduleStatus
     {
         Inactive,
-        Pending,
-        Complete,
-        Overdue
+        Active
     }
 }
