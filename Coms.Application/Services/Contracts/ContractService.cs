@@ -1148,9 +1148,7 @@ namespace Coms.Application.Services.Contracts
                         PartnerId = partnerReview.PartnerId,
                         PartnerName = partnerReview.Partner.CompanyName,
                         ServiceId = contractCost.ServiceId,
-                        ServiceName = contractCost.Service.ServiceName,
-                        SendDateString = ((DateTime)partnerReview.SendDate).ToString("yyyy-MM-dd"),
-                        ReviewDateString = ((DateTime)partnerReview.ReviewAt).ToString("yyyy-MM-dd")
+                        ServiceName = contractCost.Service.ServiceName
                     };
                     if (contract.UpdatedDate is not null)
                     {
@@ -1174,7 +1172,7 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<int>> EditContract(int contractId, string[] names, string[] values, int serviceId,
-                DateTime effectiveDate, int status, int userId, int partnerId)
+                DateTime effectiveDate, int status, int userId, int partnerId, DateTime approveDate, DateTime signDate)
         {
             try
             {
@@ -1236,6 +1234,21 @@ namespace Coms.Application.Services.Contracts
                         var existingCode = await _contractRepository.GetByContractCode(nav.Value);
                         version = existingCode.Count() + 1;
                     }
+                    if (nav.Name.Equals("Contract Duration"))
+                    {
+                        var schedule = new Schedule()
+                        {
+                            StartDate = effectiveDate,
+                            EndDate = effectiveDate.AddMonths(int.Parse(nav.Value)),
+                            ScheduleType = ScheduleType.ExpiryDate,
+                            EventName = "Expiry Contract",
+                            Description = "It's time to expiry contract!",
+                            RemindBefore = 3,
+                            Status = ScheduleStatus.Active,
+                            UserId = userId
+                        };
+                        await _scheduleRepository.Add(schedule);
+                    }
                 }
                 contract.Version = version;
                 await _contractRepository.AddContract(contract);
@@ -1295,6 +1308,36 @@ namespace Coms.Application.Services.Contracts
                         Status = FlowDetailStatus.Waiting
                     };
                     contractFlowDetails.Add(contractFlowDetail);
+                    if (flowDetail.FlowRole.Equals(FlowRole.Approver))
+                    {
+                        var schedule = new Schedule()
+                        {
+                            StartDate = DateTime.Now,
+                            EndDate = approveDate,
+                            ScheduleType = ScheduleType.ApprovalDate,
+                            EventName = "Approve Contract",
+                            Description = "It's time to approve contract!",
+                            RemindBefore = 3,
+                            Status = ScheduleStatus.Active,
+                            UserId = (int)flowDetail.UserId
+                        };
+                        await _scheduleRepository.Add(schedule);
+                    }
+                    else
+                    {
+                        var schedule = new Schedule()
+                        {
+                            StartDate = DateTime.Now,
+                            EndDate = signDate,
+                            ScheduleType = ScheduleType.SigningDate,
+                            EventName = "Sign Contract",
+                            Description = "It's time to sign contract!",
+                            RemindBefore = 3,
+                            Status = ScheduleStatus.Active,
+                            UserId = (int)flowDetail.UserId
+                        };
+                        await _scheduleRepository.Add(schedule);
+                    }
                 }
                 await _contractFlowDetailsRepository.AddRangeContractFlowDetails(contractFlowDetails);
                 var actionHistory = new ActionHistory()

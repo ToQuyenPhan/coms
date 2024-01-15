@@ -171,8 +171,9 @@ namespace Coms.Api.Controllers
         public IActionResult EditContract([FromQuery] int contractId, [FromBody] ContractFormRequest request)
         {
             ErrorOr<int> result = _contractService.EditContract(contractId, request.Name, request.Value, request.ServiceId, 
-                    request.EffectiveDate, request.Status, int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
-                    request.PartnerId).Result;
+                    request.EffectiveDate, request.Status, 
+                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
+                    request.PartnerId, request.ApproveDate, request.SignDate).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

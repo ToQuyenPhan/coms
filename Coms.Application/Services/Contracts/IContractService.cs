@@ -25,6 +25,6 @@ namespace Coms.Application.Services.Contracts
                 string name, string creatorName, int? status, int currentPage, int pageSize);
         Task<ErrorOr<ContractResult>> GetPartnerAndService(int id);
         Task<ErrorOr<int>> EditContract(int contractId, string[] names, string[] values, int serviceId,
-                DateTime effectiveDate, int status, int userId, int partnerId);
+                DateTime effectiveDate, int status, int userId, int partnerId, DateTime approveDate, DateTime signDate);
     }
 }
