@@ -9,6 +9,7 @@ using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
 using System.Net.Mail;
 using System.Net;
+using System.Reflection;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -593,6 +594,10 @@ namespace Coms.Application.Services.Contracts
                                 UserId = (int)flowDetail.UserId
                             };
                             await _scheduleRepository.Add(schedule);
+                            Dictionary<string, string> data = ToDictionary(new { DocumentType = "Contract", Id = contract.Id, Type = "Approve" }, 3);
+                            string title = "New Contract";
+                            string body = "You have a new contract to approve!";
+                            await SendNotification(title, body, data, flowDetail.UserId.ToString());
                         }
                         else
                         {
@@ -608,6 +613,10 @@ namespace Coms.Application.Services.Contracts
                                 UserId = (int)flowDetail.UserId
                             };
                             await _scheduleRepository.Add(schedule);
+                            Dictionary<string, string> data = ToDictionary(new { DocumentType = "Contract", Id = contract.Id, Type = "Sign" }, 3);
+                            string title = "Sign Contract";
+                            string body = "You have a new contract to sign!";
+                            await SendNotification(title, body, data, flowDetail.UserId.ToString());
                         }
                     }
                     await _contractFlowDetailsRepository.AddRangeContractFlowDetails(contractFlowDetails);
@@ -1375,6 +1384,30 @@ namespace Coms.Application.Services.Contracts
             smtp.Credentials = new NetworkCredential(systemSettings.Email, "hibz dgyu xnww dnvx");
             smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtp.Send(message);
+        }
+
+        private Dictionary<string, string> ToDictionary(object obj, int method)
+        {
+            var dictionary = obj.GetType()
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .ToDictionary(prop => prop.Name, prop => (prop.Name.Contains("1") && method == 0)
+                ? "" : prop.GetValue(obj, null).ToString());
+            return dictionary;
+        }
+
+        private async Task SendNotification(string title, string body, Dictionary<string, string> data, string uid)
+        {
+            var message = new FirebaseAdmin.Messaging.Message()
+            {
+                Notification = new FirebaseAdmin.Messaging.Notification()
+                {
+                    Title = title,
+                    Body = body
+                },
+                Data = data,
+                Topic = uid
+            };
+            await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SendAsync(message);
         }
     }
 }
