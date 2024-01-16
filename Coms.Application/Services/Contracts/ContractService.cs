@@ -10,6 +10,10 @@ using Syncfusion.Pdf;
 using System.Net.Mail;
 using System.Net;
 using System.Reflection;
+using Microsoft.VisualBasic.FileIO;
+using Microsoft.VisualBasic;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -1710,6 +1714,15 @@ namespace Coms.Application.Services.Contracts
                 Data = data,
                 Topic = uid
             };
+            string fileConfigPath = Path.Combine(Directory.GetCurrentDirectory(), @"coms-64e4a-firebase-adminsdk-rzqca-3869e0f5ce.json");
+            //var stream = new FileStream(fileConfigPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+            if(FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance is null)
+            {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile(fileConfigPath)
+                });
+            }
             await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SendAsync(message);
         }
     }
