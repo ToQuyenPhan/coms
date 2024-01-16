@@ -594,7 +594,7 @@ namespace Coms.Application.Services.Contracts
                                 UserId = (int)flowDetail.UserId
                             };
                             await _scheduleRepository.Add(schedule);
-                            Dictionary<string, string> data = ToDictionary(new { DocumentType = "Contract", Id = contract.Id, Type = "Approve" }, 3);
+                            Dictionary<string, string> data = ToDictionary(new { DocumentType = "Contract", Id = contract.Id, Type = "Approve" });
                             string title = "New Contract";
                             string body = "You have a new contract to approve!";
                             await SendNotification(title, body, data, flowDetail.UserId.ToString());
@@ -613,7 +613,7 @@ namespace Coms.Application.Services.Contracts
                                 UserId = (int)flowDetail.UserId
                             };
                             await _scheduleRepository.Add(schedule);
-                            Dictionary<string, string> data = ToDictionary(new { DocumentType = "Contract", Id = contract.Id, Type = "Sign" }, 3);
+                            Dictionary<string, string> data = ToDictionary(new { DocumentType = "Contract", Id = contract.Id, Type = "Sign" });
                             string title = "Sign Contract";
                             string body = "You have a new contract to sign!";
                             await SendNotification(title, body, data, flowDetail.UserId.ToString());
@@ -1386,12 +1386,11 @@ namespace Coms.Application.Services.Contracts
             smtp.Send(message);
         }
 
-        private Dictionary<string, string> ToDictionary(object obj, int method)
+        private Dictionary<string, string> ToDictionary(object obj)
         {
             var dictionary = obj.GetType()
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .ToDictionary(prop => prop.Name, prop => (prop.Name.Contains("1") && method == 0)
-                ? "" : prop.GetValue(obj, null).ToString());
+                .ToDictionary(prop => prop.Name);
             return dictionary;
         }
 
