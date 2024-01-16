@@ -9,6 +9,7 @@ using Syncfusion.DocIORenderer;
 using Syncfusion.Pdf;
 using System.Net.Mail;
 using System.Net;
+using System.Reflection;
 
 namespace Coms.Application.Services.Contracts
 {
@@ -593,6 +594,10 @@ namespace Coms.Application.Services.Contracts
                                 UserId = (int)flowDetail.UserId
                             };
                             await _scheduleRepository.Add(schedule);
+                            Dictionary<string, string> data = ToDictionary(new { DocumentType = "Contract", Id = contract.Id, Type = "Approve" });
+                            string title = "New Contract";
+                            string body = "You have a new contract to approve!";
+                            await SendNotification(title, body, data, flowDetail.UserId.ToString());
                         }
                         else
                         {
@@ -608,6 +613,10 @@ namespace Coms.Application.Services.Contracts
                                 UserId = (int)flowDetail.UserId
                             };
                             await _scheduleRepository.Add(schedule);
+                            Dictionary<string, string> data = ToDictionary(new { DocumentType = "Contract", Id = contract.Id, Type = "Sign" });
+                            string title = "Sign Contract";
+                            string body = "You have a new contract to sign!";
+                            await SendNotification(title, body, data, flowDetail.UserId.ToString());
                         }
                     }
                     await _contractFlowDetailsRepository.AddRangeContractFlowDetails(contractFlowDetails);
@@ -1548,7 +1557,7 @@ namespace Coms.Application.Services.Contracts
                     Status = (int)DocumentStatus.Approving,
                     StatusString = DocumentStatus.Approving.ToString(),
                     Percent = (drafts.Count() * 100 / actionHistories.Count()),
-                    Title = "Waiting Contracts"
+                    Title = "Approving Contracts"
                 };
                 responses.Add(generalReportResult);
             }
@@ -1560,7 +1569,7 @@ namespace Coms.Application.Services.Contracts
                     Status = (int)DocumentStatus.Approving,
                     StatusString = DocumentStatus.Approving.ToString(),
                     Percent = 0,
-                    Title = "Waiting Contracts"
+                    Title = "Approving Contracts"
                 };
                 responses.Add(generalReportResult);
             }
@@ -1647,7 +1656,7 @@ namespace Coms.Application.Services.Contracts
                     Status = (int)DocumentStatus.Approving,
                     StatusString = DocumentStatus.Approving.ToString(),
                     Percent = 0,
-                    Title = "Waiting Contracts"
+                    Title = "Approving Contracts"
                 };
                 var approvedReport = new GeneralReportResult()
                 {
@@ -1679,6 +1688,29 @@ namespace Coms.Application.Services.Contracts
                 responses.Add(finalizedReport);
                 return responses.ToList();
             }
+        }
+
+        private Dictionary<string, string> ToDictionary(object obj)
+        {
+            var dictionary = obj.GetType()
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .ToDictionary(prop => prop.Name, prop => prop.GetValue(obj, null).ToString());
+            return dictionary;
+        }
+
+        private async Task SendNotification(string title, string body, Dictionary<string, string> data, string uid)
+        {
+            var message = new FirebaseAdmin.Messaging.Message()
+            {
+                Notification = new FirebaseAdmin.Messaging.Notification()
+                {
+                    Title = title,
+                    Body = body
+                },
+                Data = data,
+                Topic = uid
+            };
+            await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SendAsync(message);
         }
     }
 }
