@@ -1388,7 +1388,7 @@ namespace Coms.Application.Services.Contracts
             smtp.Host = "smtp.gmail.com";
             smtp.EnableSsl = true;
             smtp.UseDefaultCredentials = false;
-            smtp.Credentials = new NetworkCredential(systemSettings.Email, "hibz dgyu xnww dnvx");
+            smtp.Credentials = new NetworkCredential(systemSettings.Email, "jidv eeyy kvzi xpth");
             smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtp.Send(message);
         }
