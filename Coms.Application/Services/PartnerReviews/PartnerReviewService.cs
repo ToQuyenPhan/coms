@@ -80,7 +80,7 @@ namespace Coms.Application.Services.PartnerReviews
                     {
                         partnerPreview.Status = PartnerReviewStatus.Inactive;
                     }
-                    //partnerPreview.ReviewAt = DateTime.Now;
+                    partnerPreview.ReviewAt = DateTime.Now;
                     await _partnerReviewRepository.UpdatePartnerPreview(partnerPreview);
                     var partnerReviewResult = new PartnerReviewResult
                     {
@@ -90,8 +90,6 @@ namespace Coms.Application.Services.PartnerReviews
                         IsApproved = partnerPreview.IsApproved,
                         PartnerId = partnerPreview.Id,
                         PartnerCompanyName = partnerPreview.Partner.CompanyName,
-                        ReviewAt = partnerPreview.ReviewAt,
-                        SendDate = partnerPreview.SendDate,
                         UserId = partnerPreview.UserId,
                         UserName = partnerPreview.User.Username
                     };
@@ -132,9 +130,12 @@ namespace Coms.Application.Services.PartnerReviews
                                     Title = "Partner Approved!",
                                     Message = partnerReview.Partner.CompanyName + " approved your contract.",
                                     Time = partnerReview.ReviewAt,
-                                    Long = AsTimeAgo(partnerReview.ReviewAt),
                                     ContractId = partnerReview.ContractId
                                 };
+                                if(partnerReview.ReviewAt is not null)
+                                {
+                                    notificationResult.Long = AsTimeAgo((DateTime)partnerReview.ReviewAt);
+                                }
                                 results.Add(notificationResult);
                             }
                             else
@@ -146,9 +147,12 @@ namespace Coms.Application.Services.PartnerReviews
                                         Title = "Partner Rejected!",
                                         Message = partnerReview.Partner.CompanyName + " rejected your contract.",
                                         Time = partnerReview.ReviewAt,
-                                        Long = AsTimeAgo(partnerReview.ReviewAt),
                                         ContractId = partnerReview.ContractId
                                     };
+                                    if (partnerReview.ReviewAt is not null)
+                                    {
+                                        notificationResult.Long = AsTimeAgo((DateTime)partnerReview.ReviewAt);
+                                    }
                                     results.Add(notificationResult);
                                 }
                             }
@@ -189,9 +193,12 @@ namespace Coms.Application.Services.PartnerReviews
                             Title = "New Contract!",
                             Message = "You have new contract to approved.",
                             Time = partnerReview.SendDate,
-                            Long = AsTimeAgo(partnerReview.SendDate),
                             ContractId = partnerReview.ContractId
                         };
+                        if(partnerReview.SendDate is not null)
+                        {
+                            notificationResult.Long = AsTimeAgo((DateTime)partnerReview.SendDate);
+                        }
                         results.Add(notificationResult);
                     }
                     results = results.OrderByDescending(nr => nr.Time).ToList();

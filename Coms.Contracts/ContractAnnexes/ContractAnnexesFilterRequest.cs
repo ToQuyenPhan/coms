@@ -6,5 +6,6 @@ namespace Coms.Contracts.ContractAnnexes
     {
         public string? ContractAnnexName { get; set; }
         public int? Status { get; set; }
+        public bool IsYours { get; set; }
     }
 }

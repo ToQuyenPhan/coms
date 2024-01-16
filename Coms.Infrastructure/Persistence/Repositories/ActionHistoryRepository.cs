@@ -79,6 +79,29 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     { ah => ah.Contract, ah => ah.User});
             return (list.Count() > 0) ? list : null;
         }
+        public async Task<IList<ActionHistory>?> GetCommentActionByContractAnnexId(int contractAnnexId)
+        {
+            var list = await _genericRepository.WhereAsync(ah => ah.ContractAnnexId.Equals(contractAnnexId) &&
+                                      ah.ActionType.Equals(ActionType.Commented), new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User,
+                                                                                       ah => ah.Contract, ah => ah.User});
+            return (list.Count() > 0) ? list : null;
+        }
+
+        //Get Create Action By ContractAnnexId
+        public async Task<ActionHistory?> GetCreateActionByContractAnnexId(int contractAnnexId)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(ah => ah.ContractAnnexId.Equals(contractAnnexId) &&
+                                      ah.ActionType.Equals(ActionType.Created) && ah.ContractAnnexId != null, new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User,
+                                                                                       ah => ah.Contract, ah => ah.User});
+        }
+        //get create contract annex action by userId
+        public async Task<IList<ActionHistory>?> GetContractAnnexCreateActionByUserId(int userId)
+        {
+            var list = await _genericRepository.WhereAsync(ah => ah.UserId.Equals(userId) &&
+                           ah.ActionType.Equals(ActionType.Created) && ah.ContractAnnexId != null, new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User,
+                                                  ah => ah.ContractAnnex });
+            return (list.Count() > 0) ? list : null;
+        }
 
         public async Task<IList<ActionHistory>?> GetCreateActions() { 
             var list = await _genericRepository.WhereAsync(ah =>  ah.ContractId != null && ah.ActionType == ActionType.Created

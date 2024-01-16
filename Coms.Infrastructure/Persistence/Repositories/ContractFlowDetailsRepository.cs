@@ -22,8 +22,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
 
         public async Task<IList<Contract_FlowDetail>?> GetByFlowDetailId(int flowDetailId)
         {
-            var list =  await _genericRepository.WhereAsync(ufd =>
-                ufd.FlowDetailId.Equals(flowDetailId), new System.Linq.Expressions.Expression<Func<Contract_FlowDetail, object>>[] { ufd => ufd.Contract, ufd => ufd.FlowDetail });
+            var list = await _genericRepository.WhereAsync(ufd =>
+                ufd.FlowDetailId.Equals(flowDetailId) && ufd.ContractId != null,
+                new System.Linq.Expressions.Expression<Func<Contract_FlowDetail, object>>[] { ufd => ufd.Contract, ufd => ufd.FlowDetail });
             return (list.Count() > 0) ? list : null;
         }
 
@@ -86,6 +87,39 @@ namespace Coms.Infrastructure.Persistence.Repositories
             var list = await _genericRepository.WhereAsync(ufd => ufd.LiquidationRecordId.Equals(liquidationRecordId) && ufd.LiquidationRecordId != null
             , new System.Linq.Expressions.Expression<Func<Contract_FlowDetail, object>>[] { ufd => ufd.FlowDetail });
             return (list.Count() > 0) ? list : null;
+        }
+        public async Task AddContractFlowDetail(Contract_FlowDetail contractFlowDetail)
+        {
+            await _genericRepository.CreateAsync(contractFlowDetail);
+        }
+        //get contract annex flow detail by flow detail id
+        public async Task<IList<Contract_FlowDetail>?> GetContractAnnexByFlowDetailId(int flowDetailId)
+        {
+            var list = await _genericRepository.WhereAsync(ufd =>
+                           ufd.FlowDetailId.Equals(flowDetailId) && ufd.ContractAnnexId != null,
+                                          new System.Linq.Expressions.Expression<Func<Contract_FlowDetail, object>>[] { ufd => ufd.Contract, ufd => ufd.FlowDetail });
+            return (list.Count() > 0) ? list : null;
+        }
+        ////get by contract annex id
+        //public async Task<IList<Contract_FlowDetail>?> GetByContractAnnexId(int contractAnnexId)
+        //{
+        //    var list = await _genericRepository.WhereAsync(ufd =>
+        //                   ufd.ContractAnnexId.Equals(contractAnnexId), new System.Linq.Expressions.Expression<Func<Contract_FlowDetail, object>>[] { ufd => ufd.Contract, ufd => ufd.FlowDetail });
+        //    return (list.Count() > 0) ? list : null;
+        //}
+        //get approvers by contract annex id
+        public async Task<IList<Contract_FlowDetail>?> GetApproversByContractAnnexId(int contractAnnexId)
+        {
+            var list = await _genericRepository.WhereAsync(ufd =>
+                           ufd.ContractAnnexId.Equals(contractAnnexId) && ufd.FlowDetail.FlowRole.Equals(FlowRole.Approver),
+                                          new System.Linq.Expressions.Expression<Func<Contract_FlowDetail, object>>[]
+                                                         { ufd => ufd.FlowDetail });
+            return (list.Count() > 0) ? list : null;
+        }
+        //update contract annex flow detail
+        public async Task UpdateContractAnnexFlowDetail(Contract_FlowDetail contractFlowDetail)
+        {
+            await _genericRepository.UpdateAsync(contractFlowDetail);
         }
     }
 }

@@ -26,6 +26,7 @@ namespace Coms.Application.Services.Contracts
         private readonly IFlowRepository _flowRepository;
         private readonly IContractFileRepository _contractFileRepository;
         private readonly ISystemSettingsRepository _systemSettingsRepository;
+        private readonly IScheduleRepository _scheduleRepository;
 
         public ContractService(IPartnerReviewRepository partnerReviewRepository,
                 IContractRepository contractRepository,
@@ -37,7 +38,7 @@ namespace Coms.Application.Services.Contracts
                 IContractFieldRepository contractFieldRepository,
                 IFlowRepository flowRepository,
                 IContractFileRepository contractFileRepository,
-                ISystemSettingsRepository systemSettingsRepository)
+                ISystemSettingsRepository systemSettingsRepository, IScheduleRepository scheduleRepository)
         {
             _partnerReviewRepository = partnerReviewRepository;
             _templateRepository = templateRepository;
@@ -50,6 +51,7 @@ namespace Coms.Application.Services.Contracts
             _flowRepository = flowRepository;
             _contractFileRepository = contractFileRepository;
             _systemSettingsRepository = systemSettingsRepository;
+            _scheduleRepository = scheduleRepository;
         }
 
         public async Task<ErrorOr<ContractResult>> DeleteContract(int userId, int id)
@@ -265,10 +267,10 @@ namespace Coms.Application.Services.Contracts
                     var generalReportResult = new GeneralReportResult()
                     {
                         Total = drafts.Count(),
-                        Status = (int)DocumentStatus.Waiting,
-                        StatusString = DocumentStatus.Waiting.ToString(),
+                        Status = (int)DocumentStatus.Approving,
+                        StatusString = DocumentStatus.Approving.ToString(),
                         Percent = (drafts.Count() * 100 / actionHistories.Count()),
-                        Title = "Waiting Contracts"
+                        Title = "Approving Contracts"
                     };
                     responses.Add(generalReportResult);
                 }
@@ -277,10 +279,10 @@ namespace Coms.Application.Services.Contracts
                     var generalReportResult = new GeneralReportResult()
                     {
                         Total = 0,
-                        Status = (int)DocumentStatus.Waiting,
-                        StatusString = DocumentStatus.Waiting.ToString(),
+                        Status = (int)DocumentStatus.Approving,
+                        StatusString = DocumentStatus.Approving.ToString(),
                         Percent = 0,
-                        Title = "Waiting Contracts"
+                        Title = "Approving Contracts"
                     };
                     responses.Add(generalReportResult);
                 }
@@ -363,10 +365,10 @@ namespace Coms.Application.Services.Contracts
                 var draftReport = new GeneralReportResult()
                 {
                     Total = 0,
-                    Status = (int)DocumentStatus.Waiting,
-                    StatusString = DocumentStatus.Waiting.ToString(),
+                    Status = (int)DocumentStatus.Approving,
+                    StatusString = DocumentStatus.Approving.ToString(),
                     Percent = 0,
-                    Title = "Waiting Contracts"
+                    Title = "Approving Contracts"
                 };
                 var approvedReport = new GeneralReportResult()
                 {
@@ -443,8 +445,8 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<int>> AddContract(string[] names, string[] values, int contractCategoryId,
-                int serviceId, DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate,
-                int partnerId, int templatetype)
+                int serviceId, DateTime effectiveDate, int status, int userId, int partnerId, int templatetype,
+                DateTime approveDate, DateTime signDate)
         {
             try
             {
@@ -505,6 +507,21 @@ namespace Coms.Application.Services.Contracts
                                 return Error.Conflict("409", "The contract is already exist!");
                             }
                         }
+                        if (nav.Name.Equals("Contract Duration"))
+                        {
+                            var schedule = new Schedule()
+                            {
+                                StartDate = effectiveDate,
+                                EndDate = effectiveDate.AddMonths(int.Parse(nav.Value)),
+                                ScheduleType = ScheduleType.ExpiryDate,
+                                EventName = "Expiry Contract",
+                                Description = "It's time to expiry contract!",
+                                RemindBefore = 3,
+                                Status = ScheduleStatus.Active,
+                                UserId = userId
+                            };
+                            await _scheduleRepository.Add(schedule);
+                        }
                     }
                     await _contractRepository.AddContract(contract);
                     Guid UUID = new Guid();
@@ -546,8 +563,6 @@ namespace Coms.Application.Services.Contracts
                         PartnerId = partnerId,
                         UserId = userId,
                         ContractId = contract.Id,
-                        SendDate = sendDate,
-                        ReviewAt = reviewDate,
                         IsApproved = false,
                         Status = PartnerReviewStatus.Active
                     };
@@ -564,6 +579,36 @@ namespace Coms.Application.Services.Contracts
                             Status = FlowDetailStatus.Waiting
                         };
                         contractFlowDetails.Add(contractFlowDetail);
+                        if (flowDetail.FlowRole.Equals(FlowRole.Approver))
+                        {
+                            var schedule = new Schedule()
+                            {
+                                StartDate = DateTime.Now,
+                                EndDate = approveDate,
+                                ScheduleType = ScheduleType.ApprovalDate,
+                                EventName = "Approve Contract",
+                                Description = "It's time to approve contract!",
+                                RemindBefore = 3,
+                                Status = ScheduleStatus.Active,
+                                UserId = (int)flowDetail.UserId
+                            };
+                            await _scheduleRepository.Add(schedule);
+                        }
+                        else
+                        {
+                            var schedule = new Schedule()
+                            {
+                                StartDate = DateTime.Now,
+                                EndDate = signDate,
+                                ScheduleType = ScheduleType.SigningDate,
+                                EventName = "Sign Contract",
+                                Description = "It's time to sign contract!",
+                                RemindBefore = 3,
+                                Status = ScheduleStatus.Active,
+                                UserId = (int)flowDetail.UserId
+                            };
+                            await _scheduleRepository.Add(schedule);
+                        }
                     }
                     await _contractFlowDetailsRepository.AddRangeContractFlowDetails(contractFlowDetails);
                     var actionHistory = new ActionHistory()
@@ -671,15 +716,18 @@ namespace Coms.Application.Services.Contracts
                     {
                         foreach (var contractFlowDetail in contractFlowDetails)
                         {
-                            var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
-                            if (!contract.Status.Equals(DocumentStatus.Deleted) && !contract.Status.Equals(DocumentStatus.Edited))
+                            if (contractFlowDetail.Status.Equals(FlowDetailStatus.Waiting))
                             {
-                                var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
-                                if (existedContract is null)
+                                var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
+                                if (!contract.Status.Equals(DocumentStatus.Deleted) && !contract.Status.Equals(DocumentStatus.Edited))
                                 {
-                                    if (!string.IsNullOrEmpty(contract.Link))
+                                    var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
+                                    if (existedContract is null)
                                     {
-                                        contracts.Add(contract);
+                                        if (!string.IsNullOrEmpty(contract.Link))
+                                        {
+                                            contracts.Add(contract);
+                                        }
                                     }
                                 }
                             }
@@ -1103,9 +1151,7 @@ namespace Coms.Application.Services.Contracts
                         PartnerId = partnerReview.PartnerId,
                         PartnerName = partnerReview.Partner.CompanyName,
                         ServiceId = contractCost.ServiceId,
-                        ServiceName = contractCost.Service.ServiceName,
-                        SendDateString = partnerReview.SendDate.ToString("yyyy-MM-dd"),
-                        ReviewDateString = partnerReview.ReviewAt.ToString("yyyy-MM-dd")
+                        ServiceName = contractCost.Service.ServiceName
                     };
                     if (contract.UpdatedDate is not null)
                     {
@@ -1129,7 +1175,7 @@ namespace Coms.Application.Services.Contracts
         }
 
         public async Task<ErrorOr<int>> EditContract(int contractId, string[] names, string[] values, int serviceId,
-                DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate, int partnerId)
+                DateTime effectiveDate, int status, int userId, int partnerId, DateTime approveDate, DateTime signDate)
         {
             try
             {
@@ -1191,6 +1237,21 @@ namespace Coms.Application.Services.Contracts
                         var existingCode = await _contractRepository.GetByContractCode(nav.Value);
                         version = existingCode.Count() + 1;
                     }
+                    if (nav.Name.Equals("Contract Duration"))
+                    {
+                        var schedule = new Schedule()
+                        {
+                            StartDate = effectiveDate,
+                            EndDate = effectiveDate.AddMonths(int.Parse(nav.Value)),
+                            ScheduleType = ScheduleType.ExpiryDate,
+                            EventName = "Expiry Contract",
+                            Description = "It's time to expiry contract!",
+                            RemindBefore = 3,
+                            Status = ScheduleStatus.Active,
+                            UserId = userId
+                        };
+                        await _scheduleRepository.Add(schedule);
+                    }
                 }
                 contract.Version = version;
                 await _contractRepository.AddContract(contract);
@@ -1233,8 +1294,6 @@ namespace Coms.Application.Services.Contracts
                     PartnerId = partnerId,
                     UserId = userId,
                     ContractId = contract.Id,
-                    SendDate = sendDate,
-                    ReviewAt = reviewDate,
                     IsApproved = false,
                     Status = PartnerReviewStatus.Active
                 };
@@ -1252,6 +1311,36 @@ namespace Coms.Application.Services.Contracts
                         Status = FlowDetailStatus.Waiting
                     };
                     contractFlowDetails.Add(contractFlowDetail);
+                    if (flowDetail.FlowRole.Equals(FlowRole.Approver))
+                    {
+                        var schedule = new Schedule()
+                        {
+                            StartDate = DateTime.Now,
+                            EndDate = approveDate,
+                            ScheduleType = ScheduleType.ApprovalDate,
+                            EventName = "Approve Contract",
+                            Description = "It's time to approve contract!",
+                            RemindBefore = 3,
+                            Status = ScheduleStatus.Active,
+                            UserId = (int)flowDetail.UserId
+                        };
+                        await _scheduleRepository.Add(schedule);
+                    }
+                    else
+                    {
+                        var schedule = new Schedule()
+                        {
+                            StartDate = DateTime.Now,
+                            EndDate = signDate,
+                            ScheduleType = ScheduleType.SigningDate,
+                            EventName = "Sign Contract",
+                            Description = "It's time to sign contract!",
+                            RemindBefore = 3,
+                            Status = ScheduleStatus.Active,
+                            UserId = (int)flowDetail.UserId
+                        };
+                        await _scheduleRepository.Add(schedule);
+                    }
                 }
                 await _contractFlowDetailsRepository.AddRangeContractFlowDetails(contractFlowDetails);
                 var actionHistory = new ActionHistory()
@@ -1456,8 +1545,8 @@ namespace Coms.Application.Services.Contracts
                 var generalReportResult = new GeneralReportResult()
                 {
                     Total = drafts.Count(),
-                    Status = (int)DocumentStatus.Waiting,
-                    StatusString = DocumentStatus.Waiting.ToString(),
+                    Status = (int)DocumentStatus.Approving,
+                    StatusString = DocumentStatus.Approving.ToString(),
                     Percent = (drafts.Count() * 100 / actionHistories.Count()),
                     Title = "Waiting Contracts"
                 };
@@ -1468,8 +1557,8 @@ namespace Coms.Application.Services.Contracts
                 var generalReportResult = new GeneralReportResult()
                 {
                     Total = 0,
-                    Status = (int)DocumentStatus.Waiting,
-                    StatusString = DocumentStatus.Waiting.ToString(),
+                    Status = (int)DocumentStatus.Approving,
+                    StatusString = DocumentStatus.Approving.ToString(),
                     Percent = 0,
                     Title = "Waiting Contracts"
                 };
@@ -1555,8 +1644,8 @@ namespace Coms.Application.Services.Contracts
                 var draftReport = new GeneralReportResult()
                 {
                     Total = 0,
-                    Status = (int)DocumentStatus.Waiting,
-                    StatusString = DocumentStatus.Waiting.ToString(),
+                    Status = (int)DocumentStatus.Approving,
+                    StatusString = DocumentStatus.Approving.ToString(),
                     Percent = 0,
                     Title = "Waiting Contracts"
                 };

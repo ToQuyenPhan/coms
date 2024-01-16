@@ -26,6 +26,16 @@ namespace Coms.Api.Controllers
             return result.Match(result => Ok(result), errors => Problem(errors));
         }
 
+        //get all partner comments of a contract annex
+        [HttpGet("annex")]
+        [SwaggerOperation(Summary = "Get all partner comments of a contract annex in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult GetAnnexComments([FromQuery] int contractAnnexId)
+        {
+            ErrorOr<PartnerCommentResult> result = _partnerCommentService.GetPartnerCommentByContractAnnexId(contractAnnexId).Result;
+            return result.Match(result => Ok(result), errors => Problem(errors));
+        }
+
         [HttpPost]
         [SwaggerOperation(Summary = "Partner comment for a contract in Coms")]
         public IActionResult AddComment([FromBody] PartnerCommentFormRequest request)

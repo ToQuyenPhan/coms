@@ -188,10 +188,6 @@ namespace Coms.Application.Services.TemplateFields
                                 }
                             }
                         }
-                        if (templateField.FieldName.Contains("Contract Title"))
-                        {
-                            content = template.TemplateName;
-                        }
                         var templateFieldResult = new TemplateFieldResult()
                         {
                             Id = templateField.Id,

@@ -14,13 +14,15 @@ namespace Coms.Application.Services.Comments
         private readonly IContractRepository _contractRepository;
         private readonly IContractFlowDetailsRepository _userFlowDetailsRepository;
         private readonly IFlowDetailRepository _flowDetailRepository;
+        private readonly IContractAnnexRepository _contractAnnexRepository;
 
         public CommentService(ICommentRepository commentRepository,
             IActionHistoryRepository actionHistoryRepository,
             IUserRepository userRepository,
             IContractRepository contractRepository,
             IContractFlowDetailsRepository userFlowDetailsRepository,
-            IFlowDetailRepository flowDetailRepository)
+            IFlowDetailRepository flowDetailRepository,
+            IContractAnnexRepository contractAnnexRepository)
         {
             _commentRepository = commentRepository;
             _actionHistoryRepository = actionHistoryRepository;
@@ -28,6 +30,7 @@ namespace Coms.Application.Services.Comments
             _contractRepository = contractRepository;
             _userFlowDetailsRepository = userFlowDetailsRepository;
             _flowDetailRepository = flowDetailRepository;
+            _contractAnnexRepository = contractAnnexRepository;
         }
 
         public async Task<ErrorOr<PagingResult<CommentResult>>> GetAllComments(int userId, int currentPage,
@@ -364,6 +367,144 @@ namespace Coms.Application.Services.Comments
                 return Error.Failure("500", ex.Message);
             }
         }
+
+        #region ContractAnnex
+        //get all comments of a contract annex
+        public async Task<ErrorOr<PagingResult<CommentResult>>> GetContractAnnexComments(int contractAnnexId, int currentPage, int pageSize)
+        {
+            var histories = await _actionHistoryRepository.GetCommentActionByContractAnnexId(contractAnnexId);
+            if (histories is not null)
+            {
+                IList<CommentResult> comments = new List<CommentResult>();
+                foreach (var commentHistory in histories)
+                {
+                    var comment = await _commentRepository.GetByActionHistoryId(commentHistory.Id);
+                    if (comment is not null)
+                    {
+                        var commentResult = new CommentResult()
+                        {
+                            Id = comment.Id,
+                            Content = comment.Content,
+                            ActionHistoryId = comment.ActionHistoryId,
+                            ReplyId = comment.ReplyId,
+                            Status = (int)comment.Status,
+                            StatusString = comment.Status.ToString(),
+                            Long = AsTimeAgo(commentHistory.CreatedAt),
+                            CreatedAt = commentHistory.CreatedAt.ToString(),
+                            UserId = commentHistory.User.Id,
+                            FullName = commentHistory.User.FullName
+                        };
+                        if (commentHistory.User.Image is not null)
+                        {
+                            commentResult.UserImage = commentHistory.User.Image;
+                        }
+                        var userFlowDetails =
+                            await _userFlowDetailsRepository.GetByContractAnnexId((int)commentHistory.ContractAnnexId);
+                        if (userFlowDetails is not null)
+                        {
+                            int numberOfRole = 0;
+                            foreach (var userFlowDetail in userFlowDetails)
+                            {
+                                var flowDetail = await _flowDetailRepository.GetFlowDetail(userFlowDetail.FlowDetailId);
+                                if (flowDetail is not null)
+                                {
+                                    numberOfRole++;
+                                    if (numberOfRole > 1)
+                                    {
+                                        commentResult.AccessRole += ", " + flowDetail.FlowRole.ToString();
+                                    }
+                                    else
+                                    {
+                                        commentResult.AccessRole = flowDetail.FlowRole.ToString();
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            commentResult.AccessRole = "Author";
+                        }
+                        comments.Add(commentResult);
+                    }
+                }
+                int total = comments.Count();
+                comments = comments.OrderByDescending(c => c.CreatedAt).ToList();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    comments = comments.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+                }
+                return new PagingResult<CommentResult>(comments, total, currentPage, pageSize);
+            }
+            else
+            {
+                return new PagingResult<CommentResult>(new List<CommentResult>(), 0, currentPage,
+                                                          pageSize);
+            }
+        }
+
+        public async Task<ErrorOr<CommentResult>> LeaveContractAnnexComment(int userId, int contractAnnexId, string content,
+        int? replyId)
+        {
+            try
+            {
+                ContractAnnex? contractAnnex = await _contractAnnexRepository.GetContractAnnexesById(contractAnnexId);
+                if (contractAnnex is not null)
+                {
+                    if (contractAnnex.Status.Equals(DocumentStatus.Deleted))
+                    {
+                        return Error.Conflict("409", "Contract no longer exist!");
+                    }
+                    ActionHistory actionHistory = new()
+                    {
+                        ActionType = ActionType.Commented,
+                        CreatedAt = DateTime.Now,
+                        UserId = userId,
+                        ContractAnnexId = contractAnnexId
+                    };
+                    await _actionHistoryRepository.AddActionHistory(actionHistory);
+                    Comment comment = new()
+                    {
+                        Content = content,
+                        Status = CommentStatus.Active,
+                        ActionHistoryId = actionHistory.Id
+                    };
+                    if (replyId is not null && replyId > 0)
+                    {
+                        comment.ReplyId = replyId;
+                    }
+                    ActionHistory actionHistorycreated = await _actionHistoryRepository.GetActionHistoryById(actionHistory.Id);
+                    await _commentRepository.AddComment(comment);
+                    CommentResult commentResult = new()
+                    {
+                        Id = comment.Id,
+                        Content = comment.Content,
+                        ActionHistoryId = comment.ActionHistoryId,
+                        ReplyId = comment.ReplyId,
+                        Status = (int)comment.Status,
+                        StatusString = comment.Status.ToString(),
+                        UserId = (int)actionHistorycreated.UserId,
+                        FullName = actionHistorycreated.User.FullName,
+                        UserImage = actionHistorycreated.User.Image,
+                        CreatedAt = actionHistorycreated.CreatedAt.ToString(),
+                        Long = AsTimeAgo(actionHistorycreated.CreatedAt)
+                    };
+                    return commentResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "ContractAnnex is not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
+
+
+
+        #endregion
 
         private string AsTimeAgo(DateTime dateTime)
         {

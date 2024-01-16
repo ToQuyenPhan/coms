@@ -235,6 +235,9 @@ namespace Coms.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TemplateId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -297,6 +300,32 @@ namespace Coms.Infrastructure.Migrations
                     b.HasIndex("ContractCostId");
 
                     b.ToTable("ContractAnnexCosts");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexField", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ContractAnnexId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FieldName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractAnnexId");
+
+                    b.ToTable("ContractAnnexFields");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexFile", b =>
@@ -502,6 +531,9 @@ namespace Coms.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TemplateId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
@@ -549,6 +581,32 @@ namespace Coms.Infrastructure.Migrations
                     b.HasIndex("LiquidationRecordId");
 
                     b.ToTable("LiquidationRecordAttachments");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecordField", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FieldName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("LiquidationRecordId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LiquidationRecordId");
+
+                    b.ToTable("LiquidationRecordFields");
                 });
 
             modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecordFile", b =>
@@ -690,10 +748,10 @@ namespace Coms.Infrastructure.Migrations
                     b.Property<int?>("PartnerId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("ReviewAt")
+                    b.Property<DateTime?>("ReviewAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("SendDate")
+                    b.Property<DateTime?>("SendDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
@@ -1196,6 +1254,15 @@ namespace Coms.Infrastructure.Migrations
                     b.Navigation("ContractCost");
                 });
 
+            modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexField", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.ContractAnnex", "ContractAnnex")
+                        .WithMany()
+                        .HasForeignKey("ContractAnnexId");
+
+                    b.Navigation("ContractAnnex");
+                });
+
             modelBuilder.Entity("Coms.Domain.Entities.ContractAnnexFile", b =>
                 {
                     b.HasOne("Coms.Domain.Entities.ContractAnnex", "ContractAnnex")
@@ -1286,6 +1353,15 @@ namespace Coms.Infrastructure.Migrations
                         .HasForeignKey("LiquidationRecordId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("LiquidationRecord");
+                });
+
+            modelBuilder.Entity("Coms.Domain.Entities.LiquidationRecordField", b =>
+                {
+                    b.HasOne("Coms.Domain.Entities.LiquidationRecord", "LiquidationRecord")
+                        .WithMany()
+                        .HasForeignKey("LiquidationRecordId");
 
                     b.Navigation("LiquidationRecord");
                 });

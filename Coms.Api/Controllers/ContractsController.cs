@@ -103,8 +103,8 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<int> result = _contractService.AddContract(request.Name, request.Value, (int)request.ContractCategoryId, 
                         request.ServiceId, request.EffectiveDate, request.Status, 
-                        int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.SendDate,
-                        request.ReviewDate, request.PartnerId, (int)request.TemplateType).Result;
+                        int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), 
+                        request.PartnerId, (int)request.TemplateType, request.ApproveDate, request.SignDate).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
@@ -172,8 +172,8 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<int> result = _contractService.EditContract(contractId, request.Name, request.Value, request.ServiceId, 
                     request.EffectiveDate, request.Status, 
-                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.SendDate, request.ReviewDate, 
-                    request.PartnerId).Result;
+                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value),
+                    request.PartnerId, request.ApproveDate, request.SignDate).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)

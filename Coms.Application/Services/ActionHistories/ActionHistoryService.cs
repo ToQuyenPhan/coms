@@ -154,10 +154,10 @@ namespace Coms.Application.Services.ActionHistories
                     workSheet.Row(1).Height = 20;
                     workSheet.Row(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                     workSheet.Row(1).Style.Font.Bold = true;
-                    workSheet.Cells[1, 1].Value = "S.No";
+                    workSheet.Cells[1, 1].Value = "No";
                     workSheet.Cells[1, 2].Value = "Full Name";
                     workSheet.Cells[1, 3].Value = "Action Type";
-                    workSheet.Cells[1, 4].Value = "Contract Name";
+                    workSheet.Cells[1, 4].Value = "Contract Code";
                     workSheet.Cells[1, 5].Value = "Created At";
                     int recordIndex = 2;
                     foreach (var actionHistory in actionHistories)
@@ -165,7 +165,7 @@ namespace Coms.Application.Services.ActionHistories
                         workSheet.Cells[recordIndex, 1].Value = (recordIndex - 1).ToString();
                         workSheet.Cells[recordIndex, 2].Value = actionHistory.User.FullName;
                         workSheet.Cells[recordIndex, 3].Value = actionHistory.ActionType.ToString();
-                        workSheet.Cells[recordIndex, 4].Value = actionHistory.Contract.ContractName;
+                        workSheet.Cells[recordIndex, 4].Value = actionHistory.Contract.Code;
                         workSheet.Cells[recordIndex, 5].Value = actionHistory.CreatedAt.ToString("dd/MM/yyyy hh:mm:ss");
                         recordIndex++;
                     }

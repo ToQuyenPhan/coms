@@ -46,6 +46,36 @@ namespace Coms.Application.Services.PartnerComments
             }
         }
 
+        //get partner comment by contract annex id
+        public async Task<ErrorOr<PartnerCommentResult>> GetPartnerCommentByContractAnnexId(int contractAnnexId)
+        {
+            var partnerReview = await _partnerReviewRepository.GetByContractAnnexId(contractAnnexId);
+            if (partnerReview is not null)
+            {
+                var partnerComment = await _partnerCommentRepository.GetByPartnerReviewId(partnerReview.Id);
+                if (partnerComment is not null)
+                {
+                    var commentResult = new PartnerCommentResult()
+                    {
+                        Id = partnerComment.Id,
+                        Content = partnerComment.Content,
+                        ReplyId = partnerComment.Id,
+                        PartnerReviewId = partnerComment.PartnerReviewId,
+                        CreatedAt = partnerComment.CreatedAt.ToString(),
+                        Long = AsTimeAgo(partnerComment.CreatedAt)
+                    };
+                    return commentResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Not have any comment");
+                }
+            }
+            else
+            {
+                return Error.NotFound("404", "Contract annex not found!");
+            }
+        }
         public async Task<ErrorOr<PartnerCommentResult>> AddPartnerComment(int contractId, string content)
         {
             try
