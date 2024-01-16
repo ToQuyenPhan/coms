@@ -1390,7 +1390,7 @@ namespace Coms.Application.Services.Contracts
         {
             var dictionary = obj.GetType()
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .ToDictionary(prop => prop.Name);
+                .ToDictionary(prop => prop.Name, prop => prop.GetValue(obj, null).ToString());
             return dictionary;
         }
 
