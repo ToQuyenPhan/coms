@@ -797,9 +797,9 @@ namespace Coms.Application.Services.Contracts
                 {
                     predicate = predicate.And(c => c.Code.Contains(code.Trim()));
                 }
-                if(version.HasValue)
+                if (version.HasValue)
                 {
-                    if(version > 0)
+                    if (version > 0)
                     {
                         predicate = predicate.And(c => c.Version.Equals(version));
                     }
@@ -981,13 +981,16 @@ namespace Coms.Application.Services.Contracts
             {
                 foreach (var flowDetail in flowDetails)
                 {
-                    var contractFlowDetails = await _contractFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);
+                    var contractFlowDetails = await _contractFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);                  
                     if (contractFlowDetails is not null)
                     {
                         foreach (var contractFlowDetail in contractFlowDetails)
                         {
                             var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
-                            if (!contract.Status.Equals(DocumentStatus.Deleted))
+                                var partnerReview = await _partnerReviewRepository.GetByContractId(contract.Id);
+                            if (partnerReview.IsApproved == true)
+                            {
+                                if (!contract.Status.Equals(DocumentStatus.Deleted))
                             {
                                 var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
                                 if (existedContract is null)
@@ -997,7 +1000,7 @@ namespace Coms.Application.Services.Contracts
                                         contracts.Add(contract);
                                     }
                                 }
-                            }
+                            }}
                         }
                     }
                 }
@@ -1125,7 +1128,7 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
-        public async Task<ErrorOr<int>> EditContract(int contractId, string[] names, string[] values, int serviceId, 
+        public async Task<ErrorOr<int>> EditContract(int contractId, string[] names, string[] values, int serviceId,
                 DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate, int partnerId)
         {
             try
@@ -1286,6 +1289,307 @@ namespace Coms.Application.Services.Contracts
             smtp.Credentials = new NetworkCredential(systemSettings.Email, "hibz dgyu xnww dnvx");
             smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtp.Send(message);
+        }
+
+        public async Task<ErrorOr<PagingResult<ContractResult>>> GetContractsByServiceOrPartner(
+                string name, string code, int? status, int? serviceId, int? partnerId, DateTime? startDate, DateTime? endDate, int currentPage, int pageSize)
+        {
+            IList<Contract> contracts = await _contractRepository.GetContracts();
+            if (contracts.Count() > 0)
+            {
+                var predicate = PredicateBuilder.New<Contract>(true);
+                predicate = predicate.And(c => c.Status != DocumentStatus.Deleted && c.Status != DocumentStatus.Edited);
+                if (!string.IsNullOrEmpty(name))
+                {
+                    predicate = predicate.And(c => c.ContractName.Contains(name.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
+                }
+                if (!string.IsNullOrEmpty(code))
+                {
+                    predicate = predicate.And(c => c.Code.Contains(code.Trim(), System.StringComparison.CurrentCultureIgnoreCase));
+                }
+                if (status is not null && status > 0)
+                {
+
+                    predicate = predicate.And(c => c.Status.Equals((DocumentStatus)status));
+
+                }
+                if (serviceId is not null && serviceId > 0)
+                {
+                    var contractCosts = await _contractCostRepository.GetContractCostsByServiceId((int)serviceId);
+                    if (contractCosts != null && contractCosts.Any())
+                    {
+                        predicate = predicate.And(c => contractCosts.Any(cc => cc != null && cc.ContractId == c.Id));
+                    }
+                    else
+                    {
+                        predicate = predicate.And(c => false);
+                    }
+                }
+
+                if (partnerId is not null && partnerId > 0)
+                {
+                    var partnerReviews = await _partnerReviewRepository.GetByPartnerId((int)partnerId);
+                    if (partnerReviews != null && partnerReviews.Any())
+                    {
+                        predicate = predicate.And(c => partnerReviews.Any(pr => pr != null && pr.ContractId == c.Id));
+                    }
+                    else
+                    {
+                        predicate = predicate.And(c => false);
+                    }
+                }
+                if (startDate != DateTime.MinValue || endDate != DateTime.MinValue)
+                {
+                    if (startDate != DateTime.MinValue && endDate == DateTime.MinValue)
+                    {
+                        predicate = predicate.And(c => c.CreatedDate >= startDate);
+                    }
+                    else if (startDate == DateTime.MinValue && endDate != DateTime.MinValue)
+                    {
+                        predicate = predicate.And(c => c.CreatedDate <= endDate);
+                    }
+                    else if (startDate != DateTime.MinValue && endDate != DateTime.MinValue)
+                    {
+                        predicate = predicate.And(c => c.CreatedDate >= startDate && c.CreatedDate <= endDate);
+                    }
+                    else
+                    {
+                        predicate = predicate.And(c => false);
+                    }
+                }
+                
+
+                IList<Contract> filteredList = contracts.Where(predicate).OrderByDescending(c => c.CreatedDate)
+                        .ToList();
+                var total = filteredList.Count();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    filteredList = filteredList.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                            .ToList();
+                }
+                IList<ContractResult> responses = new List<ContractResult>();
+                foreach (var contract in filteredList)
+                {
+                    var contractResult = new ContractResult()
+                    {
+                        Id = contract.Id,
+                        ContractName = contract.ContractName,
+                        Version = contract.Version,
+                        CreatedDate = contract.CreatedDate,
+                        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        EffectiveDate = contract.EffectiveDate,
+                        EffectiveDateString = contract.EffectiveDate.ToString(),
+                        Status = (int)contract.Status,
+                        StatusString = contract.Status.ToString(),
+                        TemplateID = contract.TemplateId,
+                        Code = contract.Code,
+                        Link = contract.Link,
+                    };
+                    if (contract.UpdatedDate is not null)
+                    {
+                        contractResult.UpdatedDate = contract.UpdatedDate;
+                        contractResult.UpdatedDateString = contract.UpdatedDate.ToString();
+                    }
+                    var actionHistory = await _actionHistoryRepository.GetCreateActionByContractId(contract.Id);
+                    if (actionHistory is not null)
+                    {
+                        contractResult.CreatorId = actionHistory.User.Id;
+                        contractResult.CreatorName = actionHistory.User.FullName;
+                        contractResult.CreatorEmail = actionHistory.User.Email;
+                        contractResult.CreatorImage = actionHistory.User.Image;
+                    }
+                    var partner = await _partnerReviewRepository.GetByContractId(contract.Id);
+                    if (partner is not null)
+                    {
+                        contractResult.PartnerId = partner.Partner.Id;
+                        contractResult.PartnerName = partner.Partner.CompanyName;
+                    }
+                    var service = await _contractCostRepository.GetByContractId(contract.Id);
+                    if (service is not null)
+                    {
+                        contractResult.ServiceId = service.ServiceId;
+                    }
+
+                    responses.Add(contractResult);
+                }
+                return new
+                    PagingResult<ContractResult>(responses, total, currentPage, pageSize);
+            }
+            else
+            {
+                return new PagingResult<ContractResult>(new List<ContractResult>(), 0, currentPage,
+                    pageSize);
+            }
+        }
+
+        public async Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport()
+        {
+            IList<GeneralReportResult> responses = new List<GeneralReportResult>();
+            if(await _actionHistoryRepository.GetCreateActions() is not null) { 
+            var actionHistories = await _actionHistoryRepository.GetCreateActions();
+            IList<Contract> drafts = new List<Contract>();
+            IList<Contract> approvedContracts = new List<Contract>();
+            IList<Contract> completedContracts = new List<Contract>();
+            IList<Contract> finalizedContracts = new List<Contract>();
+            foreach (var actionHistory in actionHistories)
+            {
+                switch ((int)actionHistory.Contract.Status)
+                {
+                    case 8:
+                        drafts.Add(actionHistory.Contract);
+                        break;
+                    case 3:
+                        approvedContracts.Add(actionHistory.Contract);
+                        break;
+                    case 1:
+                        completedContracts.Add(actionHistory.Contract);
+                        break;
+                    case 6:
+                        finalizedContracts.Add(actionHistory.Contract);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if (drafts.Count() > 0)
+            {
+                var generalReportResult = new GeneralReportResult()
+                {
+                    Total = drafts.Count(),
+                    Status = (int)DocumentStatus.Waiting,
+                    StatusString = DocumentStatus.Waiting.ToString(),
+                    Percent = (drafts.Count() * 100 / actionHistories.Count()),
+                    Title = "Waiting Contracts"
+                };
+                responses.Add(generalReportResult);
+            }
+            else
+            {
+                var generalReportResult = new GeneralReportResult()
+                {
+                    Total = 0,
+                    Status = (int)DocumentStatus.Waiting,
+                    StatusString = DocumentStatus.Waiting.ToString(),
+                    Percent = 0,
+                    Title = "Waiting Contracts"
+                };
+                responses.Add(generalReportResult);
+            }
+            if (approvedContracts.Count() > 0)
+            {
+                var generalReportResult = new GeneralReportResult()
+                {
+                    Total = approvedContracts.Count(),
+                    Status = (int)DocumentStatus.Approved,
+                    StatusString = DocumentStatus.Approved.ToString(),
+                    Percent = (approvedContracts.Count() * 100 / actionHistories.Count()),
+                    Title = "Approved Contracts"
+                };
+                responses.Add(generalReportResult);
+            }
+            else
+            {
+                var generalReportResult = new GeneralReportResult()
+                {
+                    Total = 0,
+                    Status = (int)DocumentStatus.Approved,
+                    StatusString = DocumentStatus.Approved.ToString(),
+                    Percent = 0,
+                    Title = "Approved Contracts"
+                };
+                responses.Add(generalReportResult);
+            }
+            if (completedContracts.Count() > 0)
+            {
+                var generalReportResult = new GeneralReportResult()
+                {
+                    Total = completedContracts.Count(),
+                    Status = (int)DocumentStatus.Completed,
+                    StatusString = DocumentStatus.Completed.ToString(),
+                    Percent = (completedContracts.Count() * 100 / actionHistories.Count()),
+                    Title = "Completed Contracts"
+                };
+                responses.Add(generalReportResult);
+            }
+            else
+            {
+                var generalReportResult = new GeneralReportResult()
+                {
+                    Total = 0,
+                    Status = (int)DocumentStatus.Completed,
+                    StatusString = DocumentStatus.Completed.ToString(),
+                    Percent = 0,
+                    Title = "Completed Contracts"
+                };
+                responses.Add(generalReportResult);
+            }
+            if (finalizedContracts.Count() > 0)
+            {
+                var generalReportResult = new GeneralReportResult()
+                {
+                    Total = finalizedContracts.Count(),
+                    Status = (int)DocumentStatus.Finalized,
+                    StatusString = DocumentStatus.Finalized.ToString(),
+                    Percent = (finalizedContracts.Count() * 100 / actionHistories.Count()),
+                    Title = "Finalized Contracts"
+                };
+                responses.Add(generalReportResult);
+            }
+            else
+            {
+                var generalReportResult = new GeneralReportResult()
+                {
+                    Total = 0,
+                    Status = (int)DocumentStatus.Finalized,
+                    StatusString = DocumentStatus.Finalized.ToString(),
+                    Percent = 0,
+                    Title = "Finalized Contracts"
+                };
+                responses.Add(generalReportResult);
+            }
+            return responses.ToList();
+        }
+
+            else
+            {
+                var draftReport = new GeneralReportResult()
+                {
+                    Total = 0,
+                    Status = (int)DocumentStatus.Waiting,
+                    StatusString = DocumentStatus.Waiting.ToString(),
+                    Percent = 0,
+                    Title = "Waiting Contracts"
+                };
+                var approvedReport = new GeneralReportResult()
+                {
+                    Total = 0,
+                    Status = (int)DocumentStatus.Approved,
+                    StatusString = DocumentStatus.Approved.ToString(),
+                    Percent = 0,
+                    Title = "Approved Contracts"
+                };
+                var signedReport = new GeneralReportResult()
+                {
+                    Total = 0,
+                    Status = (int)DocumentStatus.Signed,
+                    StatusString = DocumentStatus.Signed.ToString(),
+                    Percent = 0,
+                    Title = "Signed Contracts"
+                };
+                var finalizedReport = new GeneralReportResult()
+                {
+                    Total = 0,
+                    Status = (int)DocumentStatus.Finalized,
+                    StatusString = DocumentStatus.Finalized.ToString(),
+                    Percent = 0,
+                    Title = "Finalized Contracts"
+                };
+                responses.Add(draftReport);
+                responses.Add(approvedReport);
+                responses.Add(signedReport);
+                responses.Add(finalizedReport);
+                return responses.ToList();
+            }
         }
     }
 }

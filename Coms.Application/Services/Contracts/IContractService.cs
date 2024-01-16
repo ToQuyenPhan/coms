@@ -26,5 +26,8 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<ContractResult>> GetPartnerAndService(int id);
         Task<ErrorOr<int>> EditContract(int contractId, string[] names, string[] values, int serviceId,
                 DateTime effectiveDate, int status, int userId, DateTime sendDate, DateTime reviewDate, int partnerId);
+        Task<ErrorOr<PagingResult<ContractResult>>> GetContractsByServiceOrPartner(
+                string name, string code, int? status, int? serviceId, int? partnerId, DateTime? startDate, DateTime? endDate, int currentPage, int pageSize);
+        Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport();
     }
 }

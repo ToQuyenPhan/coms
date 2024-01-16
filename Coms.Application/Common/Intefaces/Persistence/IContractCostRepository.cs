@@ -8,5 +8,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<ContractCost?> GetByContractId(int contractId);
         Task AddContractCost(ContractCost contractCost);
         Task AddContractCostsToContract(int[] services, int contractId);
+        Task<IList<ContractCost>> GetContractCostsByServiceId(int serviceId);
     }
 }

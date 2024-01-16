@@ -59,7 +59,7 @@ namespace Coms.Api.Controllers
         //get all partners
         [HttpGet("all")]
         [SwaggerOperation(Summary = "Get all partners in Coms")]
-        [Authorize(Roles = "Sale Manager")]
+        [Authorize(Roles = "Sale Manager, Manager")]
         public IActionResult GetPartners([FromQuery] PartnerFilterRequest request)
         {
             try

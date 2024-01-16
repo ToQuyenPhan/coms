@@ -59,5 +59,14 @@ namespace Coms.Infrastructure.Persistence.Repositories
                 new System.Linq.Expressions.Expression<Func<PartnerReview, object>>[] {
                     pr => pr.User, pr => pr.Contract, pr => pr.ContractAnnex, pr => pr.LiquidationRecord, pr => pr.Partner });
         }
+
+        public async Task<IList<PartnerReview>?> GetByPartnerId(int partnerId)
+        {
+            var list = await _genericRepository.WhereAsync(pr => pr.PartnerId == partnerId 
+            && pr.Status.Equals(PartnerReviewStatus.Active),
+                    new System.Linq.Expressions.Expression<Func<PartnerReview, object>>[] {
+                    pr => pr.User, pr => pr.Contract, pr => pr.Partner });
+            return (list.Count() > 0) ? list : null;
+        }
     }
 }

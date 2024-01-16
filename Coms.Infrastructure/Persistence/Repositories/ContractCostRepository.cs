@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Domain.Entities;
+using Coms.Domain.Enum;
 
 namespace Coms.Infrastructure.Persistence.Repositories
 {
@@ -46,6 +47,13 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     await _genericRepository.CreateAsync(contractCost);
                 }
             }
+        }
+
+        public async Task<IList<ContractCost>> GetContractCostsByServiceId(int serviceId)
+        {
+            var list = await _genericRepository.WhereAsync(c => c.ServiceId.Equals(serviceId),
+                new System.Linq.Expressions.Expression<Func<ContractCost, object>>[] { fd => fd.Service, fd => fd.Contract, fd => fd.ContractAnnexCosts });
+            return (list.Count() > 0) ? list : null;
         }
     }
 }

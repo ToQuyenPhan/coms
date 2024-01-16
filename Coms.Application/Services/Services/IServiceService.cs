@@ -14,5 +14,6 @@ namespace Coms.Application.Services.Services
         Task<ErrorOr<IList<ServiceResult>>> GetActiveServices(int? contractCategoryId);
         Task<ErrorOr<PagingResult<ServiceResult>>> GetActiveServicesWithFilter(int? contractCategoryId, string serviceName,
                 int currentPage, int pageSize);
+        Task<ErrorOr<PagingResult<ServiceResult>>> GetServicesByPartnerID(int? partnerId, int currentPage, int pageSize);
     }
 }

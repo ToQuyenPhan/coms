@@ -208,5 +208,31 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpGet("statistics")]
+        [SwaggerOperation(Summary = "Get contracts by Service or Partner in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult GetContractsByServiceIdOrPartnerId([FromQuery] ContractStatisticFilterRequest request)
+        {
+            ErrorOr<PagingResult<ContractResult>> result = _contractService.GetContractsByServiceOrPartner(
+                request.ContractName, request.Code, request.Status, request.ServiceId, request.PartnerId, request.StartDate, request.EndDate
+                , request.CurrentPage, request.PageSize).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
+        [HttpGet("general-reports")]
+        [SwaggerOperation(Summary = "Get all contract general reports in Coms")]
+        [Authorize(Roles = "Staff, Manager")]
+        public IActionResult GetGeneralReports()
+        {
+            ErrorOr<IList<GeneralReportResult>> result = _contractService.GetGeneralReport().Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

@@ -79,6 +79,12 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     { ah => ah.Contract, ah => ah.User});
             return (list.Count() > 0) ? list : null;
         }
+
+        public async Task<IList<ActionHistory>?> GetCreateActions() { 
+            var list = await _genericRepository.WhereAsync(ah =>  ah.ContractId != null && ah.ActionType == ActionType.Created
+            , new System.Linq.Expressions.Expression<Func<ActionHistory, object>>[] { ah => ah.User, ah => ah.Contract });
+            return (list.Count() > 0) ? list : null;
+        }
     }
 
 }

@@ -16,6 +16,7 @@ namespace Coms.Infrastructure.Persistence.Repositories
 
         public async Task<Contract?> GetContract(int id)
         {
+
             return await _genericRepository.FirstOrDefaultAsync(c => c.Id.Equals(id),
                 new System.Linq.Expressions.Expression<Func<Contract, object>>[] { c => c.Template});
         }
@@ -39,6 +40,12 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public async Task<IList<Contract>?> GetByContractCode(string code)
         {
             var list = await _genericRepository.WhereAsync(c => c.Code.Contains(code), null);
+            return (list.Count() > 0) ? list : null;
+        }
+
+        public async Task<IList<Contract>> GetContracts()
+        {
+            var list = await _genericRepository.WhereAsync(c => true, null);
             return (list.Count() > 0) ? list : null;
         }
     }
