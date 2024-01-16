@@ -1,5 +1,6 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.ActionHistories;
+using Coms.Application.Services.ContractCategories;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
@@ -45,7 +46,7 @@ namespace Coms.Application.Services.ContractCosts
             {
                 return Error.Failure("500", ex.Message);
             }
-        }       
+        }
 
     }
 }

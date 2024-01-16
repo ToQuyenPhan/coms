@@ -10,8 +10,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Coms.Api.Controllers
 {
     [Route("api/sign")]
-    //[Authorize(Roles = "Manager")]
-    [AllowAnonymous]
+    [Authorize(Roles = "Manager, Partner")]
 
     public class SignController : ApiController
     {
@@ -23,7 +22,7 @@ namespace Coms.Api.Controllers
 
         [HttpPost("document/upload-version")]
         [SwaggerOperation(Summary = "Upload and verify signature on version signed file ")]
-        public IActionResult Add([FromQuery] Guid id, [FromForm]UploadRequest request)
+        public IActionResult UploadVersion([FromQuery] Guid id, [FromForm]UploadRequest request)
         {
             var ms = new MemoryStream();
             request.File.CopyTo(ms);

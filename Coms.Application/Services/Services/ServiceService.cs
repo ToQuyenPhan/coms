@@ -1,17 +1,32 @@
 ﻿using Coms.Application.Common.Intefaces.Persistence;
 using Coms.Application.Services.Common;
+using Coms.Application.Services.Contracts;
 using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
+using LinqKit;
+using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Runtime.Intrinsics.X86;
 
 namespace Coms.Application.Services.Services
 {
     public class ServiceService : IServiceService
     {
         private readonly IServiceRepository _serviceRepository;
-        public ServiceService(IServiceRepository serviceRepository)
+        private readonly IContractRepository _contractRepository;
+        private readonly IPartnerReviewRepository _partnerReviewRepository;
+        private readonly IContractCostRepository _contractCostRepository;
+        public ServiceService(IServiceRepository serviceRepository,
+            IContractRepository contractRepository,
+            IPartnerReviewRepository partnerReviewRepository,
+            IContractCostRepository contractCostRepository)
         {
             _serviceRepository = serviceRepository;
+            _contractRepository = contractRepository;
+            _partnerReviewRepository = partnerReviewRepository;
+            _contractCostRepository = contractCostRepository;
         }
         
         public async Task<ErrorOr<IList<ServiceResult>>> GetServicesByName(string? serviceName)
@@ -264,5 +279,87 @@ namespace Coms.Application.Services.Services
                 return Error.Failure("500", ex.Message);
             }
         }
-    }
+
+        public async Task<ErrorOr<PagingResult<ServiceResult>>> GetServicesByPartnerID(int? partnerId, int currentPage, int pageSize)
+        {
+            try
+            {
+                IList<Service> serviceList = _serviceRepository.GetServices().Result;
+                if (serviceList.Count() > 0)
+                {
+                    var predicate = PredicateBuilder.New<Service>(true);
+                    IList<Domain.Entities.Contract> contracts = new List<Domain.Entities.Contract>();
+                    IList<Domain.Entities.ContractCost> contractCosts = new List<Domain.Entities.ContractCost>();
+                    if (partnerId.HasValue)
+                    {
+                        var partnerReviews = await _partnerReviewRepository.GetByPartnerId((int)partnerId);
+
+                        if (partnerReviews.Count() > 0)
+                        {
+                            foreach (var partnerReview in partnerReviews)
+                            {
+                                var contract = await _contractRepository.GetContract((int)partnerReview.ContractId);
+                                contracts.Add(contract);
+                            }
+
+                        }
+
+                        if (contracts.Count > 0)
+                        {
+                            foreach (var partnerReview in partnerReviews)
+                            {
+                                var contractCost = await _contractCostRepository.GetByContractId((int)partnerReview.ContractId);
+                                contractCosts.Add(contractCost);
+                            }
+                        }
+                    }
+                    if (contractCosts.Count > 0)
+                    {
+                        predicate = predicate.And(c => contractCosts.Any(cc => cc != null && cc.ServiceId == c.Id));
+
+                    }
+                    else
+                    {
+                        predicate = predicate.And(c => false);
+                    }
+
+                    IList<Service> filteredList = serviceList.Where(predicate)
+                      .ToList();
+                    var results = new List<ServiceResult>();
+                    if (filteredList != null)
+                    {
+                        foreach (var service in filteredList)
+                        {
+                            var result = new ServiceResult()
+                            {
+                                Id = service.Id,
+                                ServiceName = service.ServiceName,
+                                Description = service.Description,
+                                Price = service.Price,
+                                Status = (int)service.Status,
+                                StatusString = service.Status.ToString(),
+                            };
+                            results.Add(result);
+                        }
+
+                    }
+                    int total = results.Count();
+                    if (currentPage > 0 && pageSize > 0)
+                    {
+                        results = results.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+                    }
+                    return new PagingResult<ServiceResult>(results, total, currentPage, pageSize);
+                }
+                else
+                {
+                    return new PagingResult<ServiceResult>(new List<ServiceResult>(), 0, currentPage, pageSize);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return Error.NotFound("Service not found!");
+            }
+        }
+        }
 }

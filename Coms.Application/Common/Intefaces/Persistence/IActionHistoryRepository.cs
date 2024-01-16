@@ -16,5 +16,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<IList<ActionHistory>?> GetCommentActionByContractAnnexId(int contractAnnexId);
         Task<ActionHistory?> GetCreateActionByContractAnnexId(int contractAnnexId);
         Task<IList<ActionHistory>?> GetContractAnnexCreateActionByUserId(int userId);
+        Task<IList<ActionHistory>?> GetCreateActions();
     }
 }

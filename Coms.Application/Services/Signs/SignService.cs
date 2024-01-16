@@ -76,7 +76,7 @@ namespace Coms.Application.Services.Signs
                             var downloadUrl = await task;
                             fileStream.Close();
 
-                            if (contract.Status == DocumentStatus.Signed)
+                            if (contract.Status == DocumentStatus.Completed)
                             {
                                 var partnerReview = await _partnerReviewRepository.GetByContractId(contract.Id);
                                 var partnerSign = new PartnerSign()
@@ -86,7 +86,7 @@ namespace Coms.Application.Services.Signs
                                     PartnerId = partnerReview.PartnerId
                                 };
                                 await _partnerSignRepository.AddPartnerSign(partnerSign);
-                                contract.Status = DocumentStatus.Completed;
+                                contract.Status = DocumentStatus.Finalized;
                                 contract.UpdatedDate = DateTime.Now;
                                 contract.Link = link;
                             }
@@ -102,7 +102,7 @@ namespace Coms.Application.Services.Signs
                                 {
                                     flowDetail.Status = FlowDetailStatus.Signed;
                                     await _contractFlowDetailsRepository.UpdateContractFlowDetail(flowDetail);
-                                    contract.Status = DocumentStatus.Signed;
+                                    contract.Status = DocumentStatus.Completed;
                                     contract.UpdatedDate = DateTime.Now;
                                     contract.Link = link;
                                 }
@@ -145,7 +145,7 @@ namespace Coms.Application.Services.Signs
                             var downloadAnnexUrl = await task;
                             fileStream.Close();
 
-                            if (contractAnnex.Status == DocumentStatus.Signed)
+                            if (contractAnnex.Status == DocumentStatus.Completed)
                             {
                                 var partnerReview = await _partnerReviewRepository.GetByContractAnnexId(contractAnnex.Id);
                                 var partnerSign = new PartnerSign()
@@ -155,7 +155,7 @@ namespace Coms.Application.Services.Signs
                                     PartnerId = partnerReview.PartnerId
                                 };
                                 await _partnerSignRepository.AddPartnerSign(partnerSign);
-                                contractAnnex.Status = DocumentStatus.Completed;
+                                contractAnnex.Status = DocumentStatus.Finalized;
                                 contractAnnex.UpdatedDate = DateTime.Now;
                                 contractAnnex.Link = link;
                             }
@@ -172,7 +172,7 @@ namespace Coms.Application.Services.Signs
                                     flowDetail.Status = FlowDetailStatus.Signed;
                                 }
                                 await _contractFlowDetailsRepository.UpdateContractFlowDetail(flowDetail);
-                                contractAnnex.Status = DocumentStatus.Signed;
+                                contractAnnex.Status = DocumentStatus.Completed;
                                 contractAnnex.UpdatedDate = DateTime.Now;
                                 contractAnnex.Link = link;
                             }
@@ -214,7 +214,7 @@ namespace Coms.Application.Services.Signs
                             var downloadLiquidationUrl = await task;
                             fileStream.Close();
 
-                            if (liquidation.Status == DocumentStatus.Signed)
+                            if (liquidation.Status == DocumentStatus.Completed)
                             {
                                 var partnerReview = await _partnerReviewRepository.GetByContractAnnexId(liquidation.Id);
                                 var partnerSign = new PartnerSign()
@@ -224,7 +224,7 @@ namespace Coms.Application.Services.Signs
                                     PartnerId = partnerReview.PartnerId
                                 };
                                 await _partnerSignRepository.AddPartnerSign(partnerSign);
-                                liquidation.Status = DocumentStatus.Completed;
+                                liquidation.Status = DocumentStatus.Finalized;
                                 liquidation.UpdatedDate = DateTime.Now;
                                 liquidation.Link = link;
                                 var contract = await _contractRepository.GetContract(liquidation.ContractId);
@@ -252,7 +252,7 @@ namespace Coms.Application.Services.Signs
                                     flowDetail.Status = FlowDetailStatus.Signed;
                                 }
                                 await _contractFlowDetailsRepository.UpdateContractFlowDetail(flowDetail);
-                                liquidation.Status = DocumentStatus.Signed;
+                                liquidation.Status = DocumentStatus.Completed;
                                 liquidation.UpdatedDate = DateTime.Now;
                                 liquidation.Link = link;
                             }

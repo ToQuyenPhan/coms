@@ -9,8 +9,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Coms.Api.Controllers
 {
     [Route("api/document")]
-    //[Authorize(Roles = "Manager")]
-    [AllowAnonymous]
+    [Authorize(Roles = "Manager, Partner")]
     public class DocumentController : ApiController
     {
         private readonly IDocumentService _documentService;
@@ -22,7 +21,7 @@ namespace Coms.Api.Controllers
 
         [HttpGet("{id}/content")]
         [SwaggerOperation(Summary = "Get content of a Document")]
-        public IActionResult GetUserById([FromRoute] Guid id, Guid versionId)
+        public IActionResult DownloadDocument([FromRoute] Guid id, Guid versionId)
         {
             ErrorOr<ResponseModel> result = _documentService.DownloadDocument(id, versionId).Result;
             return result.Match(

@@ -11,5 +11,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task UpdatePartnerPreview(PartnerReview partnerReview);
         Task<PartnerReview?> GetByContractAnnexId(int contractAnnexId);
         Task<PartnerReview?> GetByLiquidationRecordId(int liquidationRecordId);
+        Task<IList<PartnerReview>?> GetByPartnerId(int partnerId);
     }
 }
