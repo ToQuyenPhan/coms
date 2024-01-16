@@ -26,4 +26,8 @@
     <ProjectReference Include="..\Coms.Infrastructure\Coms.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="FirebaseConfig\" />
+  </ItemGroup>
+
 </Project>
