@@ -257,7 +257,7 @@ namespace Coms.Application.Services.Contracts
                         case 3:
                             approvedContracts.Add(actionHistory.Contract);
                             break;
-                        case 5:
+                        case 1:
                             signedContracts.Add(actionHistory.Contract);
                             break;
                         case 6:
@@ -320,10 +320,10 @@ namespace Coms.Application.Services.Contracts
                     var generalReportResult = new GeneralReportResult()
                     {
                         Total = signedContracts.Count(),
-                        Status = (int)DocumentStatus.Signed,
-                        StatusString = DocumentStatus.Signed.ToString(),
+                        Status = (int)DocumentStatus.Completed,
+                        StatusString = DocumentStatus.Completed.ToString(),
                         Percent = (signedContracts.Count() * 100 / actionHistories.Count()),
-                        Title = "Signed Contracts"
+                        Title = "Completed Contracts"
                     };
                     responses.Add(generalReportResult);
                 }
@@ -332,10 +332,10 @@ namespace Coms.Application.Services.Contracts
                     var generalReportResult = new GeneralReportResult()
                     {
                         Total = 0,
-                        Status = (int)DocumentStatus.Signed,
-                        StatusString = DocumentStatus.Signed.ToString(),
+                        Status = (int)DocumentStatus.Completed,
+                        StatusString = DocumentStatus.Completed.ToString(),
                         Percent = 0,
-                        Title = "Signed Contracts"
+                        Title = "Completed Contracts"
                     };
                     responses.Add(generalReportResult);
                 }
@@ -386,10 +386,10 @@ namespace Coms.Application.Services.Contracts
                 var signedReport = new GeneralReportResult()
                 {
                     Total = 0,
-                    Status = (int)DocumentStatus.Signed,
-                    StatusString = DocumentStatus.Signed.ToString(),
+                    Status = (int)DocumentStatus.Completed,
+                    StatusString = DocumentStatus.Completed.ToString(),
                     Percent = 0,
-                    Title = "Signed Contracts"
+                    Title = "Completed Contracts"
                 };
                 var finalizedReport = new GeneralReportResult()
                 {
