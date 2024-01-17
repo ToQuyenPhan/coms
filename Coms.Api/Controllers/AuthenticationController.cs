@@ -18,6 +18,17 @@ namespace Coms.Api.Controllers
             _authenticationService = authenticationService;
         }
 
+        [HttpGet("email-confirm")]
+        [SwaggerOperation(Summary = "Get confirmation code for a partner in Coms")]
+        public IActionResult ConfirmPartner([FromQuery] int partnerId)
+        {
+            ErrorOr<string> result = _authenticationService.SendEmail(partnerId).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
+
         [HttpPost("login")]
         [SwaggerOperation(Summary = "Log in for Coms")]
         public IActionResult Login(LoginRequest request)
