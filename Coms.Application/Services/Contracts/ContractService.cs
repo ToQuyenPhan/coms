@@ -257,7 +257,7 @@ namespace Coms.Application.Services.Contracts
                         case 3:
                             approvedContracts.Add(actionHistory.Contract);
                             break;
-                        case 5:
+                        case 1:
                             signedContracts.Add(actionHistory.Contract);
                             break;
                         case 6:
@@ -320,10 +320,10 @@ namespace Coms.Application.Services.Contracts
                     var generalReportResult = new GeneralReportResult()
                     {
                         Total = signedContracts.Count(),
-                        Status = (int)DocumentStatus.Signed,
-                        StatusString = DocumentStatus.Signed.ToString(),
+                        Status = (int)DocumentStatus.Completed,
+                        StatusString = DocumentStatus.Completed.ToString(),
                         Percent = (signedContracts.Count() * 100 / actionHistories.Count()),
-                        Title = "Signed Contracts"
+                        Title = "Completed Contracts"
                     };
                     responses.Add(generalReportResult);
                 }
@@ -332,10 +332,10 @@ namespace Coms.Application.Services.Contracts
                     var generalReportResult = new GeneralReportResult()
                     {
                         Total = 0,
-                        Status = (int)DocumentStatus.Signed,
-                        StatusString = DocumentStatus.Signed.ToString(),
+                        Status = (int)DocumentStatus.Completed,
+                        StatusString = DocumentStatus.Completed.ToString(),
                         Percent = 0,
-                        Title = "Signed Contracts"
+                        Title = "Completed Contracts"
                     };
                     responses.Add(generalReportResult);
                 }
@@ -386,10 +386,10 @@ namespace Coms.Application.Services.Contracts
                 var signedReport = new GeneralReportResult()
                 {
                     Total = 0,
-                    Status = (int)DocumentStatus.Signed,
-                    StatusString = DocumentStatus.Signed.ToString(),
+                    Status = (int)DocumentStatus.Completed,
+                    StatusString = DocumentStatus.Completed.ToString(),
                     Percent = 0,
-                    Title = "Signed Contracts"
+                    Title = "Completed Contracts"
                 };
                 var finalizedReport = new GeneralReportResult()
                 {
@@ -1380,10 +1380,16 @@ namespace Coms.Application.Services.Contracts
             SmtpClient smtp = new SmtpClient();
             message.From = new MailAddress(systemSettings.Email);
             message.To.Add(new MailAddress(partnerReview.Partner.Email));
-            string bodyMessage = "You have a new contract to approve! Here is your code to sign in into our system: " +
-                partnerReview.Partner.Code + ".";
+            string bodyMessage = "<div style='font-family: Arial, sans-serif;'>" +
+                "<p style='font-size: 18px;'>Dear " + partnerReview.Partner.CompanyName + ",</p>" +
+                "<p style='font-size: 18px;'>You have a new contract to approve!</p>" +
+                "<p style='font-size: 18px;'>Here is your code to sign in into our system:</p>" +
+                "<p style='font-size: 20px; font-weight: bold;'>Your code: " + partnerReview.Partner.Code + "</p>" +
+                "<p style='font-size: 18px;'>Please login to the website: <a href='https://quanlyhopdong.hisoft.vn/partner-code' style='color: blue;'>https://quanlyhopdong.hisoft.vn/partner-code</a> to see details</p>" +
+                "</div>";
             message.Subject = "Approve New Contract";
             message.Body = bodyMessage;
+            message.IsBodyHtml = true; // This is to notify the MailMessage that the body is in HTML
             smtp.Port = 587;
             smtp.Host = "smtp.gmail.com";
             smtp.EnableSsl = true;

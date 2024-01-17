@@ -85,7 +85,7 @@ namespace Coms.Application.Services.TemplateFiles
                         return Error.Conflict("409", "Contract Code not found");
                     }
                     var contractDuration = fieldNames.FirstOrDefault(fn => fn.Equals("Contract Duration"));
-                    if (contractCode is null)
+                    if (contractDuration is null)
                     {
                         return Error.Conflict("409", "Contract Duration not found");
                     }
