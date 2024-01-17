@@ -29,5 +29,6 @@ namespace Coms.Application.Services.Contracts
         Task<ErrorOr<PagingResult<ContractResult>>> GetContractsByServiceOrPartner(
                 string name, string code, int? status, int? serviceId, int? partnerId, DateTime? startDate, DateTime? endDate, int currentPage, int pageSize);
         Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport();
+        Task<ErrorOr<ContractResult>> RejectContract(int contractId, bool isApproved);
     }
 }
