@@ -1375,20 +1375,26 @@ namespace Coms.Application.Services.Contracts
         private async Task SendEmail(int contractId)
         {
             var systemSettings = await _systemSettingsRepository.GetSystemSettings();
-            var partnerReview = await _partnerReviewRepository.GetByContractId(contractId);
+            var partnerReview = await _partnerReviewRepository.GetByContractAnnexId(contractId);
             MailMessage message = new MailMessage();
             SmtpClient smtp = new SmtpClient();
             message.From = new MailAddress(systemSettings.Email);
             message.To.Add(new MailAddress(partnerReview.Partner.Email));
-            string bodyMessage = "You have a new contract to approve! Here is your code to sign in into our system: " +
-                partnerReview.Partner.Code + ".";
+            string bodyMessage = "<div style='font-family: Arial, sans-serif;'>" +
+                "<p style='font-size: 18px;'>Hello partner,</p>" +
+                "<p style='font-size: 18px;'>You have a new contract to approve!</p>" +
+                "<p style='font-size: 18px;'>Here is your code to sign in into our system:</p>" +
+                "<p style='font-size: 20px; font-weight: bold;'>Your code: " + partnerReview.Partner.Code + "</p>" +
+                "<p style='font-size: 18px;'>Please login to the website: <a href='https://quanlyhopdong.hisoft.vn/partner-code' style='color: blue;'>https://quanlyhopdong.hisoft.vn/partner-code</a> to see details</p>" +
+                "</div>";
             message.Subject = "Approve New Contract";
             message.Body = bodyMessage;
+            message.IsBodyHtml = true; // This is to notify the MailMessage that the body is in HTML
             smtp.Port = 587;
             smtp.Host = "smtp.gmail.com";
             smtp.EnableSsl = true;
             smtp.UseDefaultCredentials = false;
-            smtp.Credentials = new NetworkCredential(systemSettings.Email, "jidv eeyy kvzi xpth");
+            smtp.Credentials = new NetworkCredential(systemSettings.Email, "hibz dgyu xnww dnvx");
             smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtp.Send(message);
         }

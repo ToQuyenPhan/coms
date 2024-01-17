@@ -46,6 +46,10 @@ namespace Coms.Domain.Entities
         public string TaxCode { get; set; }
 
         [Required]
+        [MaxLength(10)]
+        public string Abbreviation { get; set; }
+
+        [Required]
         public PartnerStatus Status { get; set; }
     }
 }
