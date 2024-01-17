@@ -959,6 +959,9 @@ namespace Coms.Application.Services.Contracts
                         {
                             contract.Status = DocumentStatus.Approved;
                             await _contractRepository.UpdateContract(contract);
+                            var partnerReview = await _partnerReviewRepository.GetByContractId2(contractId);
+                            partnerReview.SendDate = DateTime.Now;
+                            await _partnerReviewRepository.UpdatePartnerPreview(partnerReview);
                             await SendEmail(contractId);
                         }
                     }
@@ -1372,6 +1375,48 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
+        public async Task<ErrorOr<ContractResult>> RejectContract(int contractId, bool isApproved)
+        {
+            try
+            {
+                var contract = await _contractRepository.GetContract(contractId);
+                if (contract is not null)
+                {
+                    if (!isApproved)
+                    {
+                        contract.Status = DocumentStatus.Rejected;
+                    }
+                    await _contractRepository.UpdateContract(contract);
+                    var contractResult = new ContractResult()
+                    {
+                        Id = contract.Id,
+                        ContractName = contract.ContractName,
+                        Version = contract.Version,
+                        CreatedDate = contract.CreatedDate,
+                        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        UpdatedDate = contract.UpdatedDate,
+                        UpdatedDateString = contract.UpdatedDate.ToString(),
+                        EffectiveDate = contract.EffectiveDate,
+                        EffectiveDateString = contract.EffectiveDate.ToString("dd/MM/yyyy"),
+                        Status = (int)contract.Status,
+                        StatusString = contract.Status.ToString(),
+                        TemplateID = contract.TemplateId,
+                        Code = contract.Code,
+                        Link = contract.Link
+                    };
+                    return contractResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Contract is not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
         private async Task SendEmail(int contractId)
         {
             var systemSettings = await _systemSettingsRepository.GetSystemSettings();
@@ -1392,10 +1437,10 @@ namespace Coms.Application.Services.Contracts
             message.IsBodyHtml = true; // This is to notify the MailMessage that the body is in HTML
             smtp.Port = 587;
             smtp.Host = "smtp.gmail.com";
-            smtp.EnableSsl = true;
             smtp.UseDefaultCredentials = false;
-            smtp.Credentials = new NetworkCredential(systemSettings.Email, "hibz dgyu xnww dnvx");
+            smtp.Credentials = new NetworkCredential(systemSettings.Email, "iyyk saft yshb oksw");
             smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+            smtp.EnableSsl = true;
             smtp.Send(message);
         }
 

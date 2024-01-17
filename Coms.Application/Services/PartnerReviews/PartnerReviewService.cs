@@ -12,6 +12,7 @@ namespace Coms.Application.Services.PartnerReviews
         private readonly IUserRepository _userRepository;
         private readonly IPartnerRepository _partnerRepository;
         private readonly IActionHistoryRepository _actionHistoryRepository;
+        private readonly IContractRepository _contractRepository;
 
         public PartnerReviewService(IPartnerReviewRepository partnerReviewRepository,
             IUserRepository userRepository,
@@ -23,6 +24,7 @@ namespace Coms.Application.Services.PartnerReviews
             _userRepository = userRepository;
             _partnerRepository = partnerRepository;
             _actionHistoryRepository = actionHistoryRepository;
+            _contractRepository = contractRepository;
         }
 
         public async Task<ErrorOr<PartnerReviewResult>> AddPartnerReview(int partnerId, int userId, int contractId)

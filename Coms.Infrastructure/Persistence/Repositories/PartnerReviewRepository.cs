@@ -20,6 +20,12 @@ namespace Coms.Infrastructure.Persistence.Repositories
                     pr => pr.User, pr => pr.Contract, pr => pr.ContractAnnex, pr => pr.LiquidationRecord, pr => pr.Partner });
         }
 
+        public async Task<PartnerReview?> GetByContractId2(int contractId)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(pr => pr.ContractId.Equals(contractId) && pr.ContractId != null,
+                null);
+        }
+
         public async Task<PartnerReview> GetPartnerReview(int id)
         {
             return await _genericRepository.FirstOrDefaultAsync(pr => pr.Id.Equals(id),
