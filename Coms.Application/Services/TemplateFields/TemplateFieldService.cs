@@ -13,6 +13,7 @@ namespace Coms.Application.Services.TemplateFields
         private readonly IFlowDetailRepository _flowDetailRepository;
         private readonly IContractFlowDetailsRepository _userFlowDetailsRepository;
         private readonly IServiceRepository _serviceRepository;
+        private readonly IContractRepository _contractRepository;
 
         public TemplateFieldService(ITemplateFieldRepository templateFieldRepository,
                 ITemplateRepository templateRepository,
@@ -21,7 +22,8 @@ namespace Coms.Application.Services.TemplateFields
                 IFlowRepository flowRepository,
                 IFlowDetailRepository flowDetailRepository,
                 IContractFlowDetailsRepository userFlowDetailsRepository,
-                IServiceRepository serviceRepository)
+                IServiceRepository serviceRepository,
+                IContractRepository contractRepository)
         {
             _templateFieldRepository = templateFieldRepository;
             _templateRepository = templateRepository;
@@ -31,9 +33,10 @@ namespace Coms.Application.Services.TemplateFields
             _flowDetailRepository = flowDetailRepository;
             _userFlowDetailsRepository = userFlowDetailsRepository;
             _serviceRepository = serviceRepository;
+            _contractRepository = contractRepository;
         }
 
-        public async Task<ErrorOr<IList<TemplateFieldResult>>> GetTemplateFields(int contractCategoryId, 
+        public async Task<ErrorOr<IList<TemplateFieldResult>>> GetTemplateFields(int contractCategoryId,
                 int partnerId, int serviceId, int templateType)
         {
             var template = await _templateRepository.GetTemplateByContractCategoryIdAndTemplateType(contractCategoryId, templateType);
@@ -52,10 +55,10 @@ namespace Coms.Application.Services.TemplateFields
                         string? content = null;
                         bool isReadOnly = false;
                         if (templateField.FieldName.Contains("Company") || templateField.FieldName.Contains("Partner") ||
-                                templateField.FieldName.Contains("Signer") || 
-                                templateField.FieldName.Contains("Created Date") || 
+                                templateField.FieldName.Contains("Signer") ||
+                                templateField.FieldName.Contains("Created Date") ||
                                 templateField.FieldName.Contains("Bank") || templateField.FieldName.Contains("Account") ||
-                                templateField.FieldName.Contains("Service"))
+                                templateField.FieldName.Contains("Service") || templateField.FieldName.Contains("Contract Code"))
                         {
                             isReadOnly = true;
                             if (templateField.FieldName.Contains("Partner"))
@@ -94,6 +97,19 @@ namespace Coms.Application.Services.TemplateFields
                                 else
                                 {
                                     return Error.NotFound("404", "Partner is not found!");
+                                }
+                            }
+                            if (templateField.FieldName.Contains("Contract Code"))
+                            {
+                                string code = "HS-" + partner.Abbreviation + "/" + DateTime.Now.ToString("yy-MM-dd");
+                                var contracts = await _contractRepository.GetByContractCode2(code);
+                                if(contracts is not null)
+                                {
+                                    content = code + "/" + (contracts.Count() + 1);
+                                }
+                                else
+                                {
+                                    content = code;
                                 }
                             }
                             if (templateField.FieldName.Contains("Company") ||
