@@ -144,7 +144,7 @@ namespace Coms.Application.Services.Partners
                 Phone = phone,
                 Representative = representative,
                 RepresentativePosition = representativePosition,
-                Abbreviation= abbreviation.ToUpper(),
+                Abbreviation= abbreviation,
                 TaxCode = taxCode,
                 Status = (PartnerStatus)(int)PartnerStatus.Active
             };
@@ -234,7 +234,7 @@ namespace Coms.Application.Services.Partners
                 partnerUpdate.Phone = phone;
                 partnerUpdate.Representative = representative;
                 partnerUpdate.RepresentativePosition = representativePosition;
-                partnerUpdate.Abbreviation = abbreviation.ToUpper();
+                partnerUpdate.Abbreviation = abbreviation;
                 partnerUpdate.TaxCode = taxCode;
                 await _partnerRepository.UpdatePartner(partnerUpdate);
                 partnerUpdate = _partnerRepository.GetPartner(id).Result;
