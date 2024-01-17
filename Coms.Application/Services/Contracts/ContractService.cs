@@ -1375,13 +1375,13 @@ namespace Coms.Application.Services.Contracts
         private async Task SendEmail(int contractId)
         {
             var systemSettings = await _systemSettingsRepository.GetSystemSettings();
-            var partnerReview = await _partnerReviewRepository.GetByContractAnnexId(contractId);
+            var partnerReview = await _partnerReviewRepository.GetByContractId(contractId);
             MailMessage message = new MailMessage();
             SmtpClient smtp = new SmtpClient();
             message.From = new MailAddress(systemSettings.Email);
             message.To.Add(new MailAddress(partnerReview.Partner.Email));
             string bodyMessage = "<div style='font-family: Arial, sans-serif;'>" +
-                "<p style='font-size: 18px;'>Hello partner,</p>" +
+                "<p style='font-size: 18px;'>Dear " + partnerReview.Partner.CompanyName + ",</p>" +
                 "<p style='font-size: 18px;'>You have a new contract to approve!</p>" +
                 "<p style='font-size: 18px;'>Here is your code to sign in into our system:</p>" +
                 "<p style='font-size: 20px; font-weight: bold;'>Your code: " + partnerReview.Partner.Code + "</p>" +
