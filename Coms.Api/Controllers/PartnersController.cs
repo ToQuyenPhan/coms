@@ -109,11 +109,10 @@ namespace Coms.Api.Controllers
         {
             try
             {
-                ErrorOr<PartnerResult> result = _partnerService.AddPartnerAsync(request.Image, request.Representative, request.RepresentativePosition, request.Email, request.Code, request.Phone, request.Address, request.CompanyName, request.TaxCode).Result;
+                ErrorOr<PartnerResult> result = _partnerService.AddPartnerAsync(request.Image, request.Representative, request.RepresentativePosition, request.Email, request.Code, request.Phone, request.Address, request.CompanyName, request.TaxCode,request.Abbreviation).Result;
                 return result.Match(
                     result => Ok(result),
-                    errors => Problem(errors)
-                                                                                                                                                                   );
+                    errors => Problem(errors));
             }
             catch (Exception e)
             {
@@ -129,7 +128,7 @@ namespace Coms.Api.Controllers
         {
             try
             {
-                ErrorOr<PartnerResult> result = _partnerService.UpdatePartner(id, request.Image, request.Representative, request.RepresentativePosition, request.Email, request.Code, request.Phone, request.Address, request.CompanyName, request.TaxCode).Result;
+                ErrorOr<PartnerResult> result = _partnerService.UpdatePartner(id, request.Image, request.Representative, request.RepresentativePosition, request.Email, request.Code, request.Phone, request.Address, request.CompanyName, request.TaxCode, request.Abbreviation).Result;
                 return result.Match(
                     result => Ok(result),
                     errors => Problem(errors)

@@ -34,6 +34,7 @@ namespace Coms.Application.Services.Partners
                         Phone = partner.Phone,
                         Representative = partner.Representative,
                         RepresentativePosition = partner.RepresentativePosition,
+                        Abbreviation = partner.Abbreviation,
                         TaxCode = partner.TaxCode,
                         Status = (int)partner.Status,
                         StatusString = partner.Status.ToString()
@@ -64,6 +65,7 @@ namespace Coms.Application.Services.Partners
                     Phone = partner.Phone,
                     Representative = partner.Representative,
                     RepresentativePosition = partner.RepresentativePosition,
+                    Abbreviation = partner.Abbreviation,
                     TaxCode = partner.TaxCode,
                     Status = (int)partner.Status,
                     StatusString = partner.Status.ToString()
@@ -98,6 +100,7 @@ namespace Coms.Application.Services.Partners
                         Phone = partner.Phone,
                         Representative = partner.Representative,
                         RepresentativePosition = partner.RepresentativePosition,
+                        Abbreviation = partner.Abbreviation,
                         TaxCode = partner.TaxCode,
                         Status = (int)partner.Status,
                         StatusString = partner.Status.ToString()
@@ -117,7 +120,7 @@ namespace Coms.Application.Services.Partners
 
 
         //add partner
-        public async Task<ErrorOr<PartnerResult>> AddPartnerAsync(string? image, string? representative, string? representativePosition, string? email, string? code, string? phone, string? address, string? companyName, string? taxCode)
+        public async Task<ErrorOr<PartnerResult>> AddPartnerAsync(string? image, string? representative, string? representativePosition, string? email, string? code, string? phone, string? address, string? companyName, string? taxCode, string? abbreviation)
         {
             //check email is exist
             if (_partnerRepository.GetPartnerByEmail(email).Result is not null)
@@ -141,6 +144,7 @@ namespace Coms.Application.Services.Partners
                 Phone = phone,
                 Representative = representative,
                 RepresentativePosition = representativePosition,
+                Abbreviation= abbreviation,
                 TaxCode = taxCode,
                 Status = (PartnerStatus)(int)PartnerStatus.Active
             };
@@ -159,6 +163,7 @@ namespace Coms.Application.Services.Partners
                     Phone = respone.Phone,
                     Representative = respone.Representative,
                     RepresentativePosition = respone.RepresentativePosition,
+                    Abbreviation = respone.Abbreviation,
                     TaxCode = respone.TaxCode,
                     Status = (int)respone.Status,
                     StatusString = respone.Status.ToString()
@@ -191,6 +196,7 @@ namespace Coms.Application.Services.Partners
                     Phone = partner.Phone,
                     Representative = partner.Representative,
                     RepresentativePosition = partner.RepresentativePosition,
+                    Abbreviation = partner.Abbreviation,
                     TaxCode = partner.TaxCode,
                     Status = (int)partner.Status,
                     StatusString = partner.Status.ToString()
@@ -204,7 +210,7 @@ namespace Coms.Application.Services.Partners
         }
 
         //update partner with string? image, string? representative, string? representativePosition, string? email, string? code, string? phone, string? address, string? companyName, string? taxCode not use addPartnerRequest
-        public async Task<ErrorOr<PartnerResult>> UpdatePartner(int id, string? image, string? representative, string? representativePosition, string? email, string? code, string? phone, string? address, string? companyName, string? taxCode)
+        public async Task<ErrorOr<PartnerResult>> UpdatePartner(int id, string? image, string? representative, string? representativePosition, string? email, string? code, string? phone, string? address, string? companyName, string? taxCode, string? abbreviation)
         {
             //check email is exist
             if (_partnerRepository.GetPartnerByEmail(email).Result is not null && _partnerRepository.GetPartnerByEmail(email).Result.Id != id)
@@ -228,6 +234,7 @@ namespace Coms.Application.Services.Partners
                 partnerUpdate.Phone = phone;
                 partnerUpdate.Representative = representative;
                 partnerUpdate.RepresentativePosition = representativePosition;
+                partnerUpdate.Abbreviation = abbreviation;
                 partnerUpdate.TaxCode = taxCode;
                 await _partnerRepository.UpdatePartner(partnerUpdate);
                 partnerUpdate = _partnerRepository.GetPartner(id).Result;
@@ -242,6 +249,7 @@ namespace Coms.Application.Services.Partners
                     Phone = partnerUpdate.Phone,
                     Representative = partnerUpdate.Representative,
                     RepresentativePosition = partnerUpdate.RepresentativePosition,
+                    Abbreviation = partnerUpdate.Abbreviation,
                     TaxCode = partnerUpdate.TaxCode,
                     Status = (int)partnerUpdate.Status,
                     StatusString = partnerUpdate.Status.ToString()
@@ -274,6 +282,7 @@ namespace Coms.Application.Services.Partners
                     Phone = partner.Phone,
                     Representative = partner.Representative,
                     RepresentativePosition = partner.RepresentativePosition,
+                    Abbreviation = partner.Abbreviation,
                     TaxCode = partner.TaxCode,
                     Status = (int)partner.Status,
                     StatusString = partner.Status.ToString()

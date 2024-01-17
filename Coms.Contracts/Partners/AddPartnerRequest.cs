@@ -11,5 +11,6 @@
         public string? Address { get; set; }
         public string? CompanyName { get; set; }
         public string? TaxCode { get; set; }
+        public string? Abbreviation { get; set; }
     }
 }
