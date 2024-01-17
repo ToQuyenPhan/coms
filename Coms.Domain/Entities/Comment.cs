@@ -18,6 +18,9 @@ namespace Coms.Domain.Entities
         [Required]
         public CommentStatus Status { get; set; }
 
+        [Required]
+        public CommentType CommentType { get; set; }
+
         public int? ActionHistoryId { get; set; }
         public virtual ActionHistory ActionHistory { get; set; }    
     }

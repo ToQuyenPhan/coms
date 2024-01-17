@@ -16,5 +16,6 @@
         public string FullName { get; set; }
         public string AccessRole { get; set; }
         public string UserImage {  get; set; }
+        public string CommentType { get; set; }
     }
 }

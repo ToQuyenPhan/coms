@@ -72,7 +72,8 @@ namespace Coms.Application.Services.Comments
                                 Status = (int)comment.Status,
                                 StatusString = comment.Status.ToString(),
                                 Long = AsTimeAgo(comment.ActionHistory.CreatedAt),
-                                CreatedAt = comment.ActionHistory.CreatedAt.ToString()
+                                CreatedAt = comment.ActionHistory.CreatedAt.ToString(),
+                                CommentType = comment.CommentType.ToString()
                             };
                             User? user = await _userRepository.GetUser((int)comment.ActionHistory.UserId);
                             commentResult.UserId = user.Id;
@@ -115,7 +116,8 @@ namespace Coms.Application.Services.Comments
                         ActionHistoryId = comment.ActionHistoryId,
                         ReplyId = comment.ReplyId,
                         Status = (int)comment.Status,
-                        StatusString = comment.Status.ToString()
+                        StatusString = comment.Status.ToString(),
+                        CommentType = comment.CommentType.ToString(),
                     };
                     return commentResult;
                 }
@@ -152,7 +154,8 @@ namespace Coms.Application.Services.Comments
                             Long = AsTimeAgo(commentHistory.CreatedAt),
                             CreatedAt = commentHistory.CreatedAt.ToString(),
                             UserId = commentHistory.User.Id,
-                            FullName = commentHistory.User.FullName
+                            FullName = commentHistory.User.FullName,
+                            CommentType = comment.CommentType.ToString()
                         };
                         if (commentHistory.User.Image is not null)
                         {
@@ -239,7 +242,7 @@ namespace Coms.Application.Services.Comments
         }
 
         public async Task<ErrorOr<CommentResult>> LeaveComment(int userId, int contractId, string content,
-        int? replyId)
+        int? replyId, int commentType)
         {
             try
             {
@@ -262,7 +265,8 @@ namespace Coms.Application.Services.Comments
                     {
                         Content = content,
                         Status = CommentStatus.Active,
-                        ActionHistoryId = actionHistory.Id
+                        ActionHistoryId = actionHistory.Id,
+                        CommentType = (CommentType) commentType
                     };
                     if(replyId is not null && replyId > 0)
                     {
@@ -282,7 +286,8 @@ namespace Coms.Application.Services.Comments
                         FullName = actionHistorycreated.User.FullName,
                         UserImage = actionHistorycreated.User.Image,
                         CreatedAt = actionHistorycreated.CreatedAt.ToString(),
-                        Long = AsTimeAgo(actionHistorycreated.CreatedAt)
+                        Long = AsTimeAgo(actionHistorycreated.CreatedAt),
+                        CommentType = comment.CommentType.ToString()
                     };
                     return commentResult;
                 }
@@ -313,7 +318,8 @@ namespace Coms.Application.Services.Comments
                         ActionHistoryId = comment.ActionHistoryId,
                         ReplyId = comment.ReplyId,
                         Status = (int)comment.Status,
-                        StatusString = comment.Status.ToString()
+                        StatusString = comment.Status.ToString(),
+                        CommentType = comment.CommentType.ToString()
                     };
                     return commentResult;
                 }
@@ -354,6 +360,7 @@ namespace Coms.Application.Services.Comments
                         UserId = (int)actionHistory.UserId,
                         UserImage = actionHistory.User.Image,
                         Long = AsTimeAgo(actionHistory.CreatedAt),
+                        CommentType = comment.CommentType.ToString()
                     };
                     return commentResult;
                 }
@@ -501,11 +508,7 @@ namespace Coms.Application.Services.Comments
             }
         }
 
-
-
-
         #endregion
-
         private string AsTimeAgo(DateTime dateTime)
         {
             TimeSpan timeSpan = DateTime.Now.Subtract(dateTime);

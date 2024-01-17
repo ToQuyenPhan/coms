@@ -68,8 +68,8 @@ namespace Coms.Api.Controllers
         public IActionResult LeaveComment([FromBody] CommentFormRequest request)
         {
             ErrorOr<CommentResult> result = _commentService.LeaveComment(
-                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.ContractId,
-                    request.Content, request.ReplyId).Result;
+                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), 
+                    request.ContractId, request.Content, request.ReplyId, request.CommentType).Result;
             return result.Match(
                 result => Ok(result),
                 errors => Problem(errors)
