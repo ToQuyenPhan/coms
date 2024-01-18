@@ -1,11 +1,13 @@
 ﻿using Coms.Application.Services.ContractCategories;
 using Coms.Application.Services.FlowDetails;
+using Coms.Application.Services.LiquidationRecords;
 using Coms.Contracts.ContractCategories;
 using Coms.Contracts.FlowDetails;
 using ErrorOr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Coms.Api.Controllers
 {
@@ -54,6 +56,25 @@ namespace Coms.Api.Controllers
                 result => Ok(result),
                 errors => Problem(errors)
             );
+        }
+        [HttpDelete("id")]
+        [SwaggerOperation(summary: "Delete Contract category by Id in Coms")]
+        [Authorize(Roles = "Sale Manager")]
+        public IActionResult DeleteContractCategory([FromQuery][Required] int id)
+        {
+            try
+            {
+                ErrorOr<ContractCategoryResult> result = _contractCategoryService.DeleteContractCategoryById(id).Result;
+                return result.Match(
+                    result => Ok(result),
+                    errors => Problem(errors)
+                );
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+
         }
     }
 }
