@@ -15,5 +15,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
 
         Task<LiquidationRecord> GetLiquidationRecordsById(int liquidationRecordId);
         Task UpdateLiquidationRecord(LiquidationRecord liquidationRecord);
+        Task AddLiquidationrecord(LiquidationRecord liquidationRecord);
     }
 }

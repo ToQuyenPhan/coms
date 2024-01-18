@@ -2,6 +2,7 @@
 using Coms.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +18,17 @@ namespace Coms.Infrastructure.Persistence.Repositories
             _genericRepository = genericRepository;
         }
 
+        public async Task Add(LiquidationRecordFile liquidationRecordFile)
+        {
+            await _genericRepository.CreateAsync(liquidationRecordFile);
+        }
+
+        public async Task<LiquidationRecordFile?> GetLiquidationRecordFileByContractId(int liquidationRecordId)
+        {
+            return await _genericRepository
+                .FirstOrDefaultAsync(tf => tf.LiquidationRecordId.Equals(liquidationRecordId));
+        }
+
         public async Task<LiquidationRecordFile?> GetLiquidationRecordFileById(Guid id)
         {
             return await _genericRepository
@@ -27,5 +39,6 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             await _genericRepository.UpdateAsync(liquidationRecordFile);
         }
+
     }
 }

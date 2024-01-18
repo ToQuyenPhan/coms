@@ -89,5 +89,25 @@ namespace Coms.Application.Services.ContractCategories
                 return new ContractCategoryResult();
             }
         }
+        public async Task<ErrorOr<ContractCategoryResult>> DeleteContractCategoryById(int id)
+        {
+            if (_contractCategoryRepository.GetActiveContractCategoryById(id).Result is not null)
+            {
+                var result = _contractCategoryRepository.GetActiveContractCategoryById(id).Result;
+                result.Status = ContractCategoryStatus.Inactive;
+                await _contractCategoryRepository.UpdateContractCategory(result);
+                var response = new ContractCategoryResult
+                {
+                    Id = result.Id,
+                    CategoryName = result.CategoryName,
+                    Status = result.Status,
+                };
+                return response;
+            }
+            else
+            {
+                return new ContractCategoryResult();
+            }
+        }
     }
 }

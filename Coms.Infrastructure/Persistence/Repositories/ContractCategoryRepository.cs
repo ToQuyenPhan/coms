@@ -35,5 +35,9 @@ namespace Coms.Infrastructure.Persistence.Repositories
                 cc.Status.Equals(ContractCategoryStatus.Active));
             return item;
         }
+        public async Task UpdateContractCategory(ContractCategory contractCategory)
+        {
+            await _genericRepository.UpdateAsync(contractCategory);
+        }
     }
 }

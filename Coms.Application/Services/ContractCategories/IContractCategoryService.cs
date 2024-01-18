@@ -11,5 +11,6 @@ namespace Coms.Application.Services.ContractCategories
         //add get contract category by id
         ErrorOr<ContractCategoryResult> GetContractCategoryById(int id);
         Task<ErrorOr<ContractCategoryResult>> CreateContractCategory(string categoryName, ContractCategoryStatus status);
+        Task<ErrorOr<ContractCategoryResult>> DeleteContractCategoryById(int id);
     }
 }

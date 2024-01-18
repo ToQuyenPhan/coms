@@ -2,6 +2,7 @@
 using Coms.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,11 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public LiquidationRecordRepository(IGenericRepository<LiquidationRecord> genericRepository)
         {
             _genericRepository = genericRepository;
+        }
+
+        public async Task AddLiquidationrecord(LiquidationRecord liquidationRecord)
+        {
+            await _genericRepository.CreateAsync(liquidationRecord);
         }
 
         //get all Liquidation Record
