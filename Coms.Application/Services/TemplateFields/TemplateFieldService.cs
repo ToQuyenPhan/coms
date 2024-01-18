@@ -215,7 +215,7 @@ namespace Coms.Application.Services.TemplateFields
                             Content = content,
                         };
                         templateFieldResult.Type = "text";
-                        if (templateFieldResult.Name.Contains("Duration"))
+                        if (templateFieldResult.Name.Contains("Duration") || templateFieldResult.Name.Equals("Execution Time"))
                         {
                             templateFieldResult.Type = "number";
                             templateFieldResult.MinValue = 0;
