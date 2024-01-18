@@ -27,5 +27,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             await _genericRepository.UpdateAsync(contractAnnexFile);
         }
+        //Add
+        public async Task Add(ContractAnnexFile contractAnnexFile)
+        {
+            await _genericRepository.CreateAsync(contractAnnexFile);
+        }
     }
 }

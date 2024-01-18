@@ -12,6 +12,11 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task<ContractAnnex> GetContractAnnexesById(int contractAnnexId);
         //Update contractannexes by contractAnnexId
         Task UpdateContractAnnexes(ContractAnnex contractAnnex);
+        //get contractannex by contract code
+        Task<ContractAnnex> GetByContractAnnexCode(string contractAnnexCode);
+        //AddContractAnnex
+        Task AddContractAnnex(ContractAnnex contractAnnex);
+        Task<IList<ContractAnnex>> GetByContractAnnexCode2(string code);
 
     }
 }

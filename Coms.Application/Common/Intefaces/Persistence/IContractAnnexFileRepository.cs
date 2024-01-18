@@ -11,5 +11,7 @@ namespace Coms.Application.Common.Intefaces.Persistence
     {
         Task<ContractAnnexFile?> GetContractAnnexFileById(Guid id);
         Task Update(ContractAnnexFile contractAnnexFile);
+        //Add
+        Task Add(ContractAnnexFile contractAnnexFile);
     }
 }

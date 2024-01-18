@@ -398,6 +398,7 @@ namespace Coms.Application.Services.Comments
                             StatusString = comment.Status.ToString(),
                             Long = AsTimeAgo(commentHistory.CreatedAt),
                             CreatedAt = commentHistory.CreatedAt.ToString(),
+                            CommentType = comment.CommentType.ToString(),
                             UserId = commentHistory.User.Id,
                             FullName = commentHistory.User.FullName
                         };
@@ -450,7 +451,7 @@ namespace Coms.Application.Services.Comments
         }
 
         public async Task<ErrorOr<CommentResult>> LeaveContractAnnexComment(int userId, int contractAnnexId, string content,
-        int? replyId)
+        int? replyId, int commentType)
         {
             try
             {
@@ -473,7 +474,8 @@ namespace Coms.Application.Services.Comments
                     {
                         Content = content,
                         Status = CommentStatus.Active,
-                        ActionHistoryId = actionHistory.Id
+                        ActionHistoryId = actionHistory.Id,
+                        CommentType = (CommentType)commentType
                     };
                     if (replyId is not null && replyId > 0)
                     {
@@ -493,7 +495,8 @@ namespace Coms.Application.Services.Comments
                         FullName = actionHistorycreated.User.FullName,
                         UserImage = actionHistorycreated.User.Image,
                         CreatedAt = actionHistorycreated.CreatedAt.ToString(),
-                        Long = AsTimeAgo(actionHistorycreated.CreatedAt)
+                        Long = AsTimeAgo(actionHistorycreated.CreatedAt),
+                        CommentType = comment.CommentType.ToString()
                     };
                     return commentResult;
                 }

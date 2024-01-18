@@ -69,5 +69,16 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        [HttpPut("annex/approveOrReject")]
+        [SwaggerOperation(Summary = "Approve or reject a contract for partner in Coms")]
+        public IActionResult ApproveContractAnnex([FromQuery] int contractAnnexId, [FromQuery] bool isApproved)
+        {
+            ErrorOr<PartnerReviewResult> result = _partnerReviewService.ApproveAnnexPartnerReview(contractAnnexId, isApproved).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

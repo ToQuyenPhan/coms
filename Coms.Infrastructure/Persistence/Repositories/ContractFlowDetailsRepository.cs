@@ -96,8 +96,8 @@ namespace Coms.Infrastructure.Persistence.Repositories
         public async Task<IList<Contract_FlowDetail>?> GetContractAnnexByFlowDetailId(int flowDetailId)
         {
             var list = await _genericRepository.WhereAsync(ufd =>
-                           ufd.FlowDetailId.Equals(flowDetailId) && ufd.ContractAnnexId != null,
-                                          new System.Linq.Expressions.Expression<Func<Contract_FlowDetail, object>>[] { ufd => ufd.Contract, ufd => ufd.FlowDetail });
+    ufd.FlowDetailId.Equals(flowDetailId) && ufd.ContractAnnexId != null,
+    new System.Linq.Expressions.Expression<Func<Contract_FlowDetail, object>>[] { ufd => ufd.FlowDetail, ufd => ufd.ContractAnnex });
             return (list.Count() > 0) ? list : null;
         }
         ////get by contract annex id

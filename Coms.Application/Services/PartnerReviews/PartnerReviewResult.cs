@@ -19,6 +19,7 @@ namespace Coms.Application.Services.PartnerReviews
         public int? UserId { get; set; }
         public string UserName { get; set; }
         public int? ContractId { get; set; }
+        public int? ContractAnnexId { get; set; }
         public string ContractName { get; set; }
     }
 }

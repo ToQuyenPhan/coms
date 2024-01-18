@@ -111,6 +111,42 @@ namespace Coms.Application.Services.PartnerComments
             }
         }
 
+        public async Task<ErrorOr<PartnerCommentResult>> AddAnnexPartnerComment(int contractAnnexId, string content)
+        {
+            try
+            {
+                var partnerReview = await _partnerReviewRepository.GetByContractAnnexId(contractAnnexId);
+                if (partnerReview is not null)
+                {
+                    var partnerComment = new PartnerComment()
+                    {
+                        Content = content,
+                        CreatedAt = DateTime.Now,
+                        PartnerReviewId = partnerReview.Id,
+                    };
+                    await _partnerCommentRepository.AddPartnerComment(partnerComment);
+                    var commentResult = new PartnerCommentResult()
+                    {
+                        Id = partnerComment.Id,
+                        Content = partnerComment.Content,
+                        ReplyId = partnerComment.Id,
+                        PartnerReviewId = partnerComment.PartnerReviewId,
+                        CreatedAt = partnerComment.CreatedAt.ToString(),
+                        Long = AsTimeAgo(partnerComment.CreatedAt)
+                    };
+                    return commentResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Partner review not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
         private string AsTimeAgo(DateTime dateTime)
         {
             TimeSpan timeSpan = DateTime.Now.Subtract(dateTime);
