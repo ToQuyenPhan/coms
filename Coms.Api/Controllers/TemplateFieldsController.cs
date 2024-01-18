@@ -26,5 +26,15 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+        [HttpGet("Annex")]
+        public IActionResult GetTemplateAnnexFields([FromQuery] int contractId, int contractCategoryId, int partnerId, int serviceId, int templateType)
+        {
+            ErrorOr<IList<TemplateFieldResult>> result = _templateFieldService.GetTemplateAnnexFields( contractId, contractCategoryId,
+                    partnerId, serviceId, templateType).Result;
+            return result.Match(
+                result => Ok(result),
+                errors => Problem(errors)
+            );
+        }
     }
 }

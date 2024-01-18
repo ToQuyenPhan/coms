@@ -108,6 +108,47 @@ namespace Coms.Application.Services.PartnerReviews
             }
         }
 
+        public async Task<ErrorOr<PartnerReviewResult>> ApproveAnnexPartnerReview(int contractAnnexId, bool isApproved)
+        {
+            try
+            {
+                var partnerPreview = await _partnerReviewRepository.GetByContractAnnexId(contractAnnexId);
+                if (partnerPreview is not null)
+                {
+                    if (isApproved)
+                    {
+                        partnerPreview.IsApproved = true;
+                    }
+                    else
+                    {
+                        partnerPreview.Status = PartnerReviewStatus.Inactive;
+                    }
+                    partnerPreview.ReviewAt = DateTime.Now;
+                    await _partnerReviewRepository.UpdatePartnerPreview(partnerPreview);
+                    var partnerReviewResult = new PartnerReviewResult
+                    {
+                        Id = partnerPreview.Id,
+                        ContractAnnexId = partnerPreview.ContractAnnexId,
+                        ContractName = partnerPreview.ContractAnnex.ContractAnnexName,
+                        IsApproved = partnerPreview.IsApproved,
+                        PartnerId = partnerPreview.Id,
+                        PartnerCompanyName = partnerPreview.Partner.CompanyName,
+                        UserId = partnerPreview.UserId,
+                        UserName = partnerPreview.User.Username
+                    };
+                    return partnerReviewResult;
+                }
+                else
+                {
+                    return Error.NotFound("404", "Partner Review is not found!");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Error.Failure("500", ex.Message);
+            }
+        }
+
         public async Task<ErrorOr<PagingResult<NotificationResult>>> GetNotifications(int userId, int currentPage, int pageSize)
         {
             try
@@ -125,7 +166,7 @@ namespace Coms.Application.Services.PartnerReviews
                         else
                         {
                             var partnerReview = await _partnerReviewRepository.GetByContractId((int)action.ContractId);
-                            if (partnerReview.IsApproved)
+                            if (partnerReview is not null && partnerReview.IsApproved)
                             {
                                 var notificationResult = new NotificationResult()
                                 {

@@ -9,5 +9,6 @@ namespace Coms.Application.Services.PartnerReviews
         Task<ErrorOr<PartnerReviewResult>> ApprovePartnerReview(int contractId, bool isApproved);
         Task<ErrorOr<PagingResult<NotificationResult>>> GetNotifications(int userId, int currentPage, int pageSize);
         Task<ErrorOr<PagingResult<NotificationResult>>> GetPartnerNotifications(int partnerId, int currentPage, int pageSize);
-    }
+        Task<ErrorOr<PartnerReviewResult>> ApproveAnnexPartnerReview(int contractAnnexId, bool isApproved);
+    }   
 }

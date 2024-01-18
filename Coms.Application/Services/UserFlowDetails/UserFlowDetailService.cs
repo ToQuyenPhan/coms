@@ -190,6 +190,38 @@ namespace Coms.Application.Services.UserFlowDetails
                             }
                         }
                     }
+                    var contractAnnexFlowDetails = await _userFlowDetailsRepository.GetContractAnnexByFlowDetailId(flowDetail.Id);
+                    if (contractAnnexFlowDetails is not null)
+                    {
+                        foreach (var contractAnnexFlowDetail in contractAnnexFlowDetails)
+                        {
+                            if (contractAnnexFlowDetail.Status.Equals(DocumentStatus.Deleted))
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                var notificationResult = new NotificationResult()
+                                {
+                                    Title = "New Contract Annex",
+                                    Message = "You have a new contract annex to ",
+                                    Time = contractAnnexFlowDetail.ContractAnnex.CreatedDate,
+                                    Long = AsTimeAgo(contractAnnexFlowDetail.ContractAnnex.CreatedDate),
+                                    ContractAnnexId = contractAnnexFlowDetail.ContractAnnexId,
+                                    Type = "Approve"
+                                };
+                                if (flowDetail.FlowRole.Equals(FlowRole.Approver))
+                                {
+                                    notificationResult.Message += "approve!";
+                                }
+                                else
+                                {
+                                    notificationResult.Message += "sign!";
+                                }
+                                results.Add(notificationResult);
+                            }
+                        }
+                    }
                 }
             }
             if(results.Count() > 0)

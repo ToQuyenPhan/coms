@@ -115,7 +115,7 @@ namespace Coms.Api.Controllers
         {
             ErrorOr<CommentResult> result = _commentService.LeaveContractAnnexComment(
                                    int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.ContractAnnexId,
-                                                      request.Content, request.ReplyId).Result;
+                                                      request.Content, request.ReplyId, request.CommentType).Result;
             return result.Match(
                                result => Ok(result),
                                               errors => Problem(errors)

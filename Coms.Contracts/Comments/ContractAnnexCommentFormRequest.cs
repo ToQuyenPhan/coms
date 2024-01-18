@@ -5,5 +5,6 @@
         public int ContractAnnexId {  get; set; }
         public string Content {  get; set; } = string.Empty;
         public int? ReplyId { get; set; }
+        public int CommentType { get; set; }
     }
 }

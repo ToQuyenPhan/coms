@@ -37,6 +37,22 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             await _genericRepository.UpdateAsync(contractAnnex);
         }
+        //get contractannex by contract annex code
+        public async Task<ContractAnnex> GetByContractAnnexCode(string contractAnnexCode)
+        {
+            return await _genericRepository.FirstOrDefaultAsync(c => c.Code.Equals(contractAnnexCode), null);
+        }
+        //AddContractAnnex
+        public async Task AddContractAnnex(ContractAnnex contractAnnex)
+        {
+            await _genericRepository.CreateAsync(contractAnnex);
+        }
+        //get contractannex by contract annex code2
+        public async Task<IList<ContractAnnex>?> GetByContractAnnexCode2(string code)
+        {
+            var list = await _genericRepository.WhereAsync(c => c.Code.Contains(code), null);
+            return (list.Count() > 0) ? list : null;
+        }
 
 
     }

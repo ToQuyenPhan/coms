@@ -15,6 +15,6 @@ namespace Coms.Application.Services.Comments
         Task<ErrorOr<CommentResult>> EditComment(int id, string content);
         //get all comments of a contract annex
         Task<ErrorOr<PagingResult<CommentResult>>> GetContractAnnexComments(int contractAnnexId, int currentPage, int pageSize);
-        Task<ErrorOr<CommentResult>> LeaveContractAnnexComment(int userId, int contractAnnexId, string content, int? replyId);
+        Task<ErrorOr<CommentResult>> LeaveContractAnnexComment(int userId, int contractAnnexId, string content, int? replyId, int commentType);
     }
 }

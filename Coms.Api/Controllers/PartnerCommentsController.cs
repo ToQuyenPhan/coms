@@ -40,9 +40,19 @@ namespace Coms.Api.Controllers
         [SwaggerOperation(Summary = "Partner comment for a contract in Coms")]
         public IActionResult AddComment([FromBody] PartnerCommentFormRequest request)
         {
-            ErrorOr<PartnerCommentResult> result = _partnerCommentService.AddPartnerComment(request.ContractId, 
+            ErrorOr<PartnerCommentResult> result = _partnerCommentService.AddPartnerComment((int)request.ContractId, 
                     request.Content).Result;
             return result.Match(result => Ok(result), errors => Problem(errors));
         }
+        //addAnnexComment
+        [HttpPost("annex")]
+        [SwaggerOperation(Summary = "Partner comment for a contract annex in Coms")]
+        public IActionResult AddAnnexComment([FromBody] PartnerCommentFormRequest request)
+        {
+            ErrorOr<PartnerCommentResult> result = _partnerCommentService.AddAnnexPartnerComment((int)request.ContractAnnexId,
+                    request.Content).Result;
+            return result.Match(result => Ok(result), errors => Problem(errors));
+        }
+
     }
 }
