@@ -1438,7 +1438,7 @@ namespace Coms.Application.Services.Contracts
             smtp.Port = 587;
             smtp.Host = "smtp.gmail.com";
             smtp.UseDefaultCredentials = false;
-            smtp.Credentials = new NetworkCredential(systemSettings.Email, "iyyk saft yshb oksw");
+            smtp.Credentials = new NetworkCredential(systemSettings.Email, systemSettings.AppPassword);
             smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtp.EnableSsl = true;
             smtp.Send(message);

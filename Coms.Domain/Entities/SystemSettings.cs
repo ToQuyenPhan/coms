@@ -47,5 +47,9 @@ namespace Coms.Domain.Entities
         [Required]
         [MaxLength(250)]
         public string BankName { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        public string AppPassword { get; set; }
     }
 }

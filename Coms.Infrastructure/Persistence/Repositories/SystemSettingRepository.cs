@@ -14,8 +14,12 @@ namespace Coms.Infrastructure.Persistence.Repositories
 
         public async Task<SystemSettings?> GetSystemSettings()
         {
-            return await 
-                    _genericRepository.FirstOrDefaultAsync(ss => ss.CompanyName.Equals("Hisoft"), null);
+            return _genericRepository.GetAll().Take(1).FirstOrDefault();
+        }
+
+        public async Task Update(SystemSettings systemSettings)
+        {
+            await _genericRepository.UpdateAsync(systemSettings);
         }
     }
 }
