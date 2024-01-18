@@ -21,7 +21,7 @@ namespace Coms.Application.Services.Schedules
                 schedules = schedules.OrderBy(s => s.EndDate).ToList();
                 foreach (var schedule in schedules)
                 {
-                    if ((schedule.EndDate - DateTime.Now).Days < 3)
+                    if ((schedule.EndDate - DateTime.Now).Days < 3 && (schedule.EndDate - DateTime.Now).Days > 0)
                     {
                         var scheduleResult = new ScheduleResult()
                         {
