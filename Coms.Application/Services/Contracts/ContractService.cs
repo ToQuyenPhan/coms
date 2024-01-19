@@ -869,7 +869,7 @@ namespace Coms.Application.Services.Contracts
                 foreach (var review in reviews)
                 {
                     var contract = await _contractRepository.GetContract((int)review.ContractId);
-                    if (!string.IsNullOrEmpty(contract.Link))
+                    if (!string.IsNullOrEmpty(contract.Link) && review.SendDate is not null)
                     {
                         contracts.Add(contract);
                     }
