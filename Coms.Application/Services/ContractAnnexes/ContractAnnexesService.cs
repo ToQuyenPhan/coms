@@ -634,7 +634,7 @@ namespace Coms.Application.Services.ContractAnnexes
                             }
                             else
                             {
-                                return Error.Conflict("409", "The contractAnnex annex is already exist!");
+                                return Error.Conflict("409", "The contract annex is already exist!");
                             }
                         }
                     }
@@ -697,7 +697,7 @@ namespace Coms.Application.Services.ContractAnnexes
                                 EndDate = approveDate,
                                 ScheduleType = ScheduleType.ApprovalDate,
                                 EventName = "Approve Contract Annex",
-                                Description = "It's time to approve contractAnnex annex!",
+                                Description = "It's time to approve contract annex!",
                                 RemindBefore = 3,
                                 Status = ScheduleStatus.Active,
                                 UserId = (int)flowDetail.UserId
@@ -705,7 +705,7 @@ namespace Coms.Application.Services.ContractAnnexes
                             await _scheduleRepository.Add(schedule);
                             Dictionary<string, string> data = ToDictionary(new { DocumentType = "Contract Annex", Id = contractAnnex.Id, Type = "Approve" });
                             string title = "New Contract Annex";
-                            string body = "You have a new contractAnnex annex to approve!";
+                            string body = "You have a new contract annex to approve!";
                             await SendNotification(title, body, data, flowDetail.UserId.ToString());
                         } else
                         {
@@ -715,7 +715,7 @@ namespace Coms.Application.Services.ContractAnnexes
                                 EndDate = signDate,
                                 ScheduleType = ScheduleType.SigningDate,
                                 EventName = "Sign Contract Annex",
-                                Description = "It's time to sign contractAnnex annex!",
+                                Description = "It's time to sign contract annex!",
                                 RemindBefore = 3,
                                 Status = ScheduleStatus.Active,
                                 UserId = (int)flowDetail.UserId
@@ -723,7 +723,7 @@ namespace Coms.Application.Services.ContractAnnexes
                             await _scheduleRepository.Add(schedule);
                             Dictionary<string, string> data = ToDictionary(new { DocumentType = "Contract Annex", Id = contractAnnex.Id, Type = "Sign" });
                             string title = "Sign Contract Annex";
-                            string body = "You have a new contractAnnex annex to sign!";
+                            string body = "You have a new contract annex to sign!";
                             await SendNotification(title, body, data, flowDetail.UserId.ToString());
                         }
                     }

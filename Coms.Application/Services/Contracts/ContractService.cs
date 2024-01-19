@@ -1520,6 +1520,7 @@ namespace Coms.Application.Services.Contracts
                     filteredList = filteredList.Skip((currentPage - 1) * pageSize).Take(pageSize)
                             .ToList();
                 }
+
                 IList<ContractResult> responses = new List<ContractResult>();
                 foreach (var contract in filteredList)
                 {
@@ -1537,6 +1538,7 @@ namespace Coms.Application.Services.Contracts
                         TemplateID = contract.TemplateId,
                         Code = contract.Code,
                         Link = contract.Link,
+                        Durations = 0
                     };
                     if (contract.UpdatedDate is not null)
                     {

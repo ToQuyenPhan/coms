@@ -188,7 +188,7 @@ namespace Coms.Application.Services.Signs
                     }
 
                     //liquidationRecord
-                    var liquidationFile = await _liquidationRecordFileRepository.GetLiquidationRecordFileById(fileId);
+                    /*var liquidationFile = await _liquidationRecordFileRepository.GetLiquidationRecordFileById(fileId);
                     if (liquidationFile != null)
                     {
                         liquidationFile.FileData = document;
@@ -266,7 +266,8 @@ namespace Coms.Application.Services.Signs
                             responseFailed = null
 
                         };
-                    }
+                    }*/
+
                     return new ResponseModel()
                     {
                         isSuccess = false,
@@ -278,7 +279,7 @@ namespace Coms.Application.Services.Signs
                 else
                 {
                     // Xử lý khi document không hợp lệ
-                    return Error.Failure("Invalid document data.");
+                    return Error.Failure("Document không hợp lệ");
                 }
             }
             catch (Exception ex)

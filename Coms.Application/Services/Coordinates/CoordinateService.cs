@@ -20,10 +20,31 @@ namespace Coms.Application.Services.Coordinates
             tclStrat = strat;
         }
 
-        public IList<CoordianteResult> GetCoordinates(int contractId, string searchText)
+        public IList<CoordianteResult> GetCoordinatesContract(int contractId, string searchText)
         {
             List<CoordianteResult> result = new List<CoordianteResult>();
             string filePath = System.IO.Path.Combine(Environment.CurrentDirectory, "Contracts", contractId + ".pdf");
+            var reader = new PdfReader(filePath);
+            int numberOfPages = reader.NumberOfPages;
+            for (int pageIndex = numberOfPages; pageIndex >= 0; pageIndex--)
+            {
+                var parser = new PdfReaderContentParser(reader);
+                var strategy = parser.ProcessContent(pageIndex, new CoordinateService());
+                var res = strategy.GetLocations(pageIndex);
+                result = res.Where(p => p.searchText.Contains(searchText)).OrderBy(p => p.Y).Reverse().ToList();
+                if (result.Count > 0)
+                {
+                    reader.Close();
+                    break;
+                }
+            }
+            return result;
+        }
+
+        public IList<CoordianteResult> GetCoordinatesContractAnnex(int contractAnnexId, string searchText)
+        {
+            List<CoordianteResult> result = new List<CoordianteResult>();
+            string filePath = System.IO.Path.Combine(Environment.CurrentDirectory, "Contracts", "Annex-"+contractAnnexId + ".pdf");
             var reader = new PdfReader(filePath);
             int numberOfPages = reader.NumberOfPages;
             for (int pageIndex = numberOfPages; pageIndex >= 0; pageIndex--)

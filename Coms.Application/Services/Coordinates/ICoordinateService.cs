@@ -9,6 +9,7 @@ namespace Coms.Application.Services.Coordinates
 {
     public interface ICoordinateService
     {
-        IList<CoordianteResult> GetCoordinates(int contractId, string searchText);
+        IList<CoordianteResult> GetCoordinatesContract(int contractId, string searchText);
+        IList<CoordianteResult> GetCoordinatesContractAnnex(int contractAnnexId, string searchText);
     }
 }
