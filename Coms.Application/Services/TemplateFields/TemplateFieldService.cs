@@ -218,7 +218,7 @@ namespace Coms.Application.Services.TemplateFields
                         if (templateFieldResult.Name.Contains("Duration") || templateFieldResult.Name.Equals("Execution Time"))
                         {
                             templateFieldResult.Type = "number";
-                            templateFieldResult.MinValue = 0;
+                            templateFieldResult.MinValue = 1;
                         }
                         results.Add(templateFieldResult);
                     }
@@ -446,7 +446,7 @@ namespace Coms.Application.Services.TemplateFields
                         if (templateFieldResult.Name.Contains("Duration"))
                         {
                             templateFieldResult.Type = "number";
-                            templateFieldResult.MinValue = 0;
+                            templateFieldResult.MinValue = 1;
                         }
                         results.Add(templateFieldResult);
                     }
