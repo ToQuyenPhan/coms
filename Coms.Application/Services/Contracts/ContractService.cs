@@ -868,10 +868,13 @@ namespace Coms.Application.Services.Contracts
                 IList<Contract> contracts = new List<Contract>();
                 foreach (var review in reviews)
                 {
-                    var contract = await _contractRepository.GetContract((int)review.ContractId);
-                    if (!string.IsNullOrEmpty(contract.Link) && review.SendDate is not null)
+                    if (review.ContractId is not null)
                     {
-                        contracts.Add(contract);
+                        var contract = await _contractRepository.GetContract((int)review.ContractId);
+                        if (!string.IsNullOrEmpty(contract.Link) && review.SendDate is not null)
+                        {
+                            contracts.Add(contract);
+                        }
                     }
                 }
                 IList<Contract> filteredList = contracts.Where(predicate).ToList();
