@@ -891,8 +891,6 @@ namespace Coms.Application.Services.Contracts
                         Version = contract.Version,
                         CreatedDate = contract.CreatedDate,
                         CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
-                        UpdatedDate = contract.UpdatedDate,
-                        UpdatedDateString = contract.UpdatedDate.ToString(),
                         EffectiveDate = contract.EffectiveDate,
                         EffectiveDateString = contract.EffectiveDate.ToString("dd/MM/yyyy"),
                         Status = (int)contract.Status,
@@ -901,6 +899,11 @@ namespace Coms.Application.Services.Contracts
                         Code = contract.Code,
                         Link = contract.Link
                     };
+                    if(contract.UpdatedDate is not null)
+                    {
+                        contractResult.UpdatedDate = contract.UpdatedDate;
+                        contractResult.UpdatedDateString = ((DateTime)contract.UpdatedDate).ToString("dd/MM/yyyy");
+                    }
                     responses.Add(contractResult);
                 }
                 return new
