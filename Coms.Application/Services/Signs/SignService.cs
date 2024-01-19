@@ -4,7 +4,12 @@ using Coms.Domain.Entities;
 using Coms.Domain.Enum;
 using ErrorOr;
 using Firebase.Storage;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using System.Diagnostics.Contracts;
+using System.Net.Mail;
+using System.Net;
+using System.Reflection;
 
 namespace Coms.Application.Services.Signs
 {
@@ -20,7 +25,7 @@ namespace Coms.Application.Services.Signs
         private readonly IContractFlowDetailsRepository _contractFlowDetailsRepository;
         private readonly IPartnerReviewRepository _partnerReviewRepository;
         private readonly IPartnerSignRepository _partnerSignRepository;
-
+        private readonly ISystemSettingsRepository _systemSettingsRepository;
 
         public SignService(IContractFileRepository contractFileRepository,
             IContractAnnexFileRepository contractAnnexFileRepository,
@@ -30,7 +35,8 @@ namespace Coms.Application.Services.Signs
             ILiquidationRecordRepository liquidationRecordRepository,
             IContractFlowDetailsRepository contractFlowDetailsRepository,
             IPartnerReviewRepository partnerReviewRepository,
-            IPartnerSignRepository partnerSignRepository)
+            IPartnerSignRepository partnerSignRepository,
+            ISystemSettingsRepository systemSettingsRepository)
         {
             _contractFileRepository = contractFileRepository;
             _contractAnnexFileRepository = contractAnnexFileRepository;
@@ -41,6 +47,7 @@ namespace Coms.Application.Services.Signs
             _contractFlowDetailsRepository = contractFlowDetailsRepository;
             _partnerReviewRepository = partnerReviewRepository;
             _partnerSignRepository = partnerSignRepository;
+            _systemSettingsRepository = systemSettingsRepository;
         }
         public async Task<ErrorOr<ResponseModel>> UploadVersion(Guid fileId, byte[] document)
         {
@@ -108,6 +115,7 @@ namespace Coms.Application.Services.Signs
                                 }
                             }
                             await _contractRepository.UpdateContract(contract);
+                            await SendEmailSignContract(contract.Id);
                         }
                         return new ResponseModel()
                         {
@@ -145,9 +153,10 @@ namespace Coms.Application.Services.Signs
                             var downloadAnnexUrl = await task;
                             fileStream.Close();
 
+                            var partnerReview = await _partnerReviewRepository.GetByContractAnnexId(contractAnnex.Id);
                             if (contractAnnex.Status == DocumentStatus.Completed)
                             {
-                                var partnerReview = await _partnerReviewRepository.GetByContractAnnexId(contractAnnex.Id);
+                                
                                 var partnerSign = new PartnerSign()
                                 {
                                     ContractAnnexId = contractAnnex.Id,
@@ -175,8 +184,11 @@ namespace Coms.Application.Services.Signs
                                 contractAnnex.Status = DocumentStatus.Completed;
                                 contractAnnex.UpdatedDate = DateTime.Now;
                                 contractAnnex.Link = link;
+                                await SendEmailSignContractAnnex(contractAnnex.Id);                              
                             }
                             await _contractAnnexRepository.UpdateContractAnnexes(contractAnnex);
+                            
+                            
                         }
                         return new ResponseModel()
                         {
@@ -188,7 +200,7 @@ namespace Coms.Application.Services.Signs
                     }
 
                     //liquidationRecord
-                    var liquidationFile = await _liquidationRecordFileRepository.GetLiquidationRecordFileById(fileId);
+                    /*var liquidationFile = await _liquidationRecordFileRepository.GetLiquidationRecordFileById(fileId);
                     if (liquidationFile != null)
                     {
                         liquidationFile.FileData = document;
@@ -266,7 +278,8 @@ namespace Coms.Application.Services.Signs
                             responseFailed = null
 
                         };
-                    }
+                    }*/
+
                     return new ResponseModel()
                     {
                         isSuccess = false,
@@ -278,13 +291,102 @@ namespace Coms.Application.Services.Signs
                 else
                 {
                     // Xử lý khi document không hợp lệ
-                    return Error.Failure("Invalid document data.");
+                    return Error.Failure("Document không hợp lệ");
                 }
             }
             catch (Exception ex)
             {
                 return Error.Failure("500", ex.Message);
             }
+        }
+
+        private async Task SendEmailSignContract(int contractId)
+        {
+            var systemSettings = await _systemSettingsRepository.GetSystemSettings();
+            var partnerReview = await _partnerReviewRepository.GetByContractId(contractId);
+            var contract = await _contractRepository.GetContract(contractId);
+            MailMessage message = new MailMessage();
+            SmtpClient smtp = new SmtpClient();
+            message.From = new MailAddress(systemSettings.Email);
+            message.To.Add(new MailAddress(partnerReview.Partner.Email));
+            string bodyMessage = "<div style='font-family: Arial, sans-serif;'>" +
+                "<p style='font-size: 18px;'>Dear " + partnerReview.Partner.CompanyName + ",</p>" +
+                "<p style='font-size: 18px;'>You have a new contract to sign. ( Contract code: " + contract?.Code + ")</p>" +
+                "<p style='font-size: 18px;'>Here is your code to sign in into our system:</p>" +
+                "<p style='font-size: 20px; font-weight: bold;'>Your code: " + partnerReview.Partner.Code + "</p>" +
+                "<p style='font-size: 18px;'>Please login to the website: <a href='https://quanlyhopdong.hisoft.vn/partner-code' style='color: blue;'>https://quanlyhopdong.hisoft.vn/partner-code</a> to see details</p>" +
+                "</div>";
+            message.Subject = "Sign New Contract";
+            message.Body = bodyMessage;
+            message.IsBodyHtml = true; // This is to notify the MailMessage that the body is in HTML
+            smtp.Port = 587;
+            smtp.Host = "smtp.gmail.com";
+            smtp.EnableSsl = true;
+            smtp.UseDefaultCredentials = false;
+            smtp.Credentials = new NetworkCredential(systemSettings.Email, systemSettings.AppPassword);
+            smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+            smtp.Send(message);
+        }
+
+        private async Task SendEmailSignContractAnnex(int contractAnnexId)
+        {
+            var systemSettings = await _systemSettingsRepository.GetSystemSettings();
+            var partnerReview = await _partnerReviewRepository.GetByContractAnnexId(contractAnnexId);
+            var contractAnnex = await _contractAnnexRepository.GetContractAnnexesById(contractAnnexId);
+            MailMessage message = new MailMessage();
+            SmtpClient smtp = new SmtpClient();
+            message.From = new MailAddress(systemSettings.Email);
+            message.To.Add(new MailAddress(partnerReview.Partner.Email));
+            string bodyMessage = "<div style='font-family: Arial, sans-serif;'>" +
+                "<p style='font-size: 18px;'>Dear " + partnerReview.Partner.CompanyName + ",</p>" +
+                "<p style='font-size: 18px;'>You have a new contract annex to sign. ( Contract annex code: " + contractAnnex?.Code + ")</p>" +
+                "<p style='font-size: 18px;'>Here is your code to sign in into our system:</p>" +
+                "<p style='font-size: 20px; font-weight: bold;'>Your code: " + partnerReview.Partner.Code + "</p>" +
+                "<p style='font-size: 18px;'>Please login to the website: <a href='https://quanlyhopdong.hisoft.vn/partner-code' style='color: blue;'>https://quanlyhopdong.hisoft.vn/partner-code</a> to see details</p>" +
+                "</div>";
+            message.Subject = "Sign New Contract annex";
+            message.Body = bodyMessage;
+            message.IsBodyHtml = true; // This is to notify the MailMessage that the body is in HTML
+            smtp.Port = 587;
+            smtp.Host = "smtp.gmail.com";
+            smtp.EnableSsl = true;
+            smtp.UseDefaultCredentials = false;
+            smtp.Credentials = new NetworkCredential(systemSettings.Email, systemSettings.AppPassword);
+            smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+            smtp.Send(message);
+        }
+
+
+        private Dictionary<string, string> ToDictionary(object obj)
+        {
+            var dictionary = obj.GetType()
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .ToDictionary(prop => prop.Name, prop => prop.GetValue(obj, null).ToString());
+            return dictionary;
+        }
+
+        private async Task SendNotification(string title, string body, Dictionary<string, string> data, string uid)
+        {
+            var message = new FirebaseAdmin.Messaging.Message()
+            {
+                Notification = new FirebaseAdmin.Messaging.Notification()
+                {
+                    Title = title,
+                    Body = body
+                },
+                Data = data,
+                Topic = uid
+            };
+            string fileConfigPath = Path.Combine(Directory.GetCurrentDirectory(), @"coms-64e4a-firebase-adminsdk-rzqca-3869e0f5ce.json");
+            //var stream = new FileStream(fileConfigPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+            if (FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance is null)
+            {
+                FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = GoogleCredential.FromFile(fileConfigPath)
+                });
+            }
+            await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SendAsync(message);
         }
     }
 }

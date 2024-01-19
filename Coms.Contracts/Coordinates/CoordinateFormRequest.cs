@@ -8,7 +8,7 @@ namespace Coms.Contracts.Coordinates
 {
     public class CoordinateFormRequest
     {
-        public int ContractId { get; set; }
+        public int Id { get; set; }
         public string SearchText { get; set; }
     }
 }

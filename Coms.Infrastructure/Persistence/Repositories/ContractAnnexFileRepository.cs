@@ -32,5 +32,10 @@ namespace Coms.Infrastructure.Persistence.Repositories
         {
             await _genericRepository.CreateAsync(contractAnnexFile);
         }
+        public async Task<ContractAnnexFile?> GetContractAnnexFileByContractAnnexId(int contracAnnexId)
+        {
+            return await _genericRepository
+                .FirstOrDefaultAsync(tf => tf.ContractAnnexId.Equals(contracAnnexId));
+        }
     }
 }

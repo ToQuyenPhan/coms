@@ -17,14 +17,24 @@ namespace Coms.Api.Controllers
             _coordinateService = coordinateService;
         }
 
-        [HttpGet("get")]
-        [SwaggerOperation(Summary = "Get coordinates by SearchText in Coms")]
-        public IActionResult Add([FromQuery]CoordinateFormRequest request)
+        [HttpGet("contract")]
+        [SwaggerOperation(Summary = "Get coordinates in contract by SearchText in Coms")]
+        public IActionResult GetContract([FromQuery]CoordinateFormRequest request)
         {
             IList<CoordianteResult> result =
-                _coordinateService.GetCoordinates(request.ContractId ,request.SearchText);
+                _coordinateService.GetCoordinatesContract(request.Id ,request.SearchText);
             return Ok(result);
             
+        }
+        
+        [HttpGet("contractAnnex")]
+        [SwaggerOperation(Summary = "Get coordinates in contractAnnex by SearchText in Coms")]
+        public IActionResult GetContractAnnex([FromQuery] CoordinateFormRequest request)
+        {
+            IList<CoordianteResult> result =
+                _coordinateService.GetCoordinatesContractAnnex(request.Id, request.SearchText);
+            return Ok(result);
+
         }
 
     }

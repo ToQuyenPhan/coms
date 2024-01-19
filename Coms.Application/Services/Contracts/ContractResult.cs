@@ -31,6 +31,8 @@ namespace Coms.Application.Services.Contracts
         public string ServiceName { get; set; }
         public string SendDateString {  get; set; }
         public string ReviewDateString {  get; set; }
+        public int? Durations { get; set; }
+
         public string? FlowDetailStatusString { get; set; }
     }
 }

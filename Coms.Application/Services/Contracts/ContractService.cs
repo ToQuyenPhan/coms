@@ -656,7 +656,7 @@ namespace Coms.Application.Services.Contracts
                     .Child(contractId + ".pdf")
                     .PutAsync(stream);
                 string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/contracts%2F" + contractId
-                    + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
+                    + ".pdf?alt=media";
                 var contract = await _contractRepository.GetContract(contractId);
                 contract.Link = link;
                 await _contractRepository.UpdateContract(contract);
@@ -1649,6 +1649,7 @@ namespace Coms.Application.Services.Contracts
                     filteredList = filteredList.Skip((currentPage - 1) * pageSize).Take(pageSize)
                             .ToList();
                 }
+
                 IList<ContractResult> responses = new List<ContractResult>();
                 foreach (var contract in filteredList)
                 {
@@ -1666,6 +1667,7 @@ namespace Coms.Application.Services.Contracts
                         TemplateID = contract.TemplateId,
                         Code = contract.Code,
                         Link = contract.Link,
+                        Durations = 0
                     };
                     if (contract.UpdatedDate is not null)
                     {

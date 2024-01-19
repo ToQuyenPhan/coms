@@ -27,6 +27,7 @@ using Coms.Application.Services.LiquidationRecords;
 using Coms.Application.Services.Schedules;
 using Coms.Application.Services.ContractAnnexFields;
 using Coms.Application.Services.SystemSettingService;
+using Coms.Application.Services.ContractAnnexFiles;
 
 namespace Coms.Application
 {
@@ -63,6 +64,7 @@ namespace Coms.Application
             services.AddScoped<IScheduleService, ScheduleService>();
             services.AddScoped<IContractAnnexFieldService, ContractAnnexFieldService>();
             services.AddScoped<ISystemSettingService, SystemSettingService>();
+            services.AddScoped<IContractAnnexFileService, ContractAnnexFileService>();
             return services;
         }
     }

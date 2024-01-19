@@ -114,7 +114,7 @@ namespace Coms.Application.Services.Documents
                     };
                 }
 
-                var liquidationFile = await _liquidationRecordFileRepository.GetLiquidationRecordFileById(fileId);
+                /*var liquidationFile = await _liquidationRecordFileRepository.GetLiquidationRecordFileById(fileId);
                 if (liquidationFile != null)
                 {
                     return new ResponseModel()
@@ -124,7 +124,7 @@ namespace Coms.Application.Services.Documents
                         responseSuccess = Convert.ToBase64String(liquidationFile.FileData),
                         responseFailed = null,
                     };
-                }
+                }*/
 
                 return new ResponseModel
                 {

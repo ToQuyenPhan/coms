@@ -13,5 +13,6 @@ namespace Coms.Application.Common.Intefaces.Persistence
         Task Update(ContractAnnexFile contractAnnexFile);
         //Add
         Task Add(ContractAnnexFile contractAnnexFile);
+        Task<ContractAnnexFile?> GetContractAnnexFileByContractAnnexId(int contracAnnexId);
     }
 }
