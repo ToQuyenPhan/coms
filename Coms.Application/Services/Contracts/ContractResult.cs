@@ -1,4 +1,6 @@
-﻿namespace Coms.Application.Services.Contracts
+﻿using Coms.Domain.Enum;
+
+namespace Coms.Application.Services.Contracts
 {
     public class ContractResult
     {
@@ -29,5 +31,6 @@
         public string ServiceName { get; set; }
         public string SendDateString {  get; set; }
         public string ReviewDateString {  get; set; }
+        public string? FlowDetailStatusString { get; set; }
     }
 }

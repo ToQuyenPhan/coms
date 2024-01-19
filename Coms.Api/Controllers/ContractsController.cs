@@ -246,5 +246,19 @@ namespace Coms.Api.Controllers
                 errors => Problem(errors)
             );
         }
+
+        //get list contract approved or rejected of user
+        [HttpGet("user")]
+        [SwaggerOperation(Summary = "Get list contract approved or rejected of user in Coms")]
+        [Authorize(Roles = "Manager")]
+        public IActionResult GetListContractApprovedOrRejectedOfUser([FromQuery] YourContractsFilterRequest request)
+        {
+            ErrorOr<PagingResult<ContractResult>> result = _contractService.GetListContractApprovedOrRejectedOfUser(
+                               int.Parse(this.User.Claims.First(i => i.Type == ClaimTypes.NameIdentifier).Value), request.Status, request.CurrentPage, request.PageSize).Result;
+            return result.Match(
+                               result => Ok(result),
+                                              errors => Problem(errors)
+                                                         );
+        }
     }
 }
