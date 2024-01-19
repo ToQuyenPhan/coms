@@ -30,5 +30,7 @@ namespace Coms.Application.Services.Contracts
                 string name, string code, int? status, int? serviceId, int? partnerId, DateTime? startDate, DateTime? endDate, int currentPage, int pageSize);
         Task<ErrorOr<IList<GeneralReportResult>>> GetGeneralReport();
         Task<ErrorOr<ContractResult>> RejectContract(int contractId, bool isApproved);
+        //get list contract approved or rejected by user
+        Task<ErrorOr<PagingResult<ContractResult>>> GetListContractApprovedOrRejectedOfUser(int userId, int? status, int currentPage, int pageSize);
     }
 }

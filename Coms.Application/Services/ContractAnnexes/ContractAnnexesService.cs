@@ -134,6 +134,12 @@ namespace Coms.Application.Services.ContractAnnexes
                 }
             }
             IList<ContractAnnex> contractAnnexes = await _contractAnnexRepository.GetContractAnnexesByContractId(contractId);
+            //check contractAnnexes is not null return list null
+            if (contractAnnexes is null)
+            {
+                return new PagingResult<ContractAnnexesResult>(new List<ContractAnnexesResult>(), 0, currentPage,
+                                                          pageSize);
+            }
             IList<ContractAnnex> filteredList = contractAnnexes.Where(predicate).ToList();
             int total = filteredList.Count();
             if (currentPage > 0 && pageSize > 0)
@@ -1122,7 +1128,7 @@ namespace Coms.Application.Services.ContractAnnexes
             smtp.Host = "smtp.gmail.com";
             smtp.EnableSsl = true;
             smtp.UseDefaultCredentials = false;
-            smtp.Credentials = new NetworkCredential(systemSettings.Email, "qsmt mxaf ozvl ferm");
+            smtp.Credentials = new NetworkCredential(systemSettings.Email, systemSettings.AppPassword);
             smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtp.Send(message);
         }

@@ -656,7 +656,7 @@ namespace Coms.Application.Services.Contracts
                     .Child(contractId + ".pdf")
                     .PutAsync(stream);
                 string link = "https://firebasestorage.googleapis.com/v0/b/coms-64e4a.appspot.com/o/contracts%2F" + contractId
-                    + ".pdf?alt=media&token=451cd9c9-b548-48f3-b69c-0129a0c0836c";
+                    + ".pdf?alt=media";
                 var contract = await _contractRepository.GetContract(contractId);
                 contract.Link = link;
                 await _contractRepository.UpdateContract(contract);
@@ -1417,6 +1417,135 @@ namespace Coms.Application.Services.Contracts
             }
         }
 
+        //get list contract approved or rejected by user GetListContractApprovedOrRejectedOfUser
+        public async Task<ErrorOr<PagingResult<ContractResult>>> GetListContractApprovedOrRejectedOfUser(int userId, int? status, int currentPage, int pageSize)
+        {
+            IList<Contract> contracts = new List<Contract>();
+            var flowDetails = await _flowDetailRepository.GetUserFlowDetailsByUserId(userId);
+            if (flowDetails is not null)
+            {
+                foreach (var flowDetail in flowDetails)
+                {
+                    var contractFlowDetails = await _contractFlowDetailsRepository.GetByFlowDetailId(flowDetail.Id);
+                    if (contractFlowDetails is not null)
+                    {
+                        foreach (var contractFlowDetail in contractFlowDetails)
+                        {
+                            if (status == null && (contractFlowDetail.Status.Equals(FlowDetailStatus.Approved) || contractFlowDetail.Status.Equals(FlowDetailStatus.Rejected)))
+                            {
+                                var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
+                                if (!contract.Status.Equals(DocumentStatus.Deleted) && !contract.Status.Equals(DocumentStatus.Edited))
+                                {
+                                    var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
+                                    if (existedContract is null)
+                                    {
+                                        if (!string.IsNullOrEmpty(contract.Link))
+                                        {
+                                            contracts.Add(contract);
+                                        }
+                                    }
+                                }
+                            }
+                            else if (status == 1 && contractFlowDetail.Status.Equals(FlowDetailStatus.Approved))
+                            {
+                                var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
+                                if (!contract.Status.Equals(DocumentStatus.Deleted) && !contract.Status.Equals(DocumentStatus.Edited))
+                                {
+                                    var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
+                                    if (existedContract is null)
+                                    {
+                                        if (!string.IsNullOrEmpty(contract.Link))
+                                        {
+                                            contracts.Add(contract);
+                                        }
+                                    }
+                                }
+                            }
+                            else if (status == 2 && contractFlowDetail.Status.Equals(FlowDetailStatus.Rejected))
+                            {
+                                var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
+                                if (!contract.Status.Equals(DocumentStatus.Deleted) && !contract.Status.Equals(DocumentStatus.Edited))
+                                {
+                                    var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
+                                    if (existedContract is null)
+                                    {
+                                        if (!string.IsNullOrEmpty(contract.Link))
+                                        {
+                                            contracts.Add(contract);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (contracts.Count() > 0)
+            {
+                IList<ContractResult> responses = new List<ContractResult>();
+                foreach (var contract in contracts)
+                {
+                    var contractResult = new ContractResult()
+                    {
+                        Id = contract.Id,
+                        ContractName = contract.ContractName,
+                        Version = contract.Version,
+                        CreatedDate = contract.CreatedDate,
+                        CreatedDateString = contract.CreatedDate.Date.ToString("dd/MM/yyyy"),
+                        EffectiveDate = contract.EffectiveDate,
+                        EffectiveDateString = contract.EffectiveDate.ToString(),
+                        Status = (int)contract.Status,
+                        StatusString = contract.Status.ToString(),
+                        TemplateID = contract.TemplateId,
+                        Code = contract.Code,
+                    };
+                    if (contract.UpdatedDate is not null)
+                    {
+                        contractResult.UpdatedDate = contract.UpdatedDate;
+                        contractResult.UpdatedDateString = contract.UpdatedDate.ToString();
+                    }
+                    var actionHistory = await _actionHistoryRepository.GetCreateActionByContractId(contract.Id);
+                    if (actionHistory is not null)
+                    {
+                        contractResult.CreatorId = actionHistory.User.Id;
+                        contractResult.CreatorName = actionHistory.User.FullName;
+                        contractResult.CreatorEmail = actionHistory.User.Email;
+                        contractResult.CreatorImage = actionHistory.User.Image;
+                    }
+                    var partner = await _partnerReviewRepository.GetByContractId(contract.Id);
+                    if (partner is not null)
+                    {
+                        contractResult.PartnerId = partner.Partner.Id;
+                        contractResult.PartnerName = partner.Partner.CompanyName;
+                    }
+                    var contractFlowDetails = await _contractFlowDetailsRepository.GetByContractId(contract.Id);
+                    //forearch contractFlowDetails to get flow status of contract with user
+                    foreach (var contractFlowDetail in contractFlowDetails)
+                    {
+                        if (contractFlowDetail.FlowDetail.UserId == userId)
+                        {
+                            contractResult.FlowDetailStatusString = contractFlowDetail.Status.ToString();
+                        }
+                    }
+
+                    
+                    
+                    responses.Add(contractResult);
+                }
+                var total = responses.Count();
+                if (currentPage > 0 && pageSize > 0)
+                {
+                    responses = responses.Skip((currentPage - 1) * pageSize).Take(pageSize)
+                            .ToList();
+                }
+                return new PagingResult<ContractResult>(responses, total, currentPage, pageSize);
+            }
+            else
+            {
+                return new PagingResult<ContractResult>(new List<ContractResult>(), 0, currentPage, pageSize);
+            }
+        }
+
         private async Task SendEmail(int contractId)
         {
             var systemSettings = await _systemSettingsRepository.GetSystemSettings();
@@ -1438,7 +1567,7 @@ namespace Coms.Application.Services.Contracts
             smtp.Port = 587;
             smtp.Host = "smtp.gmail.com";
             smtp.UseDefaultCredentials = false;
-            smtp.Credentials = new NetworkCredential(systemSettings.Email, "iyyk saft yshb oksw");
+            smtp.Credentials = new NetworkCredential(systemSettings.Email, systemSettings.AppPassword);
             smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtp.EnableSsl = true;
             smtp.Send(message);
