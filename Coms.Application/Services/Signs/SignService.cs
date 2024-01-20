@@ -114,15 +114,15 @@ namespace Coms.Application.Services.Signs
                                         contract.Status = DocumentStatus.Completed;
                                         contract.UpdatedDate = DateTime.Now;
                                         contract.Link = link;
-                                    }
-                                    await _contractRepository.UpdateContract(contract);
-                                    await SendEmailSignContract(contract.Id);
+                                    }                                  
                                 }
                                 else
                                 {
                                     return Error.Conflict("409", partnerReview.Partner.CompanyName + "is approving!");
-                                }
+                                }                                
+                                await SendEmailSignContract(contract.Id);
                             }
+                            await _contractRepository.UpdateContract(contract);
                         }
                         return new ResponseModel()
                         {
@@ -193,7 +193,6 @@ namespace Coms.Application.Services.Signs
                                     contractAnnex.Status = DocumentStatus.Completed;
                                     contractAnnex.UpdatedDate = DateTime.Now;
                                     contractAnnex.Link = link;
-                                    await _contractAnnexRepository.UpdateContractAnnexes(contractAnnex);
                                     await SendEmailSignContractAnnex(contractAnnex.Id);
                                 }
                                 else
@@ -201,6 +200,8 @@ namespace Coms.Application.Services.Signs
                                     return Error.Conflict("409", partnerReview.Partner.CompanyName + "is approving!");
                                 }
                             }
+
+                            await _contractAnnexRepository.UpdateContractAnnexes(contractAnnex);
                         }
                         return new ResponseModel()
                         {
