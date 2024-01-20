@@ -1528,7 +1528,7 @@ namespace Coms.Application.Services.Contracts
                     //forearch contractFlowDetails to get flow status of contract with user
                     foreach (var contractFlowDetail in contractFlowDetails)
                     {
-                        if (contractFlowDetail.FlowDetail.UserId == userId)
+                        if (contractFlowDetail.FlowDetail.UserId == userId && (contractFlowDetail.Status.Equals(FlowDetailStatus.Approved) || contractFlowDetail.Status.Equals(FlowDetailStatus.Rejected)))
                         {
                             contractResult.FlowDetailStatusString = contractFlowDetail.Status.ToString();
                         }
