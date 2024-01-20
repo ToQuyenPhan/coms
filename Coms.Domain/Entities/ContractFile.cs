@@ -21,5 +21,8 @@ namespace Coms.Domain.Entities
 
         public int ContractId { get; set; }
         public virtual Contract Contract { get; set; }
+
+        public int? X { get; set; }
+        public int? Y { get; set; }
     }
 }

@@ -661,6 +661,7 @@ namespace Coms.Application.Services.Contracts
                 contract.Link = link;
                 await _contractRepository.UpdateContract(contract);
                 var downloadUrl = await task;
+                stream.Close();
                 return link;
             }
             catch (Exception ex)
