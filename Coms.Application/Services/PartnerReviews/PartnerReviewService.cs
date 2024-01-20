@@ -178,7 +178,7 @@ namespace Coms.Application.Services.PartnerReviews
                                     Time = partnerReview.ReviewAt,
                                     ContractId = partnerReview.ContractId
                                 };
-                                if(partnerReview.ReviewAt is not null)
+                                if (partnerReview.ReviewAt is not null)
                                 {
                                     notificationResult.Long = AsTimeAgo((DateTime)partnerReview.ReviewAt);
                                 }
@@ -204,7 +204,7 @@ namespace Coms.Application.Services.PartnerReviews
                             }
 
                             var partnerSign = await _partnerSignRepository.GetByContractId((int)action.ContractId);
-                            if (partnerSign is not null )
+                            if (partnerSign is not null)
                             {
                                 var notificationResult = new NotificationResult()
                                 {
@@ -251,18 +251,18 @@ namespace Coms.Application.Services.PartnerReviews
                     IList<NotificationResult> results = new List<NotificationResult>();
                     foreach (var partnerReview in partnerReviews)
                     {
-                        var notificationResult = new NotificationResult()
+                        if (partnerReview.SendDate is not null)
                         {
-                            Title = "New Contract!",
-                            Message = "You have new contract to approved.",
-                            Time = partnerReview.SendDate,
-                            ContractId = partnerReview.ContractId
-                        };
-                        if(partnerReview.SendDate is not null)
-                        {
-                            notificationResult.Long = AsTimeAgo((DateTime)partnerReview.SendDate);
+                            var notificationResult = new NotificationResult()
+                            {
+                                Title = "New Contract!",
+                                Message = "You have new contract to approve.",
+                                Time = partnerReview.SendDate,
+                                ContractId = partnerReview.ContractId,
+                                Long = AsTimeAgo((DateTime)partnerReview.SendDate)
+                            };
+                            results.Add(notificationResult);
                         }
-                        results.Add(notificationResult);
                     }
                     results = results.OrderByDescending(nr => nr.Time).ToList();
                     int total = results.Count();
