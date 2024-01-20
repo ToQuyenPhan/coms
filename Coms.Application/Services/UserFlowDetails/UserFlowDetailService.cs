@@ -126,7 +126,7 @@ namespace Coms.Application.Services.UserFlowDetails
                             var notificationResult = new NotificationResult()
                             {
                                 Title = "Partner Approved!",
-                                Message = partnerReview.Partner.CompanyName + " approved your contract.",
+                                Message = partnerReview.Partner.CompanyName + " approved contract.",
                                 Time = partnerReview.Contract.CreatedDate,
                                 Long = AsTimeAgo(partnerReview.Contract.CreatedDate),
                                 ContractId = partnerReview.ContractId,
@@ -141,7 +141,7 @@ namespace Coms.Application.Services.UserFlowDetails
                                 var notificationResult = new NotificationResult()
                                 {
                                     Title = "Partner Rejected!",
-                                    Message = partnerReview.Partner.CompanyName + " rejected your contract.",
+                                    Message = partnerReview.Partner.CompanyName + " rejected contract.",
                                     Time = partnerReview.Contract.CreatedDate,
                                     Long = AsTimeAgo(partnerReview.Contract.CreatedDate),
                                     ContractId = partnerReview.ContractId,
