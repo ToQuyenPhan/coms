@@ -13,18 +13,21 @@ namespace Coms.Application.Services.PartnerReviews
         private readonly IPartnerRepository _partnerRepository;
         private readonly IActionHistoryRepository _actionHistoryRepository;
         private readonly IContractRepository _contractRepository;
+        private readonly IPartnerSignRepository _partnerSignRepository;
 
         public PartnerReviewService(IPartnerReviewRepository partnerReviewRepository,
             IUserRepository userRepository,
             IContractRepository contractRepository,
             IPartnerRepository partnerRepository,
-            IActionHistoryRepository actionHistoryRepository)
+            IActionHistoryRepository actionHistoryRepository,
+            IPartnerSignRepository partnerSignRepository)
         {
             _partnerReviewRepository = partnerReviewRepository;
             _userRepository = userRepository;
             _partnerRepository = partnerRepository;
             _actionHistoryRepository = actionHistoryRepository;
             _contractRepository = contractRepository;
+            _partnerSignRepository = partnerSignRepository;
         }
 
         public async Task<ErrorOr<PartnerReviewResult>> AddPartnerReview(int partnerId, int userId, int contractId)
@@ -198,6 +201,23 @@ namespace Coms.Application.Services.PartnerReviews
                                     }
                                     results.Add(notificationResult);
                                 }
+                            }
+
+                            var partnerSign = await _partnerSignRepository.GetByContractId((int)action.ContractId);
+                            if (partnerSign is not null )
+                            {
+                                var notificationResult = new NotificationResult()
+                                {
+                                    Title = "Partner Signed!",
+                                    Message = partnerSign.Partner.CompanyName + " signed your contract.",
+                                    Time = partnerSign.SignedAt,
+                                    ContractId = partnerSign.ContractId
+                                };
+                                if (partnerSign?.SignedAt is not null)
+                                {
+                                    notificationResult.Long = AsTimeAgo((DateTime)partnerSign.SignedAt);
+                                }
+                                results.Add(notificationResult);
                             }
                         }
                     }
