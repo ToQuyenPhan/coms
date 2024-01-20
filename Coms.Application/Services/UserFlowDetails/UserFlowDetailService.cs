@@ -163,30 +163,50 @@ namespace Coms.Application.Services.UserFlowDetails
                     {
                         foreach (var contractFlowDetail in contractFlowDetails)
                         {
-                            if (contractFlowDetail.Contract.Status.Equals(DocumentStatus.Deleted))
+                            if (contractFlowDetail.Contract.Status.Equals(DocumentStatus.Deleted) || contractFlowDetail.Contract.Status.Equals(DocumentStatus.Edited))
                             {
                                 continue;
                             }
                             else
                             {
-                                var notificationResult = new NotificationResult()
-                                {
-                                    Title = "New Contract",
-                                    Message = "You have a new contract to ",
-                                    Time = contractFlowDetail.Contract.CreatedDate,
-                                    Long = AsTimeAgo(contractFlowDetail.Contract.CreatedDate),
-                                    ContractId = contractFlowDetail.ContractId,
-                                    Type = "Approve"
-                                };
                                 if (flowDetail.FlowRole.Equals(FlowRole.Approver))
                                 {
-                                    notificationResult.Message += "approve!";
+                                    var notificationResult = new NotificationResult()
+                                    {
+                                        Title = "New Contract",
+                                        Message = "You have a new contract to approve!",
+                                        Time = contractFlowDetail.Contract.CreatedDate,
+                                        Long = AsTimeAgo(contractFlowDetail.Contract.CreatedDate),
+                                        ContractId = contractFlowDetail.ContractId,
+                                        Type = "Approve"
+                                    };
+                                    results.Add(notificationResult);
                                 }
                                 else
                                 {
-                                    notificationResult.Message += "sign!";
+                                    var partnerReview = await _partnerReviewRepository.GetByContractId(contractFlowDetail.Contract.Id);
+                                    if (partnerReview.IsApproved)
+                                    {
+                                        var exitingContract = results.FirstOrDefault(r => r.ContractId.Equals(contractFlowDetail.Contract.Id));
+                                        if (exitingContract is null)
+                                        {
+                                            var notificationResult = new NotificationResult()
+                                            {
+                                                Title = "New Contract",
+                                                Message = "You have a new contract to sign!",
+                                                Time = contractFlowDetail.Contract.CreatedDate,
+                                                Long = AsTimeAgo(contractFlowDetail.Contract.CreatedDate),
+                                                ContractId = contractFlowDetail.ContractId,
+                                                Type = "Approve"
+                                            };
+                                            results.Add(notificationResult);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
                                 }
-                                results.Add(notificationResult);
                             }
                         }
                     }
