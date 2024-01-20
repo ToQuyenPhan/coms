@@ -1437,7 +1437,7 @@ namespace Coms.Application.Services.Contracts
                     {
                         foreach (var contractFlowDetail in contractFlowDetails)
                         {
-                            if (status == null && (contractFlowDetail.Status.Equals(FlowDetailStatus.Approved) || contractFlowDetail.Status.Equals(FlowDetailStatus.Rejected)))
+                            if (status == null && (contractFlowDetail.Status.Equals(FlowDetailStatus.Approved) || contractFlowDetail.Status.Equals(FlowDetailStatus.Rejected ) || contractFlowDetail.Status.Equals(FlowDetailStatus.Signed)))
                             {
                                 var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
                                 if (!contract.Status.Equals(DocumentStatus.Deleted) && !contract.Status.Equals(DocumentStatus.Edited))
@@ -1468,6 +1468,21 @@ namespace Coms.Application.Services.Contracts
                                 }
                             }
                             else if (status == 2 && contractFlowDetail.Status.Equals(FlowDetailStatus.Rejected))
+                            {
+                                var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
+                                if (!contract.Status.Equals(DocumentStatus.Deleted) && !contract.Status.Equals(DocumentStatus.Edited))
+                                {
+                                    var existedContract = contracts.FirstOrDefault(c => c.Id.Equals(contract.Id));
+                                    if (existedContract is null)
+                                    {
+                                        if (!string.IsNullOrEmpty(contract.Link))
+                                        {
+                                            contracts.Add(contract);
+                                        }
+                                    }
+                                }
+                            }
+                            else if (status == 3 && contractFlowDetail.Status.Equals(FlowDetailStatus.Signed))
                             {
                                 var contract = await _contractRepository.GetContract((int)contractFlowDetail.ContractId);
                                 if (!contract.Status.Equals(DocumentStatus.Deleted) && !contract.Status.Equals(DocumentStatus.Edited))
@@ -1528,7 +1543,7 @@ namespace Coms.Application.Services.Contracts
                     //forearch contractFlowDetails to get flow status of contract with user
                     foreach (var contractFlowDetail in contractFlowDetails)
                     {
-                        if (contractFlowDetail.FlowDetail.UserId == userId && (contractFlowDetail.Status.Equals(FlowDetailStatus.Approved) || contractFlowDetail.Status.Equals(FlowDetailStatus.Rejected)))
+                        if (contractFlowDetail.FlowDetail.UserId == userId && (contractFlowDetail.Status.Equals(FlowDetailStatus.Approved) || contractFlowDetail.Status.Equals(FlowDetailStatus.Rejected) || contractFlowDetail.Status.Equals(FlowDetailStatus.Signed)))
                         {
                             contractResult.FlowDetailStatusString = contractFlowDetail.Status.ToString();
                         }
