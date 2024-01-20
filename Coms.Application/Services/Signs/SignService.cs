@@ -83,9 +83,9 @@ namespace Coms.Application.Services.Signs
                             var downloadUrl = await task;
                             fileStream.Close();
 
+                            var partnerReview = await _partnerReviewRepository.GetByContractId(contract.Id);
                             if (contract.Status == DocumentStatus.Completed)
                             {
-                                var partnerReview = await _partnerReviewRepository.GetByContractId(contract.Id);
                                 var partnerSign = new PartnerSign()
                                 {
                                     ContractId = contract.Id,
@@ -99,23 +99,30 @@ namespace Coms.Application.Services.Signs
                             }
                             else
                             {
-                                var flowDetails = await _contractFlowDetailsRepository.GetByContractIdForSign(contractFile.ContractId);
-                                var flowDetail = flowDetails.FirstOrDefault(cfd => cfd.FlowDetail.FlowRole.Equals(FlowRole.Signer));
-                                if (flowDetail.Status.Equals(FlowDetailStatus.Signed))
+                                if (partnerReview.IsApproved == true)
                                 {
-                                    return Error.Conflict("409", "You are already " + flowDetail.Status.ToString().ToLower() + "!");
+                                    var flowDetails = await _contractFlowDetailsRepository.GetByContractIdForSign(contractFile.ContractId);
+                                    var flowDetail = flowDetails.FirstOrDefault(cfd => cfd.FlowDetail.FlowRole.Equals(FlowRole.Signer));
+                                    if (flowDetail.Status.Equals(FlowDetailStatus.Signed))
+                                    {
+                                        return Error.Conflict("409", "You are already " + flowDetail.Status.ToString().ToLower() + "!");
+                                    }
+                                    else
+                                    {
+                                        flowDetail.Status = FlowDetailStatus.Signed;
+                                        await _contractFlowDetailsRepository.UpdateContractFlowDetail(flowDetail);
+                                        contract.Status = DocumentStatus.Completed;
+                                        contract.UpdatedDate = DateTime.Now;
+                                        contract.Link = link;
+                                    }
+                                    await _contractRepository.UpdateContract(contract);
+                                    await SendEmailSignContract(contract.Id);
                                 }
                                 else
                                 {
-                                    flowDetail.Status = FlowDetailStatus.Signed;
-                                    await _contractFlowDetailsRepository.UpdateContractFlowDetail(flowDetail);
-                                    contract.Status = DocumentStatus.Completed;
-                                    contract.UpdatedDate = DateTime.Now;
-                                    contract.Link = link;
+                                    return Error.Conflict("409", partnerReview.Partner.CompanyName + "is approving!");
                                 }
                             }
-                            await _contractRepository.UpdateContract(contract);
-                            await SendEmailSignContract(contract.Id);
                         }
                         return new ResponseModel()
                         {
@@ -156,7 +163,7 @@ namespace Coms.Application.Services.Signs
                             var partnerReview = await _partnerReviewRepository.GetByContractAnnexId(contractAnnex.Id);
                             if (contractAnnex.Status == DocumentStatus.Completed)
                             {
-                                
+
                                 var partnerSign = new PartnerSign()
                                 {
                                     ContractAnnexId = contractAnnex.Id,
@@ -170,25 +177,30 @@ namespace Coms.Application.Services.Signs
                             }
                             else
                             {
-                                var flowDetails = await _contractFlowDetailsRepository.GetByContractAnnexIdForSign(contractAnnex.Id);
-                                var flowDetail = flowDetails.FirstOrDefault(cfd => cfd.FlowDetail.FlowRole.Equals(FlowRole.Signer));
-                                if (flowDetail.Status.Equals(FlowDetailStatus.Signed))
+                                if (partnerReview.IsApproved == true)
                                 {
-                                    return Error.Conflict("409", "You are already " + flowDetail.Status.ToString().ToLower() + "!");
+                                    var flowDetails = await _contractFlowDetailsRepository.GetByContractAnnexIdForSign(contractAnnex.Id);
+                                    var flowDetail = flowDetails.FirstOrDefault(cfd => cfd.FlowDetail.FlowRole.Equals(FlowRole.Signer));
+                                    if (flowDetail.Status.Equals(FlowDetailStatus.Signed))
+                                    {
+                                        return Error.Conflict("409", "You are already " + flowDetail.Status.ToString().ToLower() + "!");
+                                    }
+                                    else
+                                    {
+                                        flowDetail.Status = FlowDetailStatus.Signed;
+                                    }
+                                    await _contractFlowDetailsRepository.UpdateContractFlowDetail(flowDetail);
+                                    contractAnnex.Status = DocumentStatus.Completed;
+                                    contractAnnex.UpdatedDate = DateTime.Now;
+                                    contractAnnex.Link = link;
+                                    await _contractAnnexRepository.UpdateContractAnnexes(contractAnnex);
+                                    await SendEmailSignContractAnnex(contractAnnex.Id);
                                 }
                                 else
                                 {
-                                    flowDetail.Status = FlowDetailStatus.Signed;
+                                    return Error.Conflict("409", partnerReview.Partner.CompanyName + "is approving!");
                                 }
-                                await _contractFlowDetailsRepository.UpdateContractFlowDetail(flowDetail);
-                                contractAnnex.Status = DocumentStatus.Completed;
-                                contractAnnex.UpdatedDate = DateTime.Now;
-                                contractAnnex.Link = link;
-                                await SendEmailSignContractAnnex(contractAnnex.Id);                              
                             }
-                            await _contractAnnexRepository.UpdateContractAnnexes(contractAnnex);
-                            
-                            
                         }
                         return new ResponseModel()
                         {
